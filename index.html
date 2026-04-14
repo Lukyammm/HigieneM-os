@@ -705,11 +705,27 @@
     const state = {
       raw: null,
       tableData: [],
-      charts: {}
+      charts: {},
+      loadingTimeoutId: null
     };
 
     function showLoading(show) {
       document.getElementById('loading').classList.toggle('show', !!show);
+    }
+
+    function clearLoadingTimeout() {
+      if (state.loadingTimeoutId) {
+        clearTimeout(state.loadingTimeoutId);
+        state.loadingTimeoutId = null;
+      }
+    }
+
+    function startLoadingTimeout() {
+      clearLoadingTimeout();
+      state.loadingTimeoutId = setTimeout(() => {
+        showLoading(false);
+        alert('A carga da análise demorou além do esperado. Verifique permissões do Web App e acesso à planilha.');
+      }, 30000);
     }
 
     function formatNumber(value) {
@@ -1057,17 +1073,26 @@
 
     function loadDashboard(initial = false) {
       showLoading(true);
+      startLoadingTimeout();
 
       google.script.run
         .withSuccessHandler(data => {
-          if (initial) {
-            populateFilters(data.meta.availableFilters);
+          try {
+            if (initial && data && data.meta && data.meta.availableFilters) {
+              populateFilters(data.meta.availableFilters);
+            }
+            renderAll(data);
+          } catch (err) {
+            console.error(err);
+            alert('Erro ao renderizar a análise: ' + (err.message || err));
+          } finally {
+            clearLoadingTimeout();
+            showLoading(false);
           }
-          renderAll(data);
-          showLoading(false);
         })
         .withFailureHandler(err => {
           console.error(err);
+          clearLoadingTimeout();
           showLoading(false);
           alert('Erro ao carregar a análise: ' + (err.message || err));
         })
