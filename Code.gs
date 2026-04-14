@@ -25,6 +25,40 @@ function doGet() {
     .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
 }
 
+function openSpreadsheet_() {
+  const active = SpreadsheetApp.getActiveSpreadsheet();
+  if (active) return active;
+
+  const spreadsheetId = PropertiesService.getScriptProperties().getProperty('SPREADSHEET_ID');
+  if (!spreadsheetId) {
+    throw new Error(
+      'Planilha não vinculada ao projeto. Defina Script Property SPREADSHEET_ID com o ID da planilha para o Web App.'
+    );
+  }
+
+  try {
+    return SpreadsheetApp.openById(spreadsheetId);
+  } catch (error) {
+    throw new Error(
+      'Não foi possível acessar a planilha (SPREADSHEET_ID=' + spreadsheetId + '). Verifique compartilhamento e permissões do Web App. Detalhe: ' +
+      (error && error.message ? error.message : error)
+    );
+  }
+}
+
+function checkSpreadsheetAccess() {
+  const ss = openSpreadsheet_();
+  const sheets = ss.getSheets().map(s => s.getName());
+
+  return {
+    spreadsheetId: ss.getId(),
+    spreadsheetName: ss.getName(),
+    dataSheetExists: sheets.indexOf(CONFIG.DATA_SHEET_NAME) !== -1,
+    settingsSheetExists: sheets.indexOf(CONFIG.SETTINGS_SHEET_NAME) !== -1,
+    availableSheets: sheets
+  };
+}
+
 function getDashboardData(filters) {
   filters = filters || {};
 
@@ -63,11 +97,14 @@ function getFilteredTable(filters) {
 }
 
 function getBaseRows_() {
-  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  const ss = openSpreadsheet_();
   const sheet = ss.getSheetByName(CONFIG.DATA_SHEET_NAME);
 
   if (!sheet) {
-    throw new Error('A aba "' + CONFIG.DATA_SHEET_NAME + '" não foi encontrada.');
+    const available = ss.getSheets().map(s => s.getName()).join(', ');
+    throw new Error(
+      'A aba "' + CONFIG.DATA_SHEET_NAME + '" não foi encontrada. Abas disponíveis: ' + (available || 'nenhuma') + '.'
+    );
   }
 
   const lastRow = sheet.getLastRow();
@@ -82,7 +119,7 @@ function getBaseRows_() {
 }
 
 function getSettingsData_() {
-  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  const ss = openSpreadsheet_();
   const sheet = ss.getSheetByName(CONFIG.SETTINGS_SHEET_NAME);
 
   if (!sheet) {
