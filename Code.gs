@@ -180,7 +180,8 @@ function getBaseRows_() {
   const lastRow = sheet.getLastRow();
   if (lastRow < CONFIG.DATA_START_ROW) return [];
 
-  const width = Math.max(CONFIG.DATA_COLUMN_ACAO, sheet.getLastColumn());
+  // Lê somente as colunas realmente usadas na análise (A:E) para reduzir latência.
+  const width = CONFIG.DATA_COLUMN_ACAO;
 
   const rawRows = sheet.getRange(
     CONFIG.DATA_START_ROW,
