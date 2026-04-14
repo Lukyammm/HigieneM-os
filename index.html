@@ -1000,6 +1000,68 @@
       applyTableSearch();
     }
 
+    function buildEmptyPayload() {
+      return {
+        meta: {
+          generatedAt: new Date().toISOString(),
+          totalBase: 0,
+          totalFiltered: 0,
+          availableFilters: {
+            unidade: [],
+            categoria: [],
+            momento: [],
+            status: [],
+            metodo: [],
+            completeness: []
+          }
+        },
+        kpis: {
+          totalObservacoes: 0,
+          realizados: 0,
+          naoRealizados: 0,
+          incompletos: 0,
+          adesaoGeral: '0,0%',
+          taxaNaoRealizacao: '0,0%',
+          taxaIncompletos: '0,0%',
+          taxaPreenchimentoCompleto: '0,0%'
+        },
+        quality: {
+          missingUnidade: 0,
+          missingCategoria: 0,
+          missingMomento: 0,
+          missingAcao: 0,
+          pctMissingUnidade: '0,0%',
+          pctMissingCategoria: '0,0%',
+          pctMissingMomento: '0,0%',
+          pctMissingAcao: '0,0%'
+        },
+        insights: [],
+        charts: {
+          timeline: [],
+          byUnidade: [],
+          byCategoria: [],
+          byMomento: [],
+          byStatus: [],
+          byMetodo: []
+        },
+        table: []
+      };
+    }
+
+    function normalizePayload(payload) {
+      const fallback = buildEmptyPayload();
+      if (!payload || typeof payload !== 'object') return fallback;
+
+      return {
+        meta: payload.meta || fallback.meta,
+        kpis: payload.kpis || fallback.kpis,
+        quality: payload.quality || fallback.quality,
+        insights: Array.isArray(payload.insights) ? payload.insights : fallback.insights,
+        charts: payload.charts || fallback.charts,
+        table: Array.isArray(payload.table) ? payload.table : fallback.table
+      };
+    }
+
     function applyTableSearch() {
       const term = document.getElementById('tableSearch').value.trim().toLowerCase();
       const tbody = document.getElementById('tableBody');
@@ -1052,14 +1114,15 @@
     }
 
     function renderAll(payload) {
-      state.raw = payload;
+      const safePayload = normalizePayload(payload);
+      state.raw = safePayload;
 
-      renderMeta(payload.meta);
-      renderKpis(payload.kpis);
-      renderQuality(payload.quality);
-      renderInsights(payload.insights);
-      renderCharts(payload.charts);
-      renderTable(payload.table);
+      renderMeta(safePayload.meta);
+      renderKpis(safePayload.kpis);
+      renderQuality(safePayload.quality);
+      renderInsights(safePayload.insights);
+      renderCharts(safePayload.charts);
+      renderTable(safePayload.table);
     }
 
     function populateFilters(availableFilters) {
@@ -1078,10 +1141,11 @@
       google.script.run
         .withSuccessHandler(data => {
           try {
-            if (initial && data && data.meta && data.meta.availableFilters) {
-              populateFilters(data.meta.availableFilters);
+            const safeData = normalizePayload(data);
+            if (initial && safeData.meta && safeData.meta.availableFilters) {
+              populateFilters(safeData.meta.availableFilters);
             }
-            renderAll(data);
+            renderAll(safeData);
           } catch (err) {
             console.error(err);
             alert('Erro ao renderizar a análise: ' + (err.message || err));
