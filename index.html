@@ -34,6 +34,13 @@
       font-family: Inter, Arial, Helvetica, sans-serif;
     }
 
+    button,
+    input,
+    select,
+    textarea {
+      font-family: inherit;
+    }
+
     .app {
       max-width: 1600px;
       margin: 0 auto;
@@ -106,7 +113,7 @@
     .section-title {
       margin: 0 0 16px;
       font-size: 18px;
-      font-weight: 700;
+      font-weight: 600;
       letter-spacing: -0.01em;
     }
 
@@ -125,7 +132,7 @@
     .field label {
       font-size: 13px;
       color: var(--muted);
-      font-weight: 600;
+      font-weight: 500;
     }
 
     .field select,
@@ -160,7 +167,7 @@
       padding: 0 18px;
       border-radius: 14px;
       border: 0;
-      font-weight: 700;
+      font-weight: 600;
       cursor: pointer;
       transition: transform 0.15s ease, opacity 0.15s ease;
     }
@@ -209,13 +216,13 @@
     .kpi-label {
       font-size: 13px;
       color: var(--muted);
-      font-weight: 600;
+      font-weight: 500;
       margin-bottom: 10px;
     }
 
     .kpi-value {
       font-size: 34px;
-      font-weight: 800;
+      font-weight: 700;
       letter-spacing: -0.03em;
       line-height: 1;
       margin-bottom: 10px;
@@ -259,7 +266,7 @@
 
     .chart-title {
       font-size: 16px;
-      font-weight: 700;
+      font-weight: 600;
       margin: 0;
     }
 
@@ -303,13 +310,13 @@
     .quality-card .title {
       color: var(--muted);
       font-size: 13px;
-      font-weight: 600;
+      font-weight: 500;
       margin-bottom: 8px;
     }
 
     .quality-card .value {
       font-size: 28px;
-      font-weight: 800;
+      font-weight: 700;
       letter-spacing: -0.02em;
       margin-bottom: 6px;
     }
@@ -382,7 +389,7 @@
       padding: 6px 10px;
       border-radius: 999px;
       font-size: 12px;
-      font-weight: 700;
+      font-weight: 600;
       white-space: nowrap;
     }
 
@@ -427,7 +434,7 @@
       padding: 18px 22px;
       box-shadow: var(--shadow);
       border: 1px solid var(--line);
-      font-weight: 700;
+      font-weight: 600;
       color: var(--primary);
     }
 
@@ -678,7 +685,7 @@
       <h2 class="section-title">Tabela analítica detalhada</h2>
       <div class="table-tools">
         <input type="text" class="search-input" id="tableSearch" placeholder="Pesquisar na tabela..." />
-        <div id="tableCount" style="font-size:13px;color:var(--muted);font-weight:600;">0 registros</div>
+        <div id="tableCount" style="font-size:13px;color:var(--muted);font-weight:500;">0 registros</div>
       </div>
 
       <div class="table-wrap">
