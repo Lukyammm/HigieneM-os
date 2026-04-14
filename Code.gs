@@ -180,18 +180,51 @@ function getBaseRows_() {
   const lastRow = sheet.getLastRow();
   if (lastRow < CONFIG.DATA_START_ROW) return [];
 
-  // Lê somente as colunas realmente usadas na análise (A:E) para reduzir latência.
-  const width = CONFIG.DATA_COLUMN_ACAO;
-
+  const columnIndexes = getDataColumnIndexes_(sheet);
   const rawRows = sheet.getRange(
     CONFIG.DATA_START_ROW,
     1,
     lastRow - CONFIG.DATA_START_ROW + 1,
-    width
+    sheet.getLastColumn()
   ).getValues();
 
-  const withoutKnownHeaders = applyKnownHeaderOffsets_(rawRows);
+  const normalizedRows = rawRows.map(row => ([
+    row[columnIndexes.date - 1],
+    row[columnIndexes.unidade - 1],
+    row[columnIndexes.categoria - 1],
+    row[columnIndexes.momento - 1],
+    row[columnIndexes.acao - 1]
+  ]));
+
+  const withoutKnownHeaders = applyKnownHeaderOffsets_(normalizedRows);
   return withoutKnownHeaders.filter(hasDataContent_);
+}
+
+function getDataColumnIndexes_(sheet) {
+  const fallback = {
+    date: CONFIG.DATA_COLUMN_DATE,
+    unidade: CONFIG.DATA_COLUMN_UNIDADE,
+    categoria: CONFIG.DATA_COLUMN_CATEGORIA,
+    momento: CONFIG.DATA_COLUMN_MOMENTO,
+    acao: CONFIG.DATA_COLUMN_ACAO
+  };
+
+  const headerRange = sheet.getRange(1, 1, 1, sheet.getLastColumn());
+  const headers = headerRange.getDisplayValues()[0].map(h => normalizeSheetName_(h));
+  if (!headers.length) return fallback;
+
+  const findByKeywords = keywords => {
+    const idx = headers.findIndex(h => keywords.some(k => h.indexOf(k) !== -1));
+    return idx === -1 ? 0 : idx + 1;
+  };
+
+  return {
+    date: findByKeywords(['carimbo de data/hora', 'timestamp', 'data', 'data hora']) || fallback.date,
+    unidade: findByKeywords(['unidade de internacao', 'unidade de internação', 'unidade']) || fallback.unidade,
+    categoria: findByKeywords(['categoria profissional', 'categoria']) || fallback.categoria,
+    momento: findByKeywords(['momento']) || fallback.momento,
+    acao: findByKeywords(['acao', 'ação', 'higienizacao', 'higienização', 'realizacao']) || fallback.acao
+  };
 }
 
 function getSettingsData_() {
