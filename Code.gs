@@ -26,24 +26,90 @@ function doGet() {
 }
 
 function openSpreadsheet_() {
+  const spreadsheetId = PropertiesService.getScriptProperties().getProperty('SPREADSHEET_ID');
+  if (spreadsheetId) {
+    try {
+      return SpreadsheetApp.openById(spreadsheetId);
+    } catch (error) {
+      throw new Error(
+        'Não foi possível acessar a planilha (SPREADSHEET_ID=' + spreadsheetId + '). Verifique compartilhamento e permissões do Web App. Detalhe: ' +
+        (error && error.message ? error.message : error)
+      );
+    }
+  }
+
   const active = SpreadsheetApp.getActiveSpreadsheet();
   if (active) return active;
 
-  const spreadsheetId = PropertiesService.getScriptProperties().getProperty('SPREADSHEET_ID');
-  if (!spreadsheetId) {
-    throw new Error(
-      'Planilha não vinculada ao projeto. Defina Script Property SPREADSHEET_ID com o ID da planilha para o Web App.'
-    );
+  throw new Error(
+    'Planilha não vinculada ao projeto. Defina Script Property SPREADSHEET_ID com o ID da planilha para o Web App.'
+  );
+}
+
+function getSpreadsheetDebugInfo() {
+  const ss = openSpreadsheet_();
+  const sheet = resolveDataSheet_(ss);
+  const settings = resolveSettingsSheet_(ss);
+
+  return {
+    spreadsheetId: ss.getId(),
+    spreadsheetName: ss.getName(),
+    timezone: ss.getSpreadsheetTimeZone(),
+    dataSheetName: sheet ? sheet.getName() : '',
+    settingsSheetName: settings ? settings.getName() : '',
+    dataLastRow: sheet ? sheet.getLastRow() : 0,
+    dataLastColumn: sheet ? sheet.getLastColumn() : 0,
+    dataStartRow: CONFIG.DATA_START_ROW
+  };
+}
+
+function parseDateFromPtBrText_(value) {
+  const txt = String(value || '').trim();
+  if (!txt) return null;
+
+  const normalized = txt
+    .replace(/\u00A0/g, ' ')
+    .replace(/\s+/g, ' ')
+    .replace(/[T]/g, ' ')
+    .replace(/[.-]/g, '/');
+
+  const match = normalized.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})(?:\s+(\d{1,2}):(\d{2})(?::(\d{2}))?)?$/);
+  if (!match) return null;
+
+  const day = Number(match[1]);
+  const month = Number(match[2]);
+  const year = Number(match[3]);
+  const hour = Number(match[4] || 0);
+  const minute = Number(match[5] || 0);
+  const second = Number(match[6] || 0);
+
+  const d = new Date(year, month - 1, day, hour, minute, second);
+  if (isNaN(d.getTime())) return null;
+  if (d.getFullYear() !== year || d.getMonth() !== month - 1 || d.getDate() !== day) return null;
+
+  return d;
+}
+
+function hasDataContent_(row) {
+  return row.some(cell => cleanText_(cell) !== '');
+}
+
+function applyKnownHeaderOffsets_(rows) {
+  if (!rows || !rows.length) return rows;
+
+  const first = rows[0].map(cleanText_);
+  const firstColumn = (first[0] || '').toLowerCase();
+  const secondColumn = (first[1] || '').toLowerCase();
+
+  const startsWithTimestampHeader = firstColumn === 'carimbo de data/hora' || firstColumn === 'timestamp';
+  const startsWithUnidadeHeader = firstColumn === 'unidade de internação' || firstColumn === 'unidade de internacao';
+  const secondIsUnidade = secondColumn === 'unidade de internação' || secondColumn === 'unidade de internacao';
+
+  if (startsWithTimestampHeader || startsWithUnidadeHeader || secondIsUnidade) {
+    return rows.slice(1);
   }
 
-  try {
-    return SpreadsheetApp.openById(spreadsheetId);
-  } catch (error) {
-    throw new Error(
-      'Não foi possível acessar a planilha (SPREADSHEET_ID=' + spreadsheetId + '). Verifique compartilhamento e permissões do Web App. Detalhe: ' +
-      (error && error.message ? error.message : error)
-    );
-  }
+  return rows;
 }
 
 function checkSpreadsheetAccess() {
@@ -116,12 +182,15 @@ function getBaseRows_() {
 
   const width = Math.max(CONFIG.DATA_COLUMN_ACAO, sheet.getLastColumn());
 
-  return sheet.getRange(
+  const rawRows = sheet.getRange(
     CONFIG.DATA_START_ROW,
     1,
     lastRow - CONFIG.DATA_START_ROW + 1,
     width
   ).getValues();
+
+  const withoutKnownHeaders = applyKnownHeaderOffsets_(rawRows);
+  return withoutKnownHeaders.filter(hasDataContent_);
 }
 
 function getSettingsData_() {
@@ -468,6 +537,9 @@ function parseDate_(value) {
     return value;
   }
 
+  const parsedPtBr = parseDateFromPtBrText_(value);
+  if (parsedPtBr) return parsedPtBr;
+
   const d = new Date(value);
   if (!isNaN(d)) return d;
 
@@ -484,6 +556,12 @@ function resolveDataSheet_(ss) {
 
   const byPrefix = ss.getSheets().find(s => normalizeSheetName_(s.getName()).indexOf('respostas ao formulario') === 0);
   if (byPrefix) return byPrefix;
+
+  const byEnglishPrefix = ss.getSheets().find(s => {
+    const n = normalizeSheetName_(s.getName());
+    return n.indexOf('form responses') === 0 || n.indexOf('form_responses') === 0;
+  });
+  if (byEnglishPrefix) return byEnglishPrefix;
 
   return null;
 }
@@ -512,6 +590,10 @@ function normalizeSheetName_(value) {
 }
 
 function cleanText_(value) {
+  if (Object.prototype.toString.call(value) === '[object Date]' && !isNaN(value)) {
+    return Utilities.formatDate(value, Session.getScriptTimeZone(), 'dd/MM/yyyy HH:mm:ss');
+  }
+
   return String(value || '')
     .replace(/\s+/g, ' ')
     .replace(/\u00A0/g, ' ')
