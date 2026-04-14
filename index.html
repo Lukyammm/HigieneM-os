@@ -1133,76 +1133,40 @@
       fillSelect('fCompleteness', availableFilters.completeness);
     }
 
-    function validateSpreadsheetAccess(onSuccess) {
-      google.script.run
-        .withSuccessHandler(access => {
-          const dataOk = !!(access && access.dataSheetExists);
-          const settingsOk = !!(access && access.settingsSheetExists);
+    function loadDashboard(initial = false) {
+      showLoading(true);
+      startLoadingTimeout();
 
-          if (!dataOk || !settingsOk) {
-            const available = access && access.availableSheets && access.availableSheets.length
-              ? access.availableSheets.join(', ')
-              : 'nenhuma';
-            alert(
-              'Acesso à planilha validado, mas a estrutura esperada não foi encontrada.\n' +
-              'Aba de dados ("Respostas ao formulário 1"): ' + (dataOk ? 'OK' : 'NÃO ENCONTRADA') + '\n' +
-              'Aba de configurações ("Configurações (Não Editar)"): ' + (settingsOk ? 'OK' : 'NÃO ENCONTRADA') + '\n' +
-              'Abas disponíveis: ' + available
-            );
+      google.script.run
+        .withSuccessHandler(data => {
+          try {
+            const safeData = normalizePayload(data);
+            if (initial && safeData.meta && safeData.meta.availableFilters) {
+              populateFilters(safeData.meta.availableFilters);
+            }
+            renderAll(safeData);
+          } catch (err) {
+            console.error(err);
+            alert('Erro ao renderizar a análise: ' + (err.message || err));
+          } finally {
             clearLoadingTimeout();
             showLoading(false);
-            return;
           }
-
-          onSuccess();
         })
         .withFailureHandler(err => {
           console.error(err);
           clearLoadingTimeout();
           showLoading(false);
-          alert('Falha ao validar permissões do Web App/acesso à planilha: ' + (err.message || err));
+          alert('Erro ao carregar a análise: ' + (err.message || err));
         })
-        .checkSpreadsheetAccess();
-    }
-
-    function loadDashboard(initial = false) {
-      showLoading(true);
-      startLoadingTimeout();
-
-      validateSpreadsheetAccess(() => {
-        google.script.run
-          .withSuccessHandler(data => {
-            try {
-              const safeData = normalizePayload(data);
-              if (initial && safeData.meta && safeData.meta.availableFilters) {
-                populateFilters(safeData.meta.availableFilters);
-              }
-              renderAll(safeData);
-            } catch (err) {
-              console.error(err);
-              alert('Erro ao renderizar a análise: ' + (err.message || err));
-            } finally {
-              clearLoadingTimeout();
-              showLoading(false);
-            }
-          })
-          .withFailureHandler(err => {
-            console.error(err);
-            clearLoadingTimeout();
-            showLoading(false);
-            alert('Erro ao carregar a análise: ' + (err.message || err));
-          })
-          .getDashboardData(collectFilters());
-      });
+        .getDashboardData(collectFilters());
     }
 
     function startLoadingTimeout() {
       clearLoadingTimeout();
       state.loadingTimeoutId = setTimeout(() => {
         showLoading(false);
-        validateSpreadsheetAccess(() => {
-          alert('A carga da análise demorou além do esperado. Permissões e acesso à planilha estão OK. Tente novamente em instantes.');
-        });
+        alert('A carga da análise demorou além do esperado. Tente novamente em instantes.');
       }, 30000);
     }
 
