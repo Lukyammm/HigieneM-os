@@ -49,12 +49,16 @@ function openSpreadsheet_() {
 function checkSpreadsheetAccess() {
   const ss = openSpreadsheet_();
   const sheets = ss.getSheets().map(s => s.getName());
+  const dataSheet = resolveDataSheet_(ss);
+  const settingsSheet = resolveSettingsSheet_(ss);
 
   return {
     spreadsheetId: ss.getId(),
     spreadsheetName: ss.getName(),
-    dataSheetExists: sheets.indexOf(CONFIG.DATA_SHEET_NAME) !== -1,
-    settingsSheetExists: sheets.indexOf(CONFIG.SETTINGS_SHEET_NAME) !== -1,
+    dataSheetExists: !!dataSheet,
+    settingsSheetExists: !!settingsSheet,
+    dataSheetName: dataSheet ? dataSheet.getName() : '',
+    settingsSheetName: settingsSheet ? settingsSheet.getName() : '',
     availableSheets: sheets
   };
 }
@@ -98,7 +102,7 @@ function getFilteredTable(filters) {
 
 function getBaseRows_() {
   const ss = openSpreadsheet_();
-  const sheet = ss.getSheetByName(CONFIG.DATA_SHEET_NAME);
+  const sheet = resolveDataSheet_(ss);
 
   if (!sheet) {
     const available = ss.getSheets().map(s => s.getName()).join(', ');
@@ -110,17 +114,19 @@ function getBaseRows_() {
   const lastRow = sheet.getLastRow();
   if (lastRow < CONFIG.DATA_START_ROW) return [];
 
+  const width = Math.max(CONFIG.DATA_COLUMN_ACAO, sheet.getLastColumn());
+
   return sheet.getRange(
     CONFIG.DATA_START_ROW,
     1,
     lastRow - CONFIG.DATA_START_ROW + 1,
-    CONFIG.DATA_COLUMN_ACAO
+    width
   ).getValues();
 }
 
 function getSettingsData_() {
   const ss = openSpreadsheet_();
-  const sheet = ss.getSheetByName(CONFIG.SETTINGS_SHEET_NAME);
+  const sheet = resolveSettingsSheet_(ss);
 
   if (!sheet) {
     return {
@@ -466,6 +472,43 @@ function parseDate_(value) {
   if (!isNaN(d)) return d;
 
   return null;
+}
+
+function resolveDataSheet_(ss) {
+  const exact = ss.getSheetByName(CONFIG.DATA_SHEET_NAME);
+  if (exact) return exact;
+
+  const normalizedExpected = normalizeSheetName_(CONFIG.DATA_SHEET_NAME);
+  const byNormalized = ss.getSheets().find(s => normalizeSheetName_(s.getName()) === normalizedExpected);
+  if (byNormalized) return byNormalized;
+
+  const byPrefix = ss.getSheets().find(s => normalizeSheetName_(s.getName()).indexOf('respostas ao formulario') === 0);
+  if (byPrefix) return byPrefix;
+
+  return null;
+}
+
+function resolveSettingsSheet_(ss) {
+  const exact = ss.getSheetByName(CONFIG.SETTINGS_SHEET_NAME);
+  if (exact) return exact;
+
+  const normalizedExpected = normalizeSheetName_(CONFIG.SETTINGS_SHEET_NAME);
+  const byNormalized = ss.getSheets().find(s => normalizeSheetName_(s.getName()) === normalizedExpected);
+  if (byNormalized) return byNormalized;
+
+  const byPrefix = ss.getSheets().find(s => normalizeSheetName_(s.getName()).indexOf('configuracoes') === 0);
+  if (byPrefix) return byPrefix;
+
+  return null;
+}
+
+function normalizeSheetName_(value) {
+  return String(value || '')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .replace(/\s+/g, ' ')
+    .trim();
 }
 
 function cleanText_(value) {
