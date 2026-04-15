@@ -1,1186 +1,667 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Análise de Higiene das Mãos</title>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <style>
-    :root {
-      --bg: #f4f7fb;
-      --surface: #ffffff;
-      --surface-2: #f8fafc;
-      --line: #dde5ef;
-      --text: #142033;
-      --muted: #6e7d91;
-      --primary: #1f4e79;
-      --primary-2: #2d6da3;
-      --success: #1f7a4f;
-      --danger: #b42318;
-      --warning: #b54708;
-      --shadow: 0 14px 40px rgba(17, 24, 39, 0.08);
-      --radius: 18px;
-    }
-
-    * {
-      box-sizing: border-box;
-    }
-
-    html, body {
-      margin: 0;
-      padding: 0;
-      background: linear-gradient(180deg, #f6f9fd 0%, #eef3f8 100%);
-      color: var(--text);
-      font-family: Inter, Arial, Helvetica, sans-serif;
-    }
-
-    button,
-    input,
-    select,
-    textarea {
-      font-family: inherit;
-    }
-
-    .app {
-      max-width: 1600px;
-      margin: 0 auto;
-      padding: 24px;
-    }
-
-    .hero {
-      background: linear-gradient(135deg, #14304f 0%, #1f4e79 58%, #2d6da3 100%);
-      color: white;
-      border-radius: 28px;
-      padding: 28px;
-      box-shadow: var(--shadow);
-      position: relative;
-      overflow: hidden;
-    }
-
-    .hero::after {
-      content: "";
-      position: absolute;
-      right: -60px;
-      top: -60px;
-      width: 240px;
-      height: 240px;
-      background: rgba(255,255,255,0.08);
-      border-radius: 50%;
-      filter: blur(2px);
-    }
-
-    .hero h1 {
-      margin: 0 0 10px;
-      font-size: 32px;
-      line-height: 1.1;
-      letter-spacing: -0.02em;
-    }
-
-    .hero p {
-      margin: 0;
-      max-width: 980px;
-      color: rgba(255,255,255,0.88);
-      font-size: 15px;
-    }
-
-    .meta-line {
-      margin-top: 14px;
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-    }
-
-    .meta-chip {
-      padding: 8px 12px;
-      border-radius: 999px;
-      background: rgba(255,255,255,0.12);
-      border: 1px solid rgba(255,255,255,0.18);
-      font-size: 13px;
-    }
-
-    .section {
-      margin-top: 22px;
-    }
-
-    .panel {
-      background: var(--surface);
-      border: 1px solid rgba(20, 32, 51, 0.06);
-      border-radius: 24px;
-      box-shadow: var(--shadow);
-      padding: 20px;
-    }
-
-    .section-title {
-      margin: 0 0 16px;
-      font-size: 18px;
-      font-weight: 600;
-      letter-spacing: -0.01em;
-    }
-
-    .filters-grid {
-      display: grid;
-      grid-template-columns: repeat(6, minmax(0, 1fr));
-      gap: 14px;
-    }
-
-    .field {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-    }
-
-    .field label {
-      font-size: 13px;
-      color: var(--muted);
-      font-weight: 500;
-    }
-
-    .field select,
-    .field input {
-      width: 100%;
-      height: 44px;
-      border: 1px solid var(--line);
-      background: #fff;
-      border-radius: 14px;
-      padding: 0 14px;
-      font-size: 14px;
-      color: var(--text);
-      outline: none;
-      transition: 0.2s ease;
-    }
-
-    .field select:focus,
-    .field input:focus {
-      border-color: var(--primary-2);
-      box-shadow: 0 0 0 4px rgba(45, 109, 163, 0.12);
-    }
-
-    .filter-actions {
-      margin-top: 16px;
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
-    }
-
-    .btn {
-      height: 44px;
-      padding: 0 18px;
-      border-radius: 14px;
-      border: 0;
-      font-weight: 600;
-      cursor: pointer;
-      transition: transform 0.15s ease, opacity 0.15s ease;
-    }
-
-    .btn:hover {
-      transform: translateY(-1px);
-    }
-
-    .btn-primary {
-      background: var(--primary);
-      color: white;
-    }
-
-    .btn-light {
-      background: #edf3f9;
-      color: var(--primary);
-    }
-
-    .kpi-grid {
-      display: grid;
-      grid-template-columns: repeat(5, minmax(0, 1fr));
-      gap: 16px;
-    }
-
-    .kpi-card {
-      background: linear-gradient(180deg, #ffffff 0%, #f9fbfd 100%);
-      border: 1px solid rgba(20, 32, 51, 0.06);
-      border-radius: 22px;
-      padding: 18px;
-      min-height: 118px;
-      position: relative;
-      overflow: hidden;
-    }
-
-    .kpi-card::before {
-      content: "";
-      position: absolute;
-      right: -20px;
-      bottom: -20px;
-      width: 100px;
-      height: 100px;
-      border-radius: 50%;
-      background: rgba(31, 78, 121, 0.05);
-    }
-
-    .kpi-label {
-      font-size: 13px;
-      color: var(--muted);
-      font-weight: 500;
-      margin-bottom: 10px;
-    }
-
-    .kpi-value {
-      font-size: 34px;
-      font-weight: 700;
-      letter-spacing: -0.03em;
-      line-height: 1;
-      margin-bottom: 10px;
-    }
-
-    .kpi-sub {
-      font-size: 13px;
-      color: var(--muted);
-    }
-
-    .two-col,
-    .three-col {
-      display: grid;
-      gap: 16px;
-    }
-
-    .two-col {
-      grid-template-columns: 1.3fr 1fr;
-    }
-
-    .three-col {
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-    }
-
-    .chart-card {
-      background: var(--surface);
-      border: 1px solid rgba(20, 32, 51, 0.06);
-      border-radius: 22px;
-      box-shadow: var(--shadow);
-      padding: 18px;
-      min-height: 380px;
-    }
-
-    .chart-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 12px;
-      margin-bottom: 12px;
-    }
-
-    .chart-title {
-      font-size: 16px;
-      font-weight: 600;
-      margin: 0;
-    }
-
-    .chart-note {
-      color: var(--muted);
-      font-size: 12px;
-    }
-
-    .chart-wrap {
-      position: relative;
-      height: 300px;
-    }
-
-    .insight-list {
-      display: grid;
-      gap: 12px;
-    }
-
-    .insight-item {
-      padding: 14px 16px;
-      border-radius: 16px;
-      background: linear-gradient(180deg, #fbfdff 0%, #f5f8fc 100%);
-      border: 1px solid var(--line);
-      font-size: 14px;
-      line-height: 1.5;
-    }
-
-    .quality-grid {
-      display: grid;
-      grid-template-columns: repeat(4, minmax(0, 1fr));
-      gap: 14px;
-    }
-
-    .quality-card {
-      background: #fff;
-      border: 1px solid var(--line);
-      border-radius: 18px;
-      padding: 16px;
-    }
-
-    .quality-card .title {
-      color: var(--muted);
-      font-size: 13px;
-      font-weight: 500;
-      margin-bottom: 8px;
-    }
-
-    .quality-card .value {
-      font-size: 28px;
-      font-weight: 700;
-      letter-spacing: -0.02em;
-      margin-bottom: 6px;
-    }
-
-    .quality-card .sub {
-      font-size: 13px;
-      color: var(--muted);
-    }
-
-    .table-tools {
-      display: flex;
-      justify-content: space-between;
-      gap: 12px;
-      align-items: center;
-      margin-bottom: 14px;
-      flex-wrap: wrap;
-    }
-
-    .search-input {
-      width: 340px;
-      max-width: 100%;
-      height: 44px;
-      border: 1px solid var(--line);
-      border-radius: 14px;
-      padding: 0 14px;
-      font-size: 14px;
-      outline: none;
-    }
-
-    .table-wrap {
-      overflow: auto;
-      border: 1px solid var(--line);
-      border-radius: 18px;
-      background: white;
-    }
-
-    table {
-      width: 100%;
-      min-width: 1200px;
-      border-collapse: collapse;
-    }
-
-    thead th {
-      position: sticky;
-      top: 0;
-      background: #f4f8fc;
-      z-index: 1;
-      text-align: left;
-      font-size: 12px;
-      color: var(--muted);
-      padding: 14px 12px;
-      border-bottom: 1px solid var(--line);
-      white-space: nowrap;
-    }
-
-    tbody td {
-      padding: 12px;
-      border-bottom: 1px solid #edf2f7;
-      font-size: 14px;
-      vertical-align: top;
-    }
-
-    tbody tr:hover {
-      background: #f9fbfe;
-    }
-
-    .badge {
-      display: inline-flex;
-      align-items: center;
-      padding: 6px 10px;
-      border-radius: 999px;
-      font-size: 12px;
-      font-weight: 600;
-      white-space: nowrap;
-    }
-
-    .badge-success {
-      background: rgba(31, 122, 79, 0.12);
-      color: var(--success);
-    }
-
-    .badge-danger {
-      background: rgba(180, 35, 24, 0.12);
-      color: var(--danger);
-    }
-
-    .badge-warning {
-      background: rgba(181, 71, 8, 0.12);
-      color: var(--warning);
-    }
-
-    .badge-neutral {
-      background: rgba(31, 78, 121, 0.10);
-      color: var(--primary);
-    }
-
-    .loading {
-      position: fixed;
-      inset: 0;
-      background: rgba(244,247,251,0.78);
-      backdrop-filter: blur(4px);
-      display: none;
-      align-items: center;
-      justify-content: center;
-      z-index: 9999;
-    }
-
-    .loading.show {
-      display: flex;
-    }
-
-    .loading-box {
-      background: white;
-      border-radius: 20px;
-      padding: 18px 22px;
-      box-shadow: var(--shadow);
-      border: 1px solid var(--line);
-      font-weight: 600;
-      color: var(--primary);
-    }
-
-    .empty-state {
-      padding: 24px;
-      border-radius: 18px;
-      border: 1px dashed var(--line);
-      background: #fbfdff;
-      color: var(--muted);
-      text-align: center;
-    }
-
-    @media (max-width: 1280px) {
-      .filters-grid,
-      .kpi-grid,
-      .three-col,
-      .quality-grid {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-      }
-
-      .two-col {
-        grid-template-columns: 1fr;
-      }
-    }
-
-    @media (max-width: 768px) {
-      .app {
-        padding: 14px;
-      }
-
-      .hero {
-        padding: 22px;
-        border-radius: 22px;
-      }
-
-      .hero h1 {
-        font-size: 26px;
-      }
-
-      .filters-grid,
-      .kpi-grid,
-      .three-col,
-      .quality-grid {
-        grid-template-columns: 1fr;
-      }
-
-      .kpi-value {
-        font-size: 28px;
-      }
-
-      .search-input {
-        width: 100%;
-      }
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Análise de Higiene das Mãos • COSEP</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Space+Grotesk:wght@500&amp;display=swap');
+        
+        :root { --tw-color-primary: #10b981; }
+        
+        * { 
+            transition-property: color, background-color, border-color, text-decoration-color, fill, stroke; 
+            transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1); 
+            transition-duration: 150ms; 
+        }
+        
+        .card-hover:hover { 
+            transform: translateY(-3px); 
+            box-shadow: 0 20px 25px -5px rgb(16 185 129), 0 8px 10px -6px rgb(16 185 129); 
+        }
+        
+        .chart-container { 
+            height: 280px; 
+            position: relative; 
+        }
+        
+        .kpi-card { 
+            min-height: 168px; 
+        }
+        
+        select[multiple] { 
+            height: 42px; 
+            overflow-y: auto; 
+        }
+        
+        .loading-spinner {
+            animation: spin 1.5s linear infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
 </head>
-<body>
-  <div class="loading" id="loading">
-    <div class="loading-box">Carregando análise...</div>
-  </div>
-
-  <div class="app">
-    <section class="hero">
-      <h1>Análise de Higiene das Mãos</h1>
-      <p>
-        Painel analítico completo para monitoramento de observações por unidade, categoria profissional,
-        momento de realização e ação registrada. A leitura considera adesão, não realização, registros incompletos
-        e qualidade do preenchimento.
-      </p>
-      <div class="meta-line">
-        <div class="meta-chip" id="metaBase">Base: --</div>
-        <div class="meta-chip" id="metaFiltro">Filtrado: --</div>
-        <div class="meta-chip" id="metaGerado">Atualizado em: --</div>
-      </div>
-    </section>
-
-    <section class="section panel">
-      <h2 class="section-title">Filtros da análise</h2>
-      <div class="filters-grid">
-        <div class="field">
-          <label for="fUnidade">Unidade</label>
-          <select id="fUnidade"></select>
+<body class="bg-slate-50 font-sans">
+    <!-- HEADER INSTITUCIONAL -->
+    <div class="bg-white border-b border-slate-200 shadow-sm sticky top-0 z-50">
+        <div class="max-w-screen-2xl mx-auto px-8 py-5 flex items-center justify-between">
+            <div class="flex items-center gap-x-4">
+                <div class="flex items-center justify-center w-11 h-11 bg-emerald-600 text-white rounded-2xl text-3xl shadow-inner">🧼</div>
+                <div>
+                    <h1 class="text-3xl font-semibold tracking-[-0.5px] text-slate-800" style="font-family: 'Space Grotesk', sans-serif;">Higiene das Mãos</h1>
+                    <p class="text-emerald-700 text-sm font-medium tracking-widest -mt-1">BOLETIM INSTITUCIONAL • COSEP</p>
+                </div>
+                <div class="ml-3 px-3 py-1 bg-emerald-100 text-emerald-700 text-xs font-semibold rounded-3xl flex items-center gap-x-1">
+                    <div class="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></div>
+                    ANÁLISE EM TEMPO REAL
+                </div>
+            </div>
+            
+            <div class="flex items-center gap-x-8">
+                <div onclick="refreshAllData()" class="flex items-center gap-x-2 text-slate-600 hover:text-emerald-700 cursor-pointer text-sm font-medium">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.058 11H1M12 3v2m0 16v2m9-9H15m-6 0a8 8 0 01-7.714-6.314" />
+                    </svg>
+                    ATUALIZAR DADOS
+                </div>
+                
+                <div class="flex items-center bg-slate-100 rounded-3xl px-4 py-1 text-xs font-medium text-slate-500">
+                    <span class="bg-white text-emerald-700 px-3 py-px rounded-3xl mr-2">LIVE</span>
+                    Aba: Respostas ao formulário 1
+                </div>
+                
+                <div class="text-right">
+                    <div class="text-xs text-slate-400">Última atualização</div>
+                    <div id="last-update" class="text-sm font-medium text-slate-600">Agora</div>
+                </div>
+            </div>
         </div>
-        <div class="field">
-          <label for="fCategoria">Categoria profissional</label>
-          <select id="fCategoria"></select>
+    </div>
+
+    <div class="max-w-screen-2xl mx-auto px-8 py-8">
+        
+        <!-- LOADING OVERLAY -->
+        <div id="loading-screen" class="fixed inset-0 bg-white/80 backdrop-blur-xl flex items-center justify-center z-[9999] hidden">
+            <div class="text-center">
+                <div class="loading-spinner mx-auto w-12 h-12 border-4 border-emerald-300 border-t-emerald-700 rounded-full"></div>
+                <p class="mt-6 text-slate-600 font-medium">Carregando análise de higiene das mãos...</p>
+            </div>
         </div>
-        <div class="field">
-          <label for="fMomento">Momento</label>
-          <select id="fMomento"></select>
+
+        <div id="main-content">
+            
+            <!-- KPI CARDS -->
+            <div id="kpi-grid" class="grid grid-cols-2 md:grid-cols-4 xl:grid-cols-8 gap-6 mb-10"></div>
+
+            <!-- FILTROS COMPACTOS -->
+            <div class="bg-white rounded-3xl shadow-lg border border-slate-100 p-7 mb-10">
+                <div class="flex items-center justify-between mb-6">
+                    <h2 class="text-xl font-semibold text-slate-800 flex items-center gap-x-2">
+                        <span class="text-emerald-600">🔎</span> 
+                        Filtros Inteligentes
+                    </h2>
+                    <div class="flex gap-x-4">
+                        <button onclick="clearAllFilters()" 
+                                class="text-xs font-medium text-slate-400 hover:text-slate-600 flex items-center">
+                            ⟳ LIMPAR TUDO
+                        </button>
+                        <button onclick="applyCurrentFilters()" 
+                                class="px-6 py-2 bg-emerald-700 hover:bg-emerald-800 text-white rounded-2xl text-sm font-semibold">
+                            APLICAR FILTROS →
+                        </button>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-7 gap-6">
+                    <!-- Período -->
+                    <div>
+                        <label class="block text-xs font-medium text-slate-500 mb-2">PERÍODO</label>
+                        <div class="flex gap-3">
+                            <input id="dataInicio" type="date" 
+                                   class="flex-1 border border-slate-200 rounded-2xl px-4 py-3 text-sm focus:outline-none focus:border-emerald-400">
+                            <input id="dataFim" type="date" 
+                                   class="flex-1 border border-slate-200 rounded-2xl px-4 py-3 text-sm focus:outline-none focus:border-emerald-400">
+                        </div>
+                    </div>
+                    
+                    <!-- Unidade -->
+                    <div>
+                        <label class="block text-xs font-medium text-slate-500 mb-2">UNIDADE DE INTERNAÇÃO</label>
+                        <select id="unidades" multiple 
+                                class="w-full border border-slate-200 rounded-2xl px-4 py-3 text-sm focus:outline-none focus:border-emerald-400"></select>
+                    </div>
+                    
+                    <!-- Categoria -->
+                    <div>
+                        <label class="block text-xs font-medium text-slate-500 mb-2">CATEGORIA PROFISSIONAL</label>
+                        <select id="categorias" multiple 
+                                class="w-full border border-slate-200 rounded-2xl px-4 py-3 text-sm focus:outline-none focus:border-emerald-400"></select>
+                    </div>
+                    
+                    <!-- Momento -->
+                    <div>
+                        <label class="block text-xs font-medium text-slate-500 mb-2">MOMENTO DE REALIZAÇÃO</label>
+                        <select id="momentos" multiple 
+                                class="w-full border border-slate-200 rounded-2xl px-4 py-3 text-sm focus:outline-none focus:border-emerald-400"></select>
+                    </div>
+                    
+                    <!-- Situação -->
+                    <div>
+                        <label class="block text-xs font-medium text-slate-500 mb-2">SITUAÇÃO</label>
+                        <select id="situacoes" multiple 
+                                class="w-full border border-slate-200 rounded-2xl px-4 py-3 text-sm focus:outline-none focus:border-emerald-400">
+                            <option value="Realizado">Realizado</option>
+                            <option value="Não realizado">Não realizado</option>
+                            <option value="Incompleto">Incompleto</option>
+                        </select>
+                    </div>
+                    
+                    <!-- Método -->
+                    <div>
+                        <label class="block text-xs font-medium text-slate-500 mb-2">MÉTODO</label>
+                        <select id="metodos" multiple 
+                                class="w-full border border-slate-200 rounded-2xl px-4 py-3 text-sm focus:outline-none focus:border-emerald-400"></select>
+                    </div>
+                    
+                    <!-- Preenchimento -->
+                    <div>
+                        <label class="block text-xs font-medium text-slate-500 mb-2">PREENCHIMENTO</label>
+                        <select id="preenchimentos" multiple 
+                                class="w-full border border-slate-200 rounded-2xl px-4 py-3 text-sm focus:outline-none focus:border-emerald-400">
+                            <option value="Completo">Completo</option>
+                            <option value="Incompleto">Incompleto</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- GRÁFICOS (altura fixa) -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6 mb-12">
+                <div class="bg-white rounded-3xl shadow-lg p-6 flex flex-col">
+                    <div class="flex justify-between items-baseline mb-5">
+                        <h3 class="font-semibold text-slate-800">Evolução Temporal por Mês</h3>
+                    </div>
+                    <div class="chart-container flex-1"><canvas id="temporalChart"></canvas></div>
+                </div>
+                
+                <div class="bg-white rounded-3xl shadow-lg p-6 flex flex-col">
+                    <div class="flex justify-between items-baseline mb-5">
+                        <h3 class="font-semibold text-slate-800">Análise por Unidade</h3>
+                    </div>
+                    <div class="chart-container flex-1"><canvas id="unidadeChart"></canvas></div>
+                </div>
+                
+                <div class="bg-white rounded-3xl shadow-lg p-6 flex flex-col">
+                    <div class="flex justify-between items-baseline mb-5">
+                        <h3 class="font-semibold text-slate-800">Por Categoria Profissional</h3>
+                    </div>
+                    <div class="chart-container flex-1"><canvas id="categoriaChart"></canvas></div>
+                </div>
+                
+                <div class="bg-white rounded-3xl shadow-lg p-6 flex flex-col">
+                    <div class="flex justify-between items-baseline mb-5">
+                        <h3 class="font-semibold text-slate-800">Análise por Momento</h3>
+                    </div>
+                    <div class="chart-container flex-1"><canvas id="momentoChart"></canvas></div>
+                </div>
+                
+                <div class="bg-white rounded-3xl shadow-lg p-6 flex flex-col">
+                    <div class="flex justify-between items-baseline mb-5">
+                        <h3 class="font-semibold text-slate-800">Distribuição por Situação</h3>
+                    </div>
+                    <div class="chart-container flex-1"><canvas id="situacaoChart"></canvas></div>
+                </div>
+                
+                <div class="bg-white rounded-3xl shadow-lg p-6 flex flex-col">
+                    <div class="flex justify-between items-baseline mb-5">
+                        <h3 class="font-semibold text-slate-800">Distribuição por Método</h3>
+                    </div>
+                    <div class="chart-container flex-1"><canvas id="metodoChart"></canvas></div>
+                </div>
+            </div>
+
+            <!-- INSIGHTS AUTOMÁTICOS -->
+            <div class="bg-gradient-to-r from-emerald-700 to-emerald-800 text-white rounded-3xl p-8 mb-12 shadow-xl">
+                <h2 class="text-xl font-semibold mb-6 flex items-center gap-x-3">
+                    <span>💡</span> Insights Automáticos
+                </h2>
+                <div id="insights-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+            </div>
+
+            <!-- TABELA DETALHADA -->
+            <div class="bg-white rounded-3xl shadow-lg overflow-hidden border border-slate-100">
+                <div class="px-8 py-5 border-b flex items-center justify-between bg-slate-50">
+                    <h2 class="font-semibold text-lg flex items-center">
+                        Tabela Detalhada 
+                        <span id="table-info" class="ml-3 text-xs font-mono bg-white px-3 py-1 rounded-3xl text-slate-500"></span>
+                    </h2>
+                    <button onclick="exportToCSV()" 
+                            class="text-xs flex items-center gap-x-2 px-5 py-2 border border-slate-300 hover:bg-slate-100 rounded-2xl font-medium">
+                        📤 Exportar CSV
+                    </button>
+                </div>
+                
+                <div class="overflow-auto max-h-[560px]">
+                    <table class="w-full text-sm" id="detail-table">
+                        <thead class="sticky top-0 bg-white z-10 shadow-sm">
+                            <tr class="border-b">
+                                <th class="text-left px-8 py-4 font-medium text-slate-500 text-xs tracking-widest">DATA/HORA</th>
+                                <th class="text-left px-8 py-4 font-medium text-slate-500 text-xs tracking-widest">UNIDADE</th>
+                                <th class="text-left px-8 py-4 font-medium text-slate-500 text-xs tracking-widest">CATEGORIA</th>
+                                <th class="text-left px-8 py-4 font-medium text-slate-500 text-xs tracking-widest">MOMENTO</th>
+                                <th class="text-left px-8 py-4 font-medium text-slate-500 text-xs tracking-widest">AÇÃO</th>
+                                <th class="text-left px-8 py-4 font-medium text-slate-500 text-xs tracking-widest">SITUAÇÃO</th>
+                                <th class="text-left px-8 py-4 font-medium text-slate-500 text-xs tracking-widest">MÉTODO</th>
+                                <th class="text-left px-8 py-4 font-medium text-slate-500 text-xs tracking-widest">PREENCHIMENTO</th>
+                            </tr>
+                        </thead>
+                        <tbody id="table-body" class="divide-y text-slate-700"></tbody>
+                    </table>
+                </div>
+            </div>
         </div>
-        <div class="field">
-          <label for="fStatus">Situação</label>
-          <select id="fStatus"></select>
-        </div>
-        <div class="field">
-          <label for="fMetodo">Método</label>
-          <select id="fMetodo"></select>
-        </div>
-        <div class="field">
-          <label for="fCompleteness">Preenchimento</label>
-          <select id="fCompleteness"></select>
-        </div>
-        <div class="field">
-          <label for="fStartDate">Data inicial</label>
-          <input type="date" id="fStartDate">
-        </div>
-        <div class="field">
-          <label for="fEndDate">Data final</label>
-          <input type="date" id="fEndDate">
-        </div>
-      </div>
+    </div>
 
-      <div class="filter-actions">
-        <button class="btn btn-primary" id="btnAplicar">Aplicar filtros</button>
-        <button class="btn btn-light" id="btnLimpar">Limpar filtros</button>
-      </div>
-    </section>
-
-    <section class="section">
-      <div class="kpi-grid">
-        <div class="kpi-card">
-          <div class="kpi-label">Total de observações</div>
-          <div class="kpi-value" id="kpiTotal">0</div>
-          <div class="kpi-sub">Volume total do recorte aplicado</div>
-        </div>
-        <div class="kpi-card">
-          <div class="kpi-label">Adesão geral</div>
-          <div class="kpi-value" id="kpiAdesao">0,0%</div>
-          <div class="kpi-sub" id="kpiAdesaoSub">0 realizado(s)</div>
-        </div>
-        <div class="kpi-card">
-          <div class="kpi-label">Não realização</div>
-          <div class="kpi-value" id="kpiNaoRealizado">0,0%</div>
-          <div class="kpi-sub" id="kpiNaoRealizadoSub">0 não realizado(s)</div>
-        </div>
-        <div class="kpi-card">
-          <div class="kpi-label">Registros incompletos</div>
-          <div class="kpi-value" id="kpiIncompletos">0,0%</div>
-          <div class="kpi-sub" id="kpiIncompletosSub">0 incompleto(s)</div>
-        </div>
-        <div class="kpi-card">
-          <div class="kpi-label">Preenchimento completo</div>
-          <div class="kpi-value" id="kpiPreenchimento">0,0%</div>
-          <div class="kpi-sub">Qualidade do dado registrado</div>
-        </div>
-      </div>
-    </section>
-
-    <section class="section two-col">
-      <div class="chart-card">
-        <div class="chart-header">
-          <h3 class="chart-title">Evolução temporal</h3>
-          <div class="chart-note">Adesão e volume por mês</div>
-        </div>
-        <div class="chart-wrap">
-          <canvas id="chartTimeline"></canvas>
-        </div>
-      </div>
-
-      <div class="panel">
-        <h2 class="section-title">Insights automáticos</h2>
-        <div class="insight-list" id="insightsContainer"></div>
-      </div>
-    </section>
-
-    <section class="section three-col">
-      <div class="chart-card">
-        <div class="chart-header">
-          <h3 class="chart-title">Por unidade</h3>
-          <div class="chart-note">Top 10 por volume</div>
-        </div>
-        <div class="chart-wrap">
-          <canvas id="chartUnidade"></canvas>
-        </div>
-      </div>
-
-      <div class="chart-card">
-        <div class="chart-header">
-          <h3 class="chart-title">Por categoria profissional</h3>
-          <div class="chart-note">Top 10 por volume</div>
-        </div>
-        <div class="chart-wrap">
-          <canvas id="chartCategoria"></canvas>
-        </div>
-      </div>
-
-      <div class="chart-card">
-        <div class="chart-header">
-          <h3 class="chart-title">Por momento de realização</h3>
-          <div class="chart-note">Comparação por adesão</div>
-        </div>
-        <div class="chart-wrap">
-          <canvas id="chartMomento"></canvas>
-        </div>
-      </div>
-    </section>
-
-    <section class="section three-col">
-      <div class="chart-card">
-        <div class="chart-header">
-          <h3 class="chart-title">Situação dos registros</h3>
-          <div class="chart-note">Realizado, não realizado e incompleto</div>
-        </div>
-        <div class="chart-wrap">
-          <canvas id="chartStatus"></canvas>
-        </div>
-      </div>
-
-      <div class="chart-card">
-        <div class="chart-header">
-          <h3 class="chart-title">Método registrado</h3>
-          <div class="chart-note">Água, álcool e demais classificações</div>
-        </div>
-        <div class="chart-wrap">
-          <canvas id="chartMetodo"></canvas>
-        </div>
-      </div>
-
-      <div class="panel">
-        <h2 class="section-title">Qualidade do preenchimento</h2>
-        <div class="quality-grid">
-          <div class="quality-card">
-            <div class="title">Unidade ausente</div>
-            <div class="value" id="qUnidade">0</div>
-            <div class="sub" id="qUnidadePct">0,0%</div>
-          </div>
-          <div class="quality-card">
-            <div class="title">Categoria ausente</div>
-            <div class="value" id="qCategoria">0</div>
-            <div class="sub" id="qCategoriaPct">0,0%</div>
-          </div>
-          <div class="quality-card">
-            <div class="title">Momento ausente</div>
-            <div class="value" id="qMomento">0</div>
-            <div class="sub" id="qMomentoPct">0,0%</div>
-          </div>
-          <div class="quality-card">
-            <div class="title">Ação ausente</div>
-            <div class="value" id="qAcao">0</div>
-            <div class="sub" id="qAcaoPct">0,0%</div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <section class="section panel">
-      <h2 class="section-title">Tabela analítica detalhada</h2>
-      <div class="table-tools">
-        <input type="text" class="search-input" id="tableSearch" placeholder="Pesquisar na tabela..." />
-        <div id="tableCount" style="font-size:13px;color:var(--muted);font-weight:500;">0 registros</div>
-      </div>
-
-      <div class="table-wrap">
-        <table>
-          <thead>
-            <tr>
-              <th>Data</th>
-              <th>Unidade</th>
-              <th>Categoria profissional</th>
-              <th>Momento</th>
-              <th>Ação</th>
-              <th>Situação</th>
-              <th>Método</th>
-              <th>Preenchimento</th>
-            </tr>
-          </thead>
-          <tbody id="tableBody"></tbody>
-        </table>
-      </div>
-    </section>
-  </div>
-
-  <script>
-    const state = {
-      raw: null,
-      tableData: [],
-      charts: {},
-      loadingTimeoutId: null
-    };
-
-    function showLoading(show) {
-      document.getElementById('loading').classList.toggle('show', !!show);
-    }
-
-    function clearLoadingTimeout() {
-      if (state.loadingTimeoutId) {
-        clearTimeout(state.loadingTimeoutId);
-        state.loadingTimeoutId = null;
-      }
-    }
-
-    function formatNumber(value) {
-      return new Intl.NumberFormat('pt-BR').format(value || 0);
-    }
-
-    function safeText(value) {
-      return (value ?? '').toString();
-    }
-
-    function createOption(select, value, label) {
-      const opt = document.createElement('option');
-      opt.value = value;
-      opt.textContent = label;
-      select.appendChild(opt);
-    }
-
-    function fillSelect(selectId, values) {
-      const select = document.getElementById(selectId);
-      select.innerHTML = '';
-      createOption(select, 'TODOS', 'Todos');
-
-      (values || []).forEach(v => {
-        createOption(select, v, v);
-      });
-    }
-
-    function collectFilters() {
-      return {
-        unidade: document.getElementById('fUnidade').value,
-        categoria: document.getElementById('fCategoria').value,
-        momento: document.getElementById('fMomento').value,
-        status: document.getElementById('fStatus').value,
-        metodo: document.getElementById('fMetodo').value,
-        completeness: document.getElementById('fCompleteness').value,
-        startDate: document.getElementById('fStartDate').value,
-        endDate: document.getElementById('fEndDate').value
-      };
-    }
-
-    function resetFilters() {
-      ['fUnidade','fCategoria','fMomento','fStatus','fMetodo','fCompleteness'].forEach(id => {
-        document.getElementById(id).value = 'TODOS';
-      });
-      document.getElementById('fStartDate').value = '';
-      document.getElementById('fEndDate').value = '';
-    }
-
-    function statusBadge(status) {
-      if (status === 'Realizado') return '<span class="badge badge-success">Realizado</span>';
-      if (status === 'Não realizado') return '<span class="badge badge-danger">Não realizado</span>';
-      return '<span class="badge badge-warning">Incompleto</span>';
-    }
-
-    function methodBadge(method) {
-      if (method === 'Água e sabonete') return '<span class="badge badge-neutral">Água e sabonete</span>';
-      if (method === 'Fricção com álcool') return '<span class="badge badge-success">Fricção com álcool</span>';
-      if (method === 'Não realizado') return '<span class="badge badge-danger">Não realizado</span>';
-      return '<span class="badge badge-warning">' + safeText(method) + '</span>';
-    }
-
-    function completenessBadge(value) {
-      if (value === 'Completo') return '<span class="badge badge-success">Completo</span>';
-      return '<span class="badge badge-warning">Incompleto</span>';
-    }
-
-    function renderMeta(meta) {
-      document.getElementById('metaBase').textContent = 'Base: ' + formatNumber(meta.totalBase);
-      document.getElementById('metaFiltro').textContent = 'Filtrado: ' + formatNumber(meta.totalFiltered);
-      document.getElementById('metaGerado').textContent = 'Atualizado em: ' + new Date(meta.generatedAt).toLocaleString('pt-BR');
-    }
-
-    function renderKpis(kpis) {
-      document.getElementById('kpiTotal').textContent = formatNumber(kpis.totalObservacoes);
-      document.getElementById('kpiAdesao').textContent = kpis.adesaoGeral;
-      document.getElementById('kpiAdesaoSub').textContent = formatNumber(kpis.realizados) + ' realizado(s)';
-
-      document.getElementById('kpiNaoRealizado').textContent = kpis.taxaNaoRealizacao;
-      document.getElementById('kpiNaoRealizadoSub').textContent = formatNumber(kpis.naoRealizados) + ' não realizado(s)';
-
-      document.getElementById('kpiIncompletos').textContent = kpis.taxaIncompletos;
-      document.getElementById('kpiIncompletosSub').textContent = formatNumber(kpis.incompletos) + ' incompleto(s)';
-
-      document.getElementById('kpiPreenchimento').textContent = kpis.taxaPreenchimentoCompleto;
-    }
-
-    function renderQuality(quality) {
-      document.getElementById('qUnidade').textContent = formatNumber(quality.missingUnidade);
-      document.getElementById('qUnidadePct').textContent = quality.pctMissingUnidade;
-
-      document.getElementById('qCategoria').textContent = formatNumber(quality.missingCategoria);
-      document.getElementById('qCategoriaPct').textContent = quality.pctMissingCategoria;
-
-      document.getElementById('qMomento').textContent = formatNumber(quality.missingMomento);
-      document.getElementById('qMomentoPct').textContent = quality.pctMissingMomento;
-
-      document.getElementById('qAcao').textContent = formatNumber(quality.missingAcao);
-      document.getElementById('qAcaoPct').textContent = quality.pctMissingAcao;
-    }
-
-    function renderInsights(insights) {
-      const container = document.getElementById('insightsContainer');
-      container.innerHTML = '';
-
-      if (!insights || !insights.length) {
-        container.innerHTML = '<div class="empty-state">Nenhum insight disponível.</div>';
-        return;
-      }
-
-      insights.forEach(text => {
-        const div = document.createElement('div');
-        div.className = 'insight-item';
-        div.textContent = text;
-        container.appendChild(div);
-      });
-    }
-
-    function destroyChart(key) {
-      if (state.charts[key]) {
-        state.charts[key].destroy();
-        state.charts[key] = null;
-      }
-    }
-
-    function createChart(key, config) {
-      destroyChart(key);
-      const ctx = document.getElementById(key).getContext('2d');
-      state.charts[key] = new Chart(ctx, config);
-    }
-
-    function topItems(data, limit = 10) {
-      return (data || []).slice(0, limit);
-    }
-
-    function renderCharts(charts) {
-      const timelineLabels = charts.timeline.map(x => x.label);
-      const timelineTotal = charts.timeline.map(x => x.total);
-      const timelineAdesao = charts.timeline.map(x => x.adesao);
-
-      createChart('chartTimeline', {
-        type: 'bar',
-        data: {
-          labels: timelineLabels,
-          datasets: [
-            {
-              type: 'bar',
-              label: 'Total de observações',
-              data: timelineTotal
-            },
-            {
-              type: 'line',
-              label: 'Adesão (%)',
-              data: timelineAdesao,
-              yAxisID: 'y1',
-              tension: 0.3
+    <script>
+        // ====================== CONFIGURAÇÃO TAILWIND ======================
+        function initTailwind() {
+            tailwind.config = {
+                content: [],
+                theme: {
+                    extend: {
+                        fontFamily: {
+                            heading: ['Space Grotesk', 'sans-serif']
+                        }
+                    }
+                }
+            };
+        }
+        
+        // ====================== VARIÁVEIS GLOBAIS ======================
+        let allRecords = null;
+        let currentResponse = null;
+        let chartInstances = {};
+        
+        // ====================== CARREGAR DADOS ======================
+        function loadData(filters = {}) {
+            const loading = document.getElementById('loading-screen');
+            loading.classList.remove('hidden');
+            
+            google.script.run
+                .withSuccessHandler(onDataSuccess)
+                .withFailureHandler(onDataError)
+                .getAnalysis(filters);
+        }
+        
+        function onDataSuccess(response) {
+            const loading = document.getElementById('loading-screen');
+            loading.classList.add('hidden');
+            
+            if (!response.success) {
+                showErrorModal(response.error);
+                return;
             }
-          ]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          interaction: { mode: 'index', intersect: false },
-          plugins: {
-            legend: { position: 'top' }
-          },
-          scales: {
-            y: {
-              beginAtZero: true
-            },
-            y1: {
-              position: 'right',
-              beginAtZero: true,
-              max: 100,
-              grid: { drawOnChartArea: false }
+            
+            currentResponse = response;
+            allRecords = response.totalProcessed || 0;
+            
+            // Popula filtros apenas na primeira carga
+            if (!document.getElementById('unidades').hasChildNodes()) {
+                populateFilterOptions(response.filterOptions);
             }
-          }
+            
+            renderKPIs(response.kpis);
+            renderAllCharts(response.chartData);
+            renderInsights(response.insights);
+            renderDetailTable(response.tableData);
+            
+            document.getElementById('last-update').textContent = new Date().toLocaleTimeString('pt-BR');
         }
-      });
-
-      const unidade = topItems(charts.byUnidade, 10);
-      createChart('chartUnidade', {
-        type: 'bar',
-        data: {
-          labels: unidade.map(x => x.label),
-          datasets: [
-            { label: 'Total', data: unidade.map(x => x.total) },
-            { label: 'Adesão (%)', data: unidade.map(x => x.adesao) }
-          ]
-        },
-        options: {
-          indexAxis: 'y',
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: { legend: { position: 'top' } },
-          scales: { x: { beginAtZero: true } }
+        
+        function onDataError(err) {
+            const loading = document.getElementById('loading-screen');
+            loading.classList.add('hidden');
+            showErrorModal(err.message || 'Erro de comunicação com o servidor');
         }
-      });
-
-      const categoria = topItems(charts.byCategoria, 10);
-      createChart('chartCategoria', {
-        type: 'bar',
-        data: {
-          labels: categoria.map(x => x.label),
-          datasets: [
-            { label: 'Total', data: categoria.map(x => x.total) },
-            { label: 'Não realização (%)', data: categoria.map(x => x.taxaNaoRealizacao) }
-          ]
-        },
-        options: {
-          indexAxis: 'y',
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: { legend: { position: 'top' } },
-          scales: { x: { beginAtZero: true } }
+        
+        // ====================== RENDER KPIs ======================
+        function renderKPIs(kpis) {
+            const container = document.getElementById('kpi-grid');
+            container.innerHTML = `
+                <div class="bg-white rounded-3xl p-6 shadow-inner card-hover kpi-card">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <p class="uppercase text-xs tracking-widest text-slate-400">Total de observações</p>
+                            <p class="text-5xl font-semibold text-slate-800 mt-2">${kpis.totalObservacoes.toLocaleString('pt-BR')}</p>
+                        </div>
+                        <div class="text-5xl opacity-20">📋</div>
+                    </div>
+                </div>
+                
+                <div class="bg-white rounded-3xl p-6 shadow-inner card-hover border border-emerald-200 kpi-card">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <p class="uppercase text-xs tracking-widest text-emerald-600">Adesão geral</p>
+                            <p class="text-5xl font-semibold text-emerald-700 mt-2">${kpis.adesaoGeral}<span class="text-2xl">%</span></p>
+                        </div>
+                        <div class="text-5xl">✅</div>
+                    </div>
+                    <div class="h-2 bg-emerald-100 rounded-3xl mt-8 overflow-hidden">
+                        <div class="h-2 bg-emerald-600 rounded-3xl" style="width: ${kpis.adesaoGeral}%"></div>
+                    </div>
+                </div>
+                
+                <div class="bg-white rounded-3xl p-6 shadow-inner card-hover kpi-card">
+                    <div class="flex justify-between">
+                        <div>
+                            <p class="uppercase text-xs tracking-widest text-emerald-500">Realizado</p>
+                            <p class="text-4xl font-semibold text-emerald-600">${kpis.totalRealizado.toLocaleString('pt-BR')}</p>
+                        </div>
+                        <div>🧼</div>
+                    </div>
+                </div>
+                
+                <div class="bg-white rounded-3xl p-6 shadow-inner card-hover kpi-card">
+                    <div class="flex justify-between">
+                        <div>
+                            <p class="uppercase text-xs tracking-widest text-red-500">Não realizado</p>
+                            <p class="text-4xl font-semibold text-red-600">${kpis.totalNaoRealizado.toLocaleString('pt-BR')}</p>
+                        </div>
+                        <div>⛔</div>
+                    </div>
+                </div>
+                
+                <div class="bg-white rounded-3xl p-6 shadow-inner card-hover kpi-card">
+                    <div class="flex justify-between">
+                        <div>
+                            <p class="uppercase text-xs tracking-widest text-amber-500">Incompleto</p>
+                            <p class="text-4xl font-semibold text-amber-600">${kpis.totalIncompleto.toLocaleString('pt-BR')}</p>
+                        </div>
+                        <div>⚠️</div>
+                    </div>
+                </div>
+                
+                <div class="bg-white rounded-3xl p-6 shadow-inner card-hover kpi-card">
+                    <p class="uppercase text-xs tracking-widest text-red-400">Taxa de não realização</p>
+                    <p class="text-5xl font-semibold text-red-600 mt-3">${kpis.taxaNaoRealizacao}%</p>
+                </div>
+                
+                <div class="bg-white rounded-3xl p-6 shadow-inner card-hover kpi-card">
+                    <p class="uppercase text-xs tracking-widest text-sky-500">Preenchimento completo</p>
+                    <p class="text-5xl font-semibold text-sky-600 mt-3">${kpis.taxaPreenchimentoCompleto}%</p>
+                </div>
+                
+                <div class="bg-white rounded-3xl p-6 shadow-inner card-hover kpi-card">
+                    <p class="uppercase text-xs tracking-widest text-orange-500">Preenchimento incompleto</p>
+                    <p class="text-5xl font-semibold text-orange-600 mt-3">${kpis.taxaPreenchimentoIncompleto}%</p>
+                </div>
+            `;
         }
-      });
-
-      const momento = topItems(charts.byMomento, 10);
-      createChart('chartMomento', {
-        type: 'bar',
-        data: {
-          labels: momento.map(x => x.label),
-          datasets: [
-            { label: 'Adesão (%)', data: momento.map(x => x.adesao) },
-            { label: 'Não realização (%)', data: momento.map(x => x.taxaNaoRealizacao) },
-            { label: 'Incompletos (%)', data: momento.map(x => x.taxaIncompletos) }
-          ]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: { legend: { position: 'top' } },
-          scales: { y: { beginAtZero: true, max: 100 } }
+        
+        // ====================== POPULAR FILTROS ======================
+        function populateFilterOptions(options) {
+            // Unidades
+            const unitSel = document.getElementById('unidades');
+            unitSel.innerHTML = options.unidades.map(u => `<option value="${u}">${u}</option>`).join('');
+            
+            // Categorias
+            const catSel = document.getElementById('categorias');
+            catSel.innerHTML = options.categorias.map(c => `<option value="${c}">${c}</option>`).join('');
+            
+            // Momentos
+            const momSel = document.getElementById('momentos');
+            momSel.innerHTML = options.momentos.map(m => `<option value="${m}">${m}</option>`).join('');
+            
+            // Métodos fixos
+            const metSel = document.getElementById('metodos');
+            const metodosFixos = ['Água e sabonete','Fricção com álcool','Não realizado','Realizado sem método detalhado','Não informado'];
+            metSel.innerHTML = metodosFixos.map(m => `<option value="${m}">${m}</option>`).join('');
         }
-      });
-
-      const status = charts.byStatus;
-      createChart('chartStatus', {
-        type: 'doughnut',
-        data: {
-          labels: status.map(x => x.label),
-          datasets: [
-            { label: 'Situação', data: status.map(x => x.total) }
-          ]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: { legend: { position: 'bottom' } }
+        
+        // ====================== PEGAR FILTROS ======================
+        function getCurrentFilters() {
+            const getSelected = (id) => Array.from(document.getElementById(id).selectedOptions).map(o => o.value);
+            
+            return {
+                dataInicio: document.getElementById('dataInicio').value || null,
+                dataFim: document.getElementById('dataFim').value || null,
+                unidades: getSelected('unidades'),
+                categorias: getSelected('categorias'),
+                momentos: getSelected('momentos'),
+                situacoes: getSelected('situacoes'),
+                metodos: getSelected('metodos'),
+                preenchimentos: getSelected('preenchimentos')
+            };
         }
-      });
-
-      const metodo = charts.byMetodo;
-      createChart('chartMetodo', {
-        type: 'pie',
-        data: {
-          labels: metodo.map(x => x.label),
-          datasets: [
-            { label: 'Método', data: metodo.map(x => x.total) }
-          ]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: { legend: { position: 'bottom' } }
+        
+        function applyCurrentFilters() {
+            loadData(getCurrentFilters());
         }
-      });
-    }
-
-    function renderTable(data) {
-      state.tableData = data || [];
-      applyTableSearch();
-    }
-
-    function buildEmptyPayload() {
-      return {
-        meta: {
-          generatedAt: new Date().toISOString(),
-          totalBase: 0,
-          totalFiltered: 0,
-          availableFilters: {
-            unidade: [],
-            categoria: [],
-            momento: [],
-            status: [],
-            metodo: [],
-            completeness: []
-          }
-        },
-        kpis: {
-          totalObservacoes: 0,
-          realizados: 0,
-          naoRealizados: 0,
-          incompletos: 0,
-          adesaoGeral: '0,0%',
-          taxaNaoRealizacao: '0,0%',
-          taxaIncompletos: '0,0%',
-          taxaPreenchimentoCompleto: '0,0%'
-        },
-        quality: {
-          missingUnidade: 0,
-          missingCategoria: 0,
-          missingMomento: 0,
-          missingAcao: 0,
-          pctMissingUnidade: '0,0%',
-          pctMissingCategoria: '0,0%',
-          pctMissingMomento: '0,0%',
-          pctMissingAcao: '0,0%'
-        },
-        insights: [],
-        charts: {
-          timeline: [],
-          byUnidade: [],
-          byCategoria: [],
-          byMomento: [],
-          byStatus: [],
-          byMetodo: []
-        },
-        table: []
-      };
-    }
-
-    function normalizePayload(payload) {
-      const fallback = buildEmptyPayload();
-      if (!payload || typeof payload !== 'object') return fallback;
-
-      return {
-        meta: payload.meta || fallback.meta,
-        kpis: payload.kpis || fallback.kpis,
-        quality: payload.quality || fallback.quality,
-        insights: Array.isArray(payload.insights) ? payload.insights : fallback.insights,
-        charts: payload.charts || fallback.charts,
-        table: Array.isArray(payload.table) ? payload.table : fallback.table
-      };
-    }
-
-    function applyTableSearch() {
-      const term = document.getElementById('tableSearch').value.trim().toLowerCase();
-      const tbody = document.getElementById('tableBody');
-      tbody.innerHTML = '';
-
-      let filtered = state.tableData;
-
-      if (term) {
-        filtered = state.tableData.filter(row => {
-          return [
-            row.data,
-            row.unidade,
-            row.categoria,
-            row.momento,
-            row.acao,
-            row.status,
-            row.metodo,
-            row.completeness
-          ].join(' ').toLowerCase().includes(term);
-        });
-      }
-
-      document.getElementById('tableCount').textContent = formatNumber(filtered.length) + ' registros';
-
-      if (!filtered.length) {
-        tbody.innerHTML = `
-          <tr>
-            <td colspan="8">
-              <div class="empty-state">Nenhum registro encontrado na tabela.</div>
-            </td>
-          </tr>
-        `;
-        return;
-      }
-
-      filtered.forEach(row => {
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-          <td>${safeText(row.data)}</td>
-          <td>${safeText(row.unidade)}</td>
-          <td>${safeText(row.categoria)}</td>
-          <td>${safeText(row.momento)}</td>
-          <td>${safeText(row.acao)}</td>
-          <td>${statusBadge(row.status)}</td>
-          <td>${methodBadge(row.metodo)}</td>
-          <td>${completenessBadge(row.completeness)}</td>
-        `;
-        tbody.appendChild(tr);
-      });
-    }
-
-    function renderAll(payload) {
-      const safePayload = normalizePayload(payload);
-      state.raw = safePayload;
-
-      renderMeta(safePayload.meta);
-      renderKpis(safePayload.kpis);
-      renderQuality(safePayload.quality);
-      renderInsights(safePayload.insights);
-      renderCharts(safePayload.charts);
-      renderTable(safePayload.table);
-    }
-
-    function populateFilters(availableFilters) {
-      fillSelect('fUnidade', availableFilters.unidade);
-      fillSelect('fCategoria', availableFilters.categoria);
-      fillSelect('fMomento', availableFilters.momento);
-      fillSelect('fStatus', availableFilters.status);
-      fillSelect('fMetodo', availableFilters.metodo);
-      fillSelect('fCompleteness', availableFilters.completeness);
-    }
-
-    function loadDashboard(initial = false) {
-      showLoading(true);
-      startLoadingTimeout();
-
-      google.script.run
-        .withSuccessHandler(data => {
-          try {
-            const safeData = normalizePayload(data);
-            if (initial && safeData.meta && safeData.meta.availableFilters) {
-              populateFilters(safeData.meta.availableFilters);
+        
+        function clearAllFilters() {
+            document.getElementById('dataInicio').value = '';
+            document.getElementById('dataFim').value = '';
+            ['unidades','categorias','momentos','situacoes','metodos','preenchimentos'].forEach(id => {
+                document.getElementById(id).selectedIndex = -1;
+            });
+            loadData({});
+        }
+        
+        // ====================== GRÁFICOS ======================
+        function renderAllCharts(chartData) {
+            Object.keys(chartInstances).forEach(key => {
+                if (chartInstances[key]) chartInstances[key].destroy();
+            });
+            
+            const commonOptions = {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { 
+                    legend: { 
+                        display: true, 
+                        position: 'top', 
+                        labels: { boxWidth: 12, padding: 18, usePointStyle: true } 
+                    } 
+                }
+            };
+            
+            // Evolução Temporal
+            chartInstances.temporal = new Chart(document.getElementById('temporalChart'), {
+                type: 'line',
+                data: {
+                    labels: chartData.temporal.labels,
+                    datasets: [{
+                        label: 'Adesão (%)',
+                        data: chartData.temporal.adesao,
+                        borderColor: '#10b981',
+                        backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                        borderWidth: 3,
+                        tension: 0.3,
+                        pointRadius: 4
+                    }]
+                },
+                options: { ...commonOptions, plugins: { legend: { display: false } } }
+            });
+            
+            // Por Unidade
+            chartInstances.unidade = new Chart(document.getElementById('unidadeChart'), {
+                type: 'bar',
+                data: {
+                    labels: chartData.porUnidade.labels,
+                    datasets: [{
+                        label: '% Adesão',
+                        data: chartData.porUnidade.adesaoPercent,
+                        backgroundColor: '#10b981',
+                        borderRadius: 6
+                    }]
+                },
+                options: { ...commonOptions, indexAxis: 'y', plugins: { legend: { display: false } } }
+            });
+            
+            // Por Categoria
+            chartInstances.categoria = new Chart(document.getElementById('categoriaChart'), {
+                type: 'bar',
+                data: {
+                    labels: chartData.porCategoria.labels,
+                    datasets: [{
+                        label: '% Adesão',
+                        data: chartData.porCategoria.adesaoPercent,
+                        backgroundColor: '#0ea5e9'
+                    }]
+                },
+                options: commonOptions
+            });
+            
+            // Por Momento
+            chartInstances.momento = new Chart(document.getElementById('momentoChart'), {
+                type: 'bar',
+                data: {
+                    labels: chartData.porMomento.labels,
+                    datasets: [{
+                        label: '% Adesão',
+                        data: chartData.porMomento.adesaoPercent,
+                        backgroundColor: '#8b5cf6'
+                    }]
+                },
+                options: commonOptions
+            });
+            
+            // Distribuição Situação
+            chartInstances.situacao = new Chart(document.getElementById('situacaoChart'), {
+                type: 'pie',
+                data: {
+                    labels: chartData.distribuicaoSituacao.labels,
+                    datasets: [{
+                        data: chartData.distribuicaoSituacao.data,
+                        backgroundColor: ['#10b981', '#f43f5e', '#f59e0b']
+                    }]
+                },
+                options: { ...commonOptions, plugins: { legend: { position: 'bottom' } } }
+            });
+            
+            // Distribuição Método
+            chartInstances.metodo = new Chart(document.getElementById('metodoChart'), {
+                type: 'pie',
+                data: {
+                    labels: chartData.distribuicaoMetodo.labels,
+                    datasets: [{
+                        data: chartData.distribuicaoMetodo.data,
+                        backgroundColor: ['#0ea5e9', '#8b5cf6', '#ec4899', '#f59e0b', '#64748b']
+                    }]
+                },
+                options: { ...commonOptions, plugins: { legend: { position: 'bottom' } } }
+            });
+        }
+        
+        // ====================== INSIGHTS ======================
+        function renderInsights(insights) {
+            const container = document.getElementById('insights-container');
+            container.innerHTML = insights.map(insight => `
+                <div class="bg-white/10 backdrop-blur-md border border-white/20 rounded-3xl p-5 text-sm leading-relaxed">
+                    ${insight}
+                </div>
+            `).join('');
+        }
+        
+        // ====================== TABELA ======================
+        function renderDetailTable(tableData) {
+            const tbody = document.getElementById('table-body');
+            const info = document.getElementById('table-info');
+            
+            info.innerHTML = `${tableData.length} registros • Total base: ${allRecords}`;
+            
+            tbody.innerHTML = tableData.map(row => `
+                <tr class="hover:bg-emerald-50">
+                    <td class="px-8 py-4 whitespace-nowrap text-xs font-medium">${row.data}</td>
+                    <td class="px-8 py-4">${row.unidade}</td>
+                    <td class="px-8 py-4">${row.categoriaProfissional}</td>
+                    <td class="px-8 py-4">${row.momento}</td>
+                    <td class="px-8 py-4 text-xs max-w-[220px] truncate">${row.acao}</td>
+                    <td class="px-8 py-4">
+                        <span class="px-4 py-1 text-xs font-semibold rounded-3xl 
+                            ${row.situacao === 'Realizado' ? 'bg-emerald-100 text-emerald-700' : 
+                              row.situacao === 'Não realizado' ? 'bg-red-100 text-red-700' : 'bg-amber-100 text-amber-700'}">
+                            ${row.situacao}
+                        </span>
+                    </td>
+                    <td class="px-8 py-4 text-xs">${row.metodo}</td>
+                    <td class="px-8 py-4">
+                        <span class="px-4 py-1 text-xs font-semibold rounded-3xl 
+                            ${row.preenchimento === 'Completo' ? 'bg-sky-100 text-sky-700' : 'bg-orange-100 text-orange-700'}">
+                            ${row.preenchimento}
+                        </span>
+                    </td>
+                </tr>
+            `).join('');
+            
+            if (tableData.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="8" class="px-8 py-12 text-center text-slate-400">Nenhum registro encontrado com os filtros aplicados.</td></tr>`;
             }
-            renderAll(safeData);
-          } catch (err) {
-            console.error(err);
-            alert('Erro ao renderizar a análise: ' + (err.message || err));
-          } finally {
-            clearLoadingTimeout();
-            showLoading(false);
-          }
-        })
-        .withFailureHandler(err => {
-          console.error(err);
-          clearLoadingTimeout();
-          showLoading(false);
-          alert('Erro ao carregar a análise: ' + (err.message || err));
-        })
-        .getDashboardData(collectFilters());
-    }
-
-    function startLoadingTimeout() {
-      clearLoadingTimeout();
-      state.loadingTimeoutId = setTimeout(() => {
-        showLoading(false);
-        alert('A carga da análise demorou além do esperado. Tente novamente em instantes.');
-      }, 30000);
-    }
-
-    document.getElementById('btnAplicar').addEventListener('click', () => loadDashboard(false));
-    document.getElementById('btnLimpar').addEventListener('click', () => {
-      resetFilters();
-      loadDashboard(false);
-    });
-
-    document.getElementById('tableSearch').addEventListener('input', applyTableSearch);
-
-    window.addEventListener('load', () => {
-      loadDashboard(true);
-    });
-  </script>
+        }
+        
+        // ====================== EXPORT CSV ======================
+        function exportToCSV() {
+            if (!currentResponse || !currentResponse.tableData) return;
+            
+            const headers = ['Data', 'Unidade', 'Categoria Profissional', 'Momento', 'Ação', 'Situação', 'Método', 'Preenchimento'];
+            let csv = headers.join(';') + '\n';
+            
+            currentResponse.tableData.forEach(row => {
+                csv += [
+                    `"${row.data}"`,
+                    `"${row.unidade}"`,
+                    `"${row.categoriaProfissional}"`,
+                    `"${row.momento}"`,
+                    `"${row.acao.replace(/"/g, '""')}"`,
+                    `"${row.situacao}"`,
+                    `"${row.metodo}"`,
+                    `"${row.preenchimento}"`
+                ].join(';') + '\n';
+            });
+            
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = `analise_higiene_maos_${new Date().toISOString().slice(0,10)}.csv`;
+            link.click();
+        }
+        
+        // ====================== ERROR MODAL ======================
+        function showErrorModal(message) {
+            const modalHTML = `
+            <div class="fixed inset-0 bg-black/70 flex items-center justify-center z-[10000]">
+                <div class="bg-white rounded-3xl max-w-md w-full mx-4 p-8">
+                    <h3 class="text-red-600 text-xl font-semibold mb-2">⚠️ Algo deu errado</h3>
+                    <p class="text-slate-600">${message}</p>
+                    <p class="text-xs text-slate-400 mt-8">Verifique se a aba "Respostas ao formulário 1" existe e contém dados.</p>
+                    <button onclick="this.closest('.fixed').remove(); loadData({})" 
+                            class="mt-8 w-full py-4 bg-slate-900 text-white rounded-3xl font-medium">
+                        Tentar novamente
+                    </button>
+                </div>
+            </div>`;
+            const div = document.createElement('div');
+            div.innerHTML = modalHTML;
+            document.body.appendChild(div);
+        }
+        
+        // ====================== REFRESH ======================
+        function refreshAllData() {
+            loadData(getCurrentFilters());
+        }
+        
+        // ====================== INICIALIZAÇÃO ======================
+        function initializeSystem() {
+            initTailwind();
+            loadData({}); // carrega todos os dados
+            console.log('%c✅ Sistema de Higiene das Mãos - HTML completo carregado com layout corrigido', 'background:#10b981;color:white;padding:2px 6px;border-radius:4px');
+        }
+        
+        window.onload = initializeSystem;
+    </script>
 </body>
 </html>
