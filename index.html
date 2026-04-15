@@ -212,30 +212,30 @@
                 </div>
             </div>
 
-            <!-- GRÁFICOS (altura fixa) -->
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-12">
-                <div class="bg-white rounded-3xl shadow-lg p-6 flex flex-col">
+            <!-- GRÁFICOS -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-4 gap-6 mb-12 auto-rows-[minmax(260px,auto)]">
+                <div class="bg-white rounded-3xl shadow-lg p-6 flex flex-col xl:col-span-2">
                     <div class="flex justify-between items-baseline mb-5">
                         <h3 class="font-semibold text-slate-800">Evolução Temporal por Mês</h3>
                     </div>
                     <div class="chart-container flex-1"><canvas id="temporalChart"></canvas></div>
                 </div>
 
-                <div class="bg-white rounded-3xl shadow-lg p-6 flex flex-col">
+                <div class="bg-white rounded-3xl shadow-lg p-6 flex flex-col xl:col-span-2">
                     <div class="flex justify-between items-baseline mb-5">
                         <h3 class="font-semibold text-slate-800">Adesão por Momento</h3>
                     </div>
                     <div class="chart-container chart-xlarge flex-1"><canvas id="momentoChart"></canvas></div>
                 </div>
 
-                <div class="bg-white rounded-3xl shadow-lg p-6 flex flex-col">
+                <div class="bg-white rounded-3xl shadow-lg p-6 flex flex-col lg:col-span-2 xl:col-span-2 xl:row-span-2">
                     <div class="flex justify-between items-baseline mb-5">
                         <h3 class="font-semibold text-slate-800">Adesão por Unidade</h3>
                     </div>
                     <div class="chart-container chart-xxlarge flex-1"><canvas id="unidadeChart"></canvas></div>
                 </div>
 
-                <div class="bg-white rounded-3xl shadow-lg p-6 flex flex-col">
+                <div class="bg-white rounded-3xl shadow-lg p-6 flex flex-col xl:col-span-2">
                     <div class="flex justify-between items-baseline mb-5">
                         <h3 class="font-semibold text-slate-800">Por Categoria Profissional</h3>
                     </div>
@@ -539,6 +539,7 @@
                 beginAtZero: true,
                 min: 0,
                 max: 100,
+                grace: '5%',
                 ticks: {
                     callback: formatPercentTicks,
                     stepSize: 20
@@ -601,7 +602,8 @@
                     indexAxis: 'y',
                     layout: {
                         padding: {
-                            left: 8
+                            left: 10,
+                            right: 6
                         }
                     },
                     scales: {
@@ -632,21 +634,23 @@
                 },
                 options: {
                     ...commonOptions,
+                    indexAxis: 'y',
                     scales: {
-                        y: percentScaleY,
-                        x: {
+                        x: percentScaleX,
+                        y: {
                             ticks: {
+                                autoSkip: false,
                                 callback: function(value) {
                                     const originalLabel = this.getLabelForValue(value);
-                                    return wrapLabel(originalLabel, 16);
+                                    return wrapLabel(originalLabel, 24);
                                 },
-                                autoSkip: true,
-                                maxTicksLimit: 10,
-                                maxRotation: 0,
-                                minRotation: 0
+                                font: {
+                                    size: 11
+                                }
                             }
                         }
-                    }
+                    },
+                    plugins: { legend: { display: false } }
                 }
             });
 
