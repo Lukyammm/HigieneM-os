@@ -3,43 +3,51 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Análise de Higiene das Mãos • COSEP</title>
+    <title>Análise de Hig da SCIH - HUC</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Space+Grotesk:wght@500&amp;display=swap');
-        
+
         :root { --tw-color-primary: #10b981; }
-        
-        * { 
-            transition-property: color, background-color, border-color, text-decoration-color, fill, stroke; 
-            transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1); 
-            transition-duration: 150ms; 
+
+        * {
+            transition-property: color, background-color, border-color, text-decoration-color, fill, stroke;
+            transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+            transition-duration: 150ms;
         }
-        
-        .card-hover:hover { 
-            transform: translateY(-3px); 
-            box-shadow: 0 20px 25px -5px rgb(16 185 129), 0 8px 10px -6px rgb(16 185 129); 
+
+        .card-hover:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 20px 25px -5px rgb(16 185 129), 0 8px 10px -6px rgb(16 185 129);
         }
-        
-        .chart-container { 
-            height: 280px; 
-            position: relative; 
+
+        .chart-container {
+            height: 280px;
+            position: relative;
         }
-        
-        .kpi-card { 
-            min-height: 168px; 
+
+        .chart-container.chart-tall {
+            height: 360px;
         }
-        
-        select[multiple] { 
-            height: 42px; 
-            overflow-y: auto; 
+
+        .chart-container.chart-xlarge {
+            height: 420px;
         }
-        
+
+        .kpi-card {
+            min-height: 168px;
+        }
+
+        select[multiple] {
+            height: 42px;
+            overflow-y: auto;
+        }
+
         .loading-spinner {
             animation: spin 1.5s linear infinite;
         }
-        
+
         @keyframes spin {
             to { transform: rotate(360deg); }
         }
@@ -53,14 +61,14 @@
                 <div class="flex items-center justify-center w-11 h-11 bg-emerald-600 text-white rounded-2xl text-3xl shadow-inner">🧼</div>
                 <div>
                     <h1 class="text-3xl font-semibold tracking-[-0.5px] text-slate-800" style="font-family: 'Space Grotesk', sans-serif;">Higiene das Mãos</h1>
-                    <p class="text-emerald-700 text-sm font-medium tracking-widest -mt-1">BOLETIM INSTITUCIONAL • COSEP</p>
+                    <p class="text-emerald-700 text-sm font-medium tracking-widest -mt-1">ANÁLISE DE HIG • SCIH - HUC</p>
                 </div>
                 <div class="ml-3 px-3 py-1 bg-emerald-100 text-emerald-700 text-xs font-semibold rounded-3xl flex items-center gap-x-1">
                     <div class="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></div>
                     ANÁLISE EM TEMPO REAL
                 </div>
             </div>
-            
+
             <div class="flex items-center gap-x-8">
                 <div onclick="refreshAllData()" class="flex items-center gap-x-2 text-slate-600 hover:text-emerald-700 cursor-pointer text-sm font-medium">
                     <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -68,12 +76,12 @@
                     </svg>
                     ATUALIZAR DADOS
                 </div>
-                
+
                 <div class="flex items-center bg-slate-100 rounded-3xl px-4 py-1 text-xs font-medium text-slate-500">
                     <span class="bg-white text-emerald-700 px-3 py-px rounded-3xl mr-2">LIVE</span>
                     Aba: Respostas ao formulário 1
                 </div>
-                
+
                 <div class="text-right">
                     <div class="text-xs text-slate-400">Última atualização</div>
                     <div id="last-update" class="text-sm font-medium text-slate-600">Agora</div>
@@ -83,7 +91,7 @@
     </div>
 
     <div class="max-w-screen-2xl mx-auto px-8 py-8">
-        
+
         <!-- LOADING OVERLAY -->
         <div id="loading-screen" class="fixed inset-0 bg-white/80 backdrop-blur-xl flex items-center justify-center z-[9999] hidden">
             <div class="text-center">
@@ -93,7 +101,7 @@
         </div>
 
         <div id="main-content">
-            
+
             <!-- KPI CARDS -->
             <div id="kpi-grid" class="grid grid-cols-2 md:grid-cols-4 xl:grid-cols-8 gap-6 mb-10"></div>
 
@@ -101,15 +109,15 @@
             <div class="bg-white rounded-3xl shadow-lg border border-slate-100 p-7 mb-10">
                 <div class="flex items-center justify-between mb-6">
                     <h2 class="text-xl font-semibold text-slate-800 flex items-center gap-x-2">
-                        <span class="text-emerald-600">🔎</span> 
+                        <span class="text-emerald-600">🔎</span>
                         Filtros Inteligentes
                     </h2>
                     <div class="flex gap-x-4">
-                        <button onclick="clearAllFilters()" 
+                        <button onclick="clearAllFilters()"
                                 class="text-xs font-medium text-slate-400 hover:text-slate-600 flex items-center">
                             ⟳ LIMPAR TUDO
                         </button>
-                        <button onclick="applyCurrentFilters()" 
+                        <button onclick="applyCurrentFilters()"
                                 class="px-6 py-2 bg-emerald-700 hover:bg-emerald-800 text-white rounded-2xl text-sm font-semibold">
                             APLICAR FILTROS →
                         </button>
@@ -121,56 +129,56 @@
                     <div>
                         <label class="block text-xs font-medium text-slate-500 mb-2">PERÍODO</label>
                         <div class="flex gap-3">
-                            <input id="dataInicio" type="date" 
+                            <input id="dataInicio" type="date"
                                    class="flex-1 border border-slate-200 rounded-2xl px-4 py-3 text-sm focus:outline-none focus:border-emerald-400">
-                            <input id="dataFim" type="date" 
+                            <input id="dataFim" type="date"
                                    class="flex-1 border border-slate-200 rounded-2xl px-4 py-3 text-sm focus:outline-none focus:border-emerald-400">
                         </div>
                     </div>
-                    
+
                     <!-- Unidade -->
                     <div>
                         <label class="block text-xs font-medium text-slate-500 mb-2">UNIDADE DE INTERNAÇÃO</label>
-                        <select id="unidades" multiple 
+                        <select id="unidades" multiple
                                 class="w-full border border-slate-200 rounded-2xl px-4 py-3 text-sm focus:outline-none focus:border-emerald-400"></select>
                     </div>
-                    
+
                     <!-- Categoria -->
                     <div>
                         <label class="block text-xs font-medium text-slate-500 mb-2">CATEGORIA PROFISSIONAL</label>
-                        <select id="categorias" multiple 
+                        <select id="categorias" multiple
                                 class="w-full border border-slate-200 rounded-2xl px-4 py-3 text-sm focus:outline-none focus:border-emerald-400"></select>
                     </div>
-                    
+
                     <!-- Momento -->
                     <div>
                         <label class="block text-xs font-medium text-slate-500 mb-2">MOMENTO DE REALIZAÇÃO</label>
-                        <select id="momentos" multiple 
+                        <select id="momentos" multiple
                                 class="w-full border border-slate-200 rounded-2xl px-4 py-3 text-sm focus:outline-none focus:border-emerald-400"></select>
                     </div>
-                    
+
                     <!-- Situação -->
                     <div>
                         <label class="block text-xs font-medium text-slate-500 mb-2">SITUAÇÃO</label>
-                        <select id="situacoes" multiple 
+                        <select id="situacoes" multiple
                                 class="w-full border border-slate-200 rounded-2xl px-4 py-3 text-sm focus:outline-none focus:border-emerald-400">
                             <option value="Realizado">Realizado</option>
                             <option value="Não realizado">Não realizado</option>
                             <option value="Incompleto">Incompleto</option>
                         </select>
                     </div>
-                    
+
                     <!-- Método -->
                     <div>
                         <label class="block text-xs font-medium text-slate-500 mb-2">MÉTODO</label>
-                        <select id="metodos" multiple 
+                        <select id="metodos" multiple
                                 class="w-full border border-slate-200 rounded-2xl px-4 py-3 text-sm focus:outline-none focus:border-emerald-400"></select>
                     </div>
-                    
+
                     <!-- Preenchimento -->
                     <div>
                         <label class="block text-xs font-medium text-slate-500 mb-2">PREENCHIMENTO</label>
-                        <select id="preenchimentos" multiple 
+                        <select id="preenchimentos" multiple
                                 class="w-full border border-slate-200 rounded-2xl px-4 py-3 text-sm focus:outline-none focus:border-emerald-400">
                             <option value="Completo">Completo</option>
                             <option value="Incompleto">Incompleto</option>
@@ -187,35 +195,35 @@
                     </div>
                     <div class="chart-container flex-1"><canvas id="temporalChart"></canvas></div>
                 </div>
-                
-                <div class="bg-white rounded-3xl shadow-lg p-6 flex flex-col">
+
+                <div class="bg-white rounded-3xl shadow-lg p-6 flex flex-col lg:col-span-2">
                     <div class="flex justify-between items-baseline mb-5">
                         <h3 class="font-semibold text-slate-800">Análise por Unidade</h3>
                     </div>
-                    <div class="chart-container flex-1"><canvas id="unidadeChart"></canvas></div>
+                    <div class="chart-container chart-tall flex-1"><canvas id="unidadeChart"></canvas></div>
                 </div>
-                
+
                 <div class="bg-white rounded-3xl shadow-lg p-6 flex flex-col">
                     <div class="flex justify-between items-baseline mb-5">
                         <h3 class="font-semibold text-slate-800">Por Categoria Profissional</h3>
                     </div>
                     <div class="chart-container flex-1"><canvas id="categoriaChart"></canvas></div>
                 </div>
-                
-                <div class="bg-white rounded-3xl shadow-lg p-6 flex flex-col">
+
+                <div class="bg-white rounded-3xl shadow-lg p-6 flex flex-col xl:col-span-2">
                     <div class="flex justify-between items-baseline mb-5">
                         <h3 class="font-semibold text-slate-800">Análise por Momento</h3>
                     </div>
-                    <div class="chart-container flex-1"><canvas id="momentoChart"></canvas></div>
+                    <div class="chart-container chart-xlarge flex-1"><canvas id="momentoChart"></canvas></div>
                 </div>
-                
+
                 <div class="bg-white rounded-3xl shadow-lg p-6 flex flex-col">
                     <div class="flex justify-between items-baseline mb-5">
                         <h3 class="font-semibold text-slate-800">Distribuição por Situação</h3>
                     </div>
                     <div class="chart-container flex-1"><canvas id="situacaoChart"></canvas></div>
                 </div>
-                
+
                 <div class="bg-white rounded-3xl shadow-lg p-6 flex flex-col">
                     <div class="flex justify-between items-baseline mb-5">
                         <h3 class="font-semibold text-slate-800">Distribuição por Método</h3>
@@ -236,15 +244,15 @@
             <div class="bg-white rounded-3xl shadow-lg overflow-hidden border border-slate-100">
                 <div class="px-8 py-5 border-b flex items-center justify-between bg-slate-50">
                     <h2 class="font-semibold text-lg flex items-center">
-                        Tabela Detalhada 
+                        Tabela Detalhada
                         <span id="table-info" class="ml-3 text-xs font-mono bg-white px-3 py-1 rounded-3xl text-slate-500"></span>
                     </h2>
-                    <button onclick="exportToCSV()" 
+                    <button onclick="exportToCSV()"
                             class="text-xs flex items-center gap-x-2 px-5 py-2 border border-slate-300 hover:bg-slate-100 rounded-2xl font-medium">
                         📤 Exportar CSV
                     </button>
                 </div>
-                
+
                 <div class="overflow-auto max-h-[560px]">
                     <table class="w-full text-sm" id="detail-table">
                         <thead class="sticky top-0 bg-white z-10 shadow-sm">
@@ -280,54 +288,54 @@
                 }
             };
         }
-        
+
         // ====================== VARIÁVEIS GLOBAIS ======================
         let allRecords = null;
         let currentResponse = null;
         let chartInstances = {};
-        
+
         // ====================== CARREGAR DADOS ======================
         function loadData(filters = {}) {
             const loading = document.getElementById('loading-screen');
             loading.classList.remove('hidden');
-            
+
             google.script.run
                 .withSuccessHandler(onDataSuccess)
                 .withFailureHandler(onDataError)
                 .getAnalysis(filters);
         }
-        
+
         function onDataSuccess(response) {
             const loading = document.getElementById('loading-screen');
             loading.classList.add('hidden');
-            
+
             if (!response.success) {
                 showErrorModal(response.error);
                 return;
             }
-            
+
             currentResponse = response;
             allRecords = response.totalProcessed || 0;
-            
+
             // Popula filtros apenas na primeira carga
             if (!document.getElementById('unidades').hasChildNodes()) {
                 populateFilterOptions(response.filterOptions);
             }
-            
+
             renderKPIs(response.kpis);
             renderAllCharts(response.chartData);
             renderInsights(response.insights);
             renderDetailTable(response.tableData);
-            
+
             document.getElementById('last-update').textContent = new Date().toLocaleTimeString('pt-BR');
         }
-        
+
         function onDataError(err) {
             const loading = document.getElementById('loading-screen');
             loading.classList.add('hidden');
             showErrorModal(err.message || 'Erro de comunicação com o servidor');
         }
-        
+
         // ====================== RENDER KPIs ======================
         function renderKPIs(kpis) {
             const container = document.getElementById('kpi-grid');
@@ -341,7 +349,7 @@
                         <div class="text-5xl opacity-20">📋</div>
                     </div>
                 </div>
-                
+
                 <div class="bg-white rounded-3xl p-6 shadow-inner card-hover border border-emerald-200 kpi-card">
                     <div class="flex justify-between items-start">
                         <div>
@@ -354,7 +362,7 @@
                         <div class="h-2 bg-emerald-600 rounded-3xl" style="width: ${kpis.adesaoGeral}%"></div>
                     </div>
                 </div>
-                
+
                 <div class="bg-white rounded-3xl p-6 shadow-inner card-hover kpi-card">
                     <div class="flex justify-between">
                         <div>
@@ -364,7 +372,7 @@
                         <div>🧼</div>
                     </div>
                 </div>
-                
+
                 <div class="bg-white rounded-3xl p-6 shadow-inner card-hover kpi-card">
                     <div class="flex justify-between">
                         <div>
@@ -374,7 +382,7 @@
                         <div>⛔</div>
                     </div>
                 </div>
-                
+
                 <div class="bg-white rounded-3xl p-6 shadow-inner card-hover kpi-card">
                     <div class="flex justify-between">
                         <div>
@@ -384,48 +392,48 @@
                         <div>⚠️</div>
                     </div>
                 </div>
-                
+
                 <div class="bg-white rounded-3xl p-6 shadow-inner card-hover kpi-card">
                     <p class="uppercase text-xs tracking-widest text-red-400">Taxa de não realização</p>
                     <p class="text-5xl font-semibold text-red-600 mt-3">${kpis.taxaNaoRealizacao}%</p>
                 </div>
-                
+
                 <div class="bg-white rounded-3xl p-6 shadow-inner card-hover kpi-card">
                     <p class="uppercase text-xs tracking-widest text-sky-500">Preenchimento completo</p>
                     <p class="text-5xl font-semibold text-sky-600 mt-3">${kpis.taxaPreenchimentoCompleto}%</p>
                 </div>
-                
+
                 <div class="bg-white rounded-3xl p-6 shadow-inner card-hover kpi-card">
                     <p class="uppercase text-xs tracking-widest text-orange-500">Preenchimento incompleto</p>
                     <p class="text-5xl font-semibold text-orange-600 mt-3">${kpis.taxaPreenchimentoIncompleto}%</p>
                 </div>
             `;
         }
-        
+
         // ====================== POPULAR FILTROS ======================
         function populateFilterOptions(options) {
             // Unidades
             const unitSel = document.getElementById('unidades');
             unitSel.innerHTML = options.unidades.map(u => `<option value="${u}">${u}</option>`).join('');
-            
+
             // Categorias
             const catSel = document.getElementById('categorias');
             catSel.innerHTML = options.categorias.map(c => `<option value="${c}">${c}</option>`).join('');
-            
+
             // Momentos
             const momSel = document.getElementById('momentos');
             momSel.innerHTML = options.momentos.map(m => `<option value="${m}">${m}</option>`).join('');
-            
+
             // Métodos fixos
             const metSel = document.getElementById('metodos');
             const metodosFixos = ['Água e sabonete','Fricção com álcool','Não realizado','Realizado sem método detalhado','Não informado'];
             metSel.innerHTML = metodosFixos.map(m => `<option value="${m}">${m}</option>`).join('');
         }
-        
+
         // ====================== PEGAR FILTROS ======================
         function getCurrentFilters() {
             const getSelected = (id) => Array.from(document.getElementById(id).selectedOptions).map(o => o.value);
-            
+
             return {
                 dataInicio: document.getElementById('dataInicio').value || null,
                 dataFim: document.getElementById('dataFim').value || null,
@@ -437,11 +445,11 @@
                 preenchimentos: getSelected('preenchimentos')
             };
         }
-        
+
         function applyCurrentFilters() {
             loadData(getCurrentFilters());
         }
-        
+
         function clearAllFilters() {
             document.getElementById('dataInicio').value = '';
             document.getElementById('dataFim').value = '';
@@ -450,25 +458,62 @@
             });
             loadData({});
         }
-        
+
         // ====================== GRÁFICOS ======================
         function renderAllCharts(chartData) {
             Object.keys(chartInstances).forEach(key => {
                 if (chartInstances[key]) chartInstances[key].destroy();
             });
-            
+
             const commonOptions = {
                 responsive: true,
                 maintainAspectRatio: false,
-                plugins: { 
-                    legend: { 
-                        display: true, 
-                        position: 'top', 
-                        labels: { boxWidth: 12, padding: 18, usePointStyle: true } 
-                    } 
+                plugins: {
+                    legend: {
+                        display: true,
+                        position: 'top',
+                        labels: { boxWidth: 12, padding: 18, usePointStyle: true }
+                    }
                 }
             };
-            
+
+            const formatPercentTicks = (value) => `${value}%`;
+            const percentScaleY = {
+                beginAtZero: true,
+                min: 0,
+                max: 100,
+                ticks: {
+                    callback: formatPercentTicks,
+                    stepSize: 20
+                }
+            };
+            const percentScaleX = {
+                beginAtZero: true,
+                min: 0,
+                max: 100,
+                ticks: {
+                    callback: formatPercentTicks,
+                    stepSize: 20
+                }
+            };
+            const wrapLabel = (label, maxChars = 28) => {
+                if (!label || label.length <= maxChars) return label;
+                const words = label.split(' ');
+                const lines = [];
+                let current = '';
+                words.forEach(word => {
+                    const candidate = current ? `${current} ${word}` : word;
+                    if (candidate.length > maxChars && current) {
+                        lines.push(current);
+                        current = word;
+                    } else {
+                        current = candidate;
+                    }
+                });
+                if (current) lines.push(current);
+                return lines;
+            };
+
             // Evolução Temporal
             chartInstances.temporal = new Chart(document.getElementById('temporalChart'), {
                 type: 'line',
@@ -484,9 +529,13 @@
                         pointRadius: 4
                     }]
                 },
-                options: { ...commonOptions, plugins: { legend: { display: false } } }
+                options: {
+                    ...commonOptions,
+                    scales: { y: percentScaleY },
+                    plugins: { legend: { display: false } }
+                }
             });
-            
+
             // Por Unidade
             chartInstances.unidade = new Chart(document.getElementById('unidadeChart'), {
                 type: 'bar',
@@ -499,9 +548,14 @@
                         borderRadius: 6
                     }]
                 },
-                options: { ...commonOptions, indexAxis: 'y', plugins: { legend: { display: false } } }
+                options: {
+                    ...commonOptions,
+                    indexAxis: 'y',
+                    scales: { x: percentScaleX },
+                    plugins: { legend: { display: false } }
+                }
             });
-            
+
             // Por Categoria
             chartInstances.categoria = new Chart(document.getElementById('categoriaChart'), {
                 type: 'bar',
@@ -513,9 +567,25 @@
                         backgroundColor: '#0ea5e9'
                     }]
                 },
-                options: commonOptions
+                options: {
+                    ...commonOptions,
+                    scales: {
+                        y: percentScaleY,
+                        x: {
+                            ticks: {
+                                callback: function(value) {
+                                    const originalLabel = this.getLabelForValue(value);
+                                    return wrapLabel(originalLabel, 16);
+                                },
+                                autoSkip: false,
+                                maxRotation: 0,
+                                minRotation: 0
+                            }
+                        }
+                    }
+                }
             });
-            
+
             // Por Momento
             chartInstances.momento = new Chart(document.getElementById('momentoChart'), {
                 type: 'bar',
@@ -527,9 +597,25 @@
                         backgroundColor: '#8b5cf6'
                     }]
                 },
-                options: commonOptions
+                options: {
+                    ...commonOptions,
+                    scales: {
+                        y: percentScaleY,
+                        x: {
+                            ticks: {
+                                callback: function(value) {
+                                    const originalLabel = this.getLabelForValue(value);
+                                    return wrapLabel(originalLabel, 18);
+                                },
+                                autoSkip: false,
+                                maxRotation: 0,
+                                minRotation: 0
+                            }
+                        }
+                    }
+                }
             });
-            
+
             // Distribuição Situação
             chartInstances.situacao = new Chart(document.getElementById('situacaoChart'), {
                 type: 'pie',
@@ -542,7 +628,7 @@
                 },
                 options: { ...commonOptions, plugins: { legend: { position: 'bottom' } } }
             });
-            
+
             // Distribuição Método
             chartInstances.metodo = new Chart(document.getElementById('metodoChart'), {
                 type: 'pie',
@@ -556,7 +642,7 @@
                 options: { ...commonOptions, plugins: { legend: { position: 'bottom' } } }
             });
         }
-        
+
         // ====================== INSIGHTS ======================
         function renderInsights(insights) {
             const container = document.getElementById('insights-container');
@@ -566,14 +652,14 @@
                 </div>
             `).join('');
         }
-        
+
         // ====================== TABELA ======================
         function renderDetailTable(tableData) {
             const tbody = document.getElementById('table-body');
             const info = document.getElementById('table-info');
-            
+
             info.innerHTML = `${tableData.length} registros • Total base: ${allRecords}`;
-            
+
             tbody.innerHTML = tableData.map(row => `
                 <tr class="hover:bg-emerald-50">
                     <td class="px-8 py-4 whitespace-nowrap text-xs font-medium">${row.data}</td>
@@ -582,34 +668,34 @@
                     <td class="px-8 py-4">${row.momento}</td>
                     <td class="px-8 py-4 text-xs max-w-[220px] truncate">${row.acao}</td>
                     <td class="px-8 py-4">
-                        <span class="px-4 py-1 text-xs font-semibold rounded-3xl 
-                            ${row.situacao === 'Realizado' ? 'bg-emerald-100 text-emerald-700' : 
+                        <span class="px-4 py-1 text-xs font-semibold rounded-3xl
+                            ${row.situacao === 'Realizado' ? 'bg-emerald-100 text-emerald-700' :
                               row.situacao === 'Não realizado' ? 'bg-red-100 text-red-700' : 'bg-amber-100 text-amber-700'}">
                             ${row.situacao}
                         </span>
                     </td>
                     <td class="px-8 py-4 text-xs">${row.metodo}</td>
                     <td class="px-8 py-4">
-                        <span class="px-4 py-1 text-xs font-semibold rounded-3xl 
+                        <span class="px-4 py-1 text-xs font-semibold rounded-3xl
                             ${row.preenchimento === 'Completo' ? 'bg-sky-100 text-sky-700' : 'bg-orange-100 text-orange-700'}">
                             ${row.preenchimento}
                         </span>
                     </td>
                 </tr>
             `).join('');
-            
+
             if (tableData.length === 0) {
                 tbody.innerHTML = `<tr><td colspan="8" class="px-8 py-12 text-center text-slate-400">Nenhum registro encontrado com os filtros aplicados.</td></tr>`;
             }
         }
-        
+
         // ====================== EXPORT CSV ======================
         function exportToCSV() {
             if (!currentResponse || !currentResponse.tableData) return;
-            
+
             const headers = ['Data', 'Unidade', 'Categoria Profissional', 'Momento', 'Ação', 'Situação', 'Método', 'Preenchimento'];
             let csv = headers.join(';') + '\n';
-            
+
             currentResponse.tableData.forEach(row => {
                 csv += [
                     `"${row.data}"`,
@@ -622,14 +708,14 @@
                     `"${row.preenchimento}"`
                 ].join(';') + '\n';
             });
-            
+
             const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
             const link = document.createElement('a');
             link.href = URL.createObjectURL(blob);
             link.download = `analise_higiene_maos_${new Date().toISOString().slice(0,10)}.csv`;
             link.click();
         }
-        
+
         // ====================== ERROR MODAL ======================
         function showErrorModal(message) {
             const modalHTML = `
@@ -638,7 +724,7 @@
                     <h3 class="text-red-600 text-xl font-semibold mb-2">⚠️ Algo deu errado</h3>
                     <p class="text-slate-600">${message}</p>
                     <p class="text-xs text-slate-400 mt-8">Verifique se a aba "Respostas ao formulário 1" existe e contém dados.</p>
-                    <button onclick="this.closest('.fixed').remove(); loadData({})" 
+                    <button onclick="this.closest('.fixed').remove(); loadData({})"
                             class="mt-8 w-full py-4 bg-slate-900 text-white rounded-3xl font-medium">
                         Tentar novamente
                     </button>
@@ -648,19 +734,19 @@
             div.innerHTML = modalHTML;
             document.body.appendChild(div);
         }
-        
+
         // ====================== REFRESH ======================
         function refreshAllData() {
             loadData(getCurrentFilters());
         }
-        
+
         // ====================== INICIALIZAÇÃO ======================
         function initializeSystem() {
             initTailwind();
             loadData({}); // carrega todos os dados
             console.log('%c✅ Sistema de Higiene das Mãos - HTML completo carregado com layout corrigido', 'background:#10b981;color:white;padding:2px 6px;border-radius:4px');
         }
-        
+
         window.onload = initializeSystem;
     </script>
 </body>

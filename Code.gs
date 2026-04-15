@@ -6,7 +6,7 @@ const SHEET_NAME = 'Respostas ao formulário 1';
 function doGet() {
   return HtmlService.createTemplateFromFile('index')
     .evaluate()
-    .setTitle('Análise de Higiene das Mãos • COSEP')
+    .setTitle('Análise de Hig da SCIH - HUC')
     .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL)
     .setSandboxMode(HtmlService.SandboxMode.IFRAME);
 }
@@ -252,7 +252,18 @@ function buildPieData(filtered, key) {
   filtered.forEach(r => {
     counts[r[key]] = (counts[r[key]] || 0) + 1;
   });
-  const labels = Object.keys(counts);
+
+  let labels;
+  if (key === 'situacao') {
+    const situacaoOrder = ['Realizado', 'Não realizado', 'Incompleto'];
+    labels = situacaoOrder.filter(label => counts[label] !== undefined);
+  } else if (key === 'metodo') {
+    const metodoOrder = ['Água e sabonete', 'Fricção com álcool', 'Não realizado', 'Realizado sem método detalhado', 'Não informado'];
+    labels = metodoOrder.filter(label => counts[label] !== undefined);
+  } else {
+    labels = Object.keys(counts);
+  }
+
   return {
     labels: labels,
     data: labels.map(l => counts[l])
