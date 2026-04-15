@@ -7,101 +7,47 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
-
-        :root {
-            --bg: #f4f7fb;
-            --surface: #ffffff;
-            --surface-2: #f8fafc;
-            --line: #dde5ef;
-            --text: #142033;
-            --muted: #6e7d91;
-            --primary: #1f4e79;
-            --primary-2: #2d6da3;
-            --success: #1f7a4f;
-            --danger: #b42318;
-            --warning: #b54708;
-            --shadow: 0 14px 40px rgba(17, 24, 39, 0.08);
-            --radius: 18px;
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Space+Grotesk:wght@500&amp;display=swap');
+        
+        :root { --tw-color-primary: #10b981; }
+        
+        * { 
+            transition-property: color, background-color, border-color, text-decoration-color, fill, stroke; 
+            transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1); 
+            transition-duration: 150ms; 
         }
-
-        * { box-sizing: border-box; }
-
-        html, body {
-            margin: 0;
-            padding: 0;
-            background: linear-gradient(180deg, #f6f9fd 0%, #eef3f8 100%);
-            color: var(--text);
-            font-family: Inter, Arial, Helvetica, sans-serif;
+        
+        .card-hover:hover { 
+            transform: translateY(-3px); 
+            box-shadow: 0 20px 25px -5px rgb(16 185 129), 0 8px 10px -6px rgb(16 185 129); 
         }
-
-        .app-header {
-            background: var(--surface);
-            border-bottom: 1px solid var(--line);
-            box-shadow: 0 6px 24px rgba(20, 32, 51, 0.06);
+        
+        .chart-container { 
+            height: 280px; 
+            position: relative; 
         }
-
-        .main-shell {
-            max-width: 1600px;
-            margin: 0 auto;
-            padding: 24px;
+        
+        .kpi-card { 
+            min-height: 168px; 
         }
-
-        .panel, .chart-card-pro, .table-panel, .filters-panel {
-            background: var(--surface);
-            border: 1px solid rgba(20, 32, 51, 0.06);
-            border-radius: 24px;
-            box-shadow: var(--shadow);
+        
+        select[multiple] { 
+            height: 42px; 
+            overflow-y: auto; 
         }
-
-        .filters-panel { padding: 24px; }
-
-        .chart-card-pro {
-            padding: 18px;
-            min-height: 390px;
+        
+        .loading-spinner {
+            animation: spin 1.5s linear infinite;
         }
-
-        .chart-container {
-            height: 320px;
-            position: relative;
-        }
-
-        .kpi-card-pro {
-            min-height: 168px;
-            border: 1px solid rgba(20, 32, 51, 0.06);
-            background: linear-gradient(180deg, #ffffff 0%, #f9fbfd 100%);
-            border-radius: 22px;
-            box-shadow: var(--shadow);
-        }
-
-        .kpi-card-pro:hover { transform: translateY(-2px); }
-
-        select[multiple] { height: 42px; overflow-y: auto; }
-
-        .loading-spinner { animation: spin 1.5s linear infinite; }
-        @keyframes spin { to { transform: rotate(360deg); } }
-
-        .insights-panel {
-            background: linear-gradient(135deg, #14304f 0%, #1f4e79 58%, #2d6da3 100%);
-            border-radius: 24px;
-            box-shadow: var(--shadow);
-        }
-
-        #detail-table thead th {
-            position: sticky;
-            top: 0;
-            background: #f4f8fc;
-        }
-
-        @media (max-width: 768px) {
-            .main-shell { padding: 14px; }
-            .chart-container { height: 280px; }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
         }
     </style>
 </head>
-<body class="font-sans">
+<body class="bg-slate-50 font-sans">
     <!-- HEADER INSTITUCIONAL -->
-    <div class="app-header sticky top-0 z-50">
+    <div class="bg-white border-b border-slate-200 shadow-sm sticky top-0 z-50">
         <div class="max-w-screen-2xl mx-auto px-8 py-5 flex items-center justify-between">
             <div class="flex items-center gap-x-4">
                 <div class="flex items-center justify-center w-11 h-11 bg-emerald-600 text-white rounded-2xl text-3xl shadow-inner">🧼</div>
@@ -136,7 +82,7 @@
         </div>
     </div>
 
-    <div class="main-shell">
+    <div class="max-w-screen-2xl mx-auto px-8 py-8">
         
         <!-- LOADING OVERLAY -->
         <div id="loading-screen" class="fixed inset-0 bg-white/80 backdrop-blur-xl flex items-center justify-center z-[9999] hidden">
@@ -152,7 +98,7 @@
             <div id="kpi-grid" class="grid grid-cols-2 md:grid-cols-4 xl:grid-cols-8 gap-6 mb-10"></div>
 
             <!-- FILTROS COMPACTOS -->
-            <div class="filters-panel mb-10">
+            <div class="bg-white rounded-3xl shadow-lg border border-slate-100 p-7 mb-10">
                 <div class="flex items-center justify-between mb-6">
                     <h2 class="text-xl font-semibold text-slate-800 flex items-center gap-x-2">
                         <span class="text-emerald-600">🔎</span> 
@@ -235,42 +181,42 @@
 
             <!-- GRÁFICOS (altura fixa) -->
             <div class="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6 mb-12">
-                <div class="chart-card-pro flex flex-col">
+                <div class="bg-white rounded-3xl shadow-lg p-6 flex flex-col">
                     <div class="flex justify-between items-baseline mb-5">
                         <h3 class="font-semibold text-slate-800">Evolução Temporal por Mês</h3>
                     </div>
                     <div class="chart-container flex-1"><canvas id="temporalChart"></canvas></div>
                 </div>
                 
-                <div class="chart-card-pro flex flex-col">
+                <div class="bg-white rounded-3xl shadow-lg p-6 flex flex-col">
                     <div class="flex justify-between items-baseline mb-5">
                         <h3 class="font-semibold text-slate-800">Análise por Unidade</h3>
                     </div>
                     <div class="chart-container flex-1"><canvas id="unidadeChart"></canvas></div>
                 </div>
                 
-                <div class="chart-card-pro flex flex-col">
+                <div class="bg-white rounded-3xl shadow-lg p-6 flex flex-col">
                     <div class="flex justify-between items-baseline mb-5">
                         <h3 class="font-semibold text-slate-800">Por Categoria Profissional</h3>
                     </div>
                     <div class="chart-container flex-1"><canvas id="categoriaChart"></canvas></div>
                 </div>
                 
-                <div class="chart-card-pro flex flex-col">
+                <div class="bg-white rounded-3xl shadow-lg p-6 flex flex-col">
                     <div class="flex justify-between items-baseline mb-5">
                         <h3 class="font-semibold text-slate-800">Análise por Momento</h3>
                     </div>
                     <div class="chart-container flex-1"><canvas id="momentoChart"></canvas></div>
                 </div>
                 
-                <div class="chart-card-pro flex flex-col">
+                <div class="bg-white rounded-3xl shadow-lg p-6 flex flex-col">
                     <div class="flex justify-between items-baseline mb-5">
                         <h3 class="font-semibold text-slate-800">Distribuição por Situação</h3>
                     </div>
                     <div class="chart-container flex-1"><canvas id="situacaoChart"></canvas></div>
                 </div>
                 
-                <div class="chart-card-pro flex flex-col">
+                <div class="bg-white rounded-3xl shadow-lg p-6 flex flex-col">
                     <div class="flex justify-between items-baseline mb-5">
                         <h3 class="font-semibold text-slate-800">Distribuição por Método</h3>
                     </div>
@@ -279,7 +225,7 @@
             </div>
 
             <!-- INSIGHTS AUTOMÁTICOS -->
-            <div class="insights-panel text-white p-8 mb-12">
+            <div class="bg-gradient-to-r from-emerald-700 to-emerald-800 text-white rounded-3xl p-8 mb-12 shadow-xl">
                 <h2 class="text-xl font-semibold mb-6 flex items-center gap-x-3">
                     <span>💡</span> Insights Automáticos
                 </h2>
@@ -287,7 +233,7 @@
             </div>
 
             <!-- TABELA DETALHADA -->
-            <div class="table-panel overflow-hidden">
+            <div class="bg-white rounded-3xl shadow-lg overflow-hidden border border-slate-100">
                 <div class="px-8 py-5 border-b flex items-center justify-between bg-slate-50">
                     <h2 class="font-semibold text-lg flex items-center">
                         Tabela Detalhada 
@@ -386,7 +332,7 @@
         function renderKPIs(kpis) {
             const container = document.getElementById('kpi-grid');
             container.innerHTML = `
-                <div class="kpi-card-pro p-6 card-hover">
+                <div class="bg-white rounded-3xl p-6 shadow-inner card-hover kpi-card">
                     <div class="flex justify-between items-start">
                         <div>
                             <p class="uppercase text-xs tracking-widest text-slate-400">Total de observações</p>
@@ -396,7 +342,7 @@
                     </div>
                 </div>
                 
-                <div class="kpi-card-pro p-6 card-hover border border-emerald-200">
+                <div class="bg-white rounded-3xl p-6 shadow-inner card-hover border border-emerald-200 kpi-card">
                     <div class="flex justify-between items-start">
                         <div>
                             <p class="uppercase text-xs tracking-widest text-emerald-600">Adesão geral</p>
@@ -409,7 +355,7 @@
                     </div>
                 </div>
                 
-                <div class="kpi-card-pro p-6 card-hover">
+                <div class="bg-white rounded-3xl p-6 shadow-inner card-hover kpi-card">
                     <div class="flex justify-between">
                         <div>
                             <p class="uppercase text-xs tracking-widest text-emerald-500">Realizado</p>
@@ -419,7 +365,7 @@
                     </div>
                 </div>
                 
-                <div class="kpi-card-pro p-6 card-hover">
+                <div class="bg-white rounded-3xl p-6 shadow-inner card-hover kpi-card">
                     <div class="flex justify-between">
                         <div>
                             <p class="uppercase text-xs tracking-widest text-red-500">Não realizado</p>
@@ -429,7 +375,7 @@
                     </div>
                 </div>
                 
-                <div class="kpi-card-pro p-6 card-hover">
+                <div class="bg-white rounded-3xl p-6 shadow-inner card-hover kpi-card">
                     <div class="flex justify-between">
                         <div>
                             <p class="uppercase text-xs tracking-widest text-amber-500">Incompleto</p>
@@ -439,17 +385,17 @@
                     </div>
                 </div>
                 
-                <div class="kpi-card-pro p-6 card-hover">
+                <div class="bg-white rounded-3xl p-6 shadow-inner card-hover kpi-card">
                     <p class="uppercase text-xs tracking-widest text-red-400">Taxa de não realização</p>
                     <p class="text-5xl font-semibold text-red-600 mt-3">${kpis.taxaNaoRealizacao}%</p>
                 </div>
                 
-                <div class="kpi-card-pro p-6 card-hover">
+                <div class="bg-white rounded-3xl p-6 shadow-inner card-hover kpi-card">
                     <p class="uppercase text-xs tracking-widest text-sky-500">Preenchimento completo</p>
                     <p class="text-5xl font-semibold text-sky-600 mt-3">${kpis.taxaPreenchimentoCompleto}%</p>
                 </div>
                 
-                <div class="kpi-card-pro p-6 card-hover">
+                <div class="bg-white rounded-3xl p-6 shadow-inner card-hover kpi-card">
                     <p class="uppercase text-xs tracking-widest text-orange-500">Preenchimento incompleto</p>
                     <p class="text-5xl font-semibold text-orange-600 mt-3">${kpis.taxaPreenchimentoIncompleto}%</p>
                 </div>
@@ -514,40 +460,12 @@
             const commonOptions = {
                 responsive: true,
                 maintainAspectRatio: false,
-                interaction: { mode: 'index', intersect: false },
-                plugins: {
-                    legend: {
-                        display: true,
-                        position: 'top',
-                        labels: {
-                            boxWidth: 10,
-                            boxHeight: 10,
-                            usePointStyle: true,
-                            pointStyle: 'circle',
-                            padding: 16,
-                            color: '#42546a',
-                            font: { size: 12, weight: '600' }
-                        }
-                    },
-                    tooltip: {
-                        backgroundColor: '#142033',
-                        titleColor: '#ffffff',
-                        bodyColor: '#d9e5f5',
-                        padding: 10,
-                        cornerRadius: 10,
-                        displayColors: true
-                    }
-                },
-                scales: {
-                    x: {
-                        grid: { color: 'rgba(148,163,184,0.18)' },
-                        ticks: { color: '#6e7d91', font: { size: 11 } }
-                    },
-                    y: {
-                        beginAtZero: true,
-                        grid: { color: 'rgba(148,163,184,0.18)' },
-                        ticks: { color: '#6e7d91', font: { size: 11 } }
-                    }
+                plugins: { 
+                    legend: { 
+                        display: true, 
+                        position: 'top', 
+                        labels: { boxWidth: 12, padding: 18, usePointStyle: true } 
+                    } 
                 }
             };
             
@@ -566,7 +484,7 @@
                         pointRadius: 4
                     }]
                 },
-                options: { ...commonOptions, plugins: { ...commonOptions.plugins, legend: { display: false } }, scales: { ...commonOptions.scales, y: { ...commonOptions.scales.y, max: 100, ticks: { ...commonOptions.scales.y.ticks, callback: (v) => `${v}%` } } } }
+                options: { ...commonOptions, plugins: { legend: { display: false } } }
             });
             
             // Por Unidade
@@ -577,13 +495,11 @@
                     datasets: [{
                         label: '% Adesão',
                         data: chartData.porUnidade.adesaoPercent,
-                        backgroundColor: '#1f4e79',
-                        borderRadius: 8,
-                        borderSkipped: false,
-                        barThickness: 18
+                        backgroundColor: '#10b981',
+                        borderRadius: 6
                     }]
                 },
-                options: { ...commonOptions, indexAxis: 'y', plugins: { ...commonOptions.plugins, legend: { display: false } }, scales: { ...commonOptions.scales, x: { ...commonOptions.scales.x, max: 100, ticks: { ...commonOptions.scales.x.ticks, callback: (v) => `${v}%` } } } }
+                options: { ...commonOptions, indexAxis: 'y', plugins: { legend: { display: false } } }
             });
             
             // Por Categoria
@@ -594,12 +510,10 @@
                     datasets: [{
                         label: '% Adesão',
                         data: chartData.porCategoria.adesaoPercent,
-                        backgroundColor: '#2d6da3',
-                        borderRadius: 8,
-                        borderSkipped: false
+                        backgroundColor: '#0ea5e9'
                     }]
                 },
-                options: { ...commonOptions, plugins: { ...commonOptions.plugins, legend: { display: false } }, scales: { ...commonOptions.scales, y: { ...commonOptions.scales.y, max: 100, ticks: { ...commonOptions.scales.y.ticks, callback: (v) => `${v}%` } } } }
+                options: commonOptions
             });
             
             // Por Momento
@@ -610,42 +524,36 @@
                     datasets: [{
                         label: '% Adesão',
                         data: chartData.porMomento.adesaoPercent,
-                        backgroundColor: '#5b7fa3',
-                        borderRadius: 8,
-                        borderSkipped: false
+                        backgroundColor: '#8b5cf6'
                     }]
                 },
-                options: { ...commonOptions, plugins: { ...commonOptions.plugins, legend: { display: false } }, scales: { ...commonOptions.scales, y: { ...commonOptions.scales.y, max: 100, ticks: { ...commonOptions.scales.y.ticks, callback: (v) => `${v}%` } } } }
+                options: commonOptions
             });
             
             // Distribuição Situação
             chartInstances.situacao = new Chart(document.getElementById('situacaoChart'), {
-                type: 'doughnut',
+                type: 'pie',
                 data: {
                     labels: chartData.distribuicaoSituacao.labels,
                     datasets: [{
                         data: chartData.distribuicaoSituacao.data,
-                        backgroundColor: ['#1f7a4f', '#b42318', '#b54708'],
-                        borderColor: '#ffffff',
-                        borderWidth: 2
+                        backgroundColor: ['#10b981', '#f43f5e', '#f59e0b']
                     }]
                 },
-                options: { ...commonOptions, scales: undefined, plugins: { ...commonOptions.plugins, legend: { ...commonOptions.plugins.legend, position: 'bottom' } }, cutout: '62%' }
+                options: { ...commonOptions, plugins: { legend: { position: 'bottom' } } }
             });
             
             // Distribuição Método
             chartInstances.metodo = new Chart(document.getElementById('metodoChart'), {
-                type: 'doughnut',
+                type: 'pie',
                 data: {
                     labels: chartData.distribuicaoMetodo.labels,
                     datasets: [{
                         data: chartData.distribuicaoMetodo.data,
-                        backgroundColor: ['#1f4e79', '#2d6da3', '#5b7fa3', '#9bb3cc', '#cfd9e6'],
-                        borderColor: '#ffffff',
-                        borderWidth: 2
+                        backgroundColor: ['#0ea5e9', '#8b5cf6', '#ec4899', '#f59e0b', '#64748b']
                     }]
                 },
-                options: { ...commonOptions, scales: undefined, plugins: { ...commonOptions.plugins, legend: { ...commonOptions.plugins.legend, position: 'bottom' } }, cutout: '62%' }
+                options: { ...commonOptions, plugins: { legend: { position: 'bottom' } } }
             });
         }
         
