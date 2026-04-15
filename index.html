@@ -44,6 +44,14 @@
             height: 420px;
         }
 
+        .chart-container.chart-categoria {
+            height: 448px;
+        }
+
+        .chart-container.chart-distribuicao {
+            height: 192px;
+        }
+
         .chart-container.chart-xxlarge {
             height: 560px;
         }
@@ -244,21 +252,21 @@
                     <div class="flex justify-between items-baseline mb-5">
                         <h3 class="font-semibold text-slate-800">Por Categoria Profissional</h3>
                     </div>
-                    <div class="chart-container chart-xlarge flex-1"><canvas id="categoriaChart"></canvas></div>
+                    <div class="chart-container chart-categoria flex-1"><canvas id="categoriaChart"></canvas></div>
                 </div>
 
                 <div class="bg-white rounded-3xl shadow-lg p-6 flex flex-col">
                     <div class="flex justify-between items-baseline mb-5">
                         <h3 class="font-semibold text-slate-800">Distribuição por Situação</h3>
                     </div>
-                    <div class="chart-container chart-compact flex-1"><canvas id="situacaoChart"></canvas></div>
+                    <div class="chart-container chart-distribuicao flex-1"><canvas id="situacaoChart"></canvas></div>
                 </div>
 
                 <div class="bg-white rounded-3xl shadow-lg p-6 flex flex-col">
                     <div class="flex justify-between items-baseline mb-5">
                         <h3 class="font-semibold text-slate-800">Distribuição por Método</h3>
                     </div>
-                    <div class="chart-container chart-compact flex-1"><canvas id="metodoChart"></canvas></div>
+                    <div class="chart-container chart-distribuicao flex-1"><canvas id="metodoChart"></canvas></div>
                 </div>
             </div>
 
