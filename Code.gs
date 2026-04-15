@@ -67,14 +67,9 @@ function normalizeRecords(rawData) {
     let momento = String(row[3] || '').trim();
     let acaoRaw = String(row[4] || '').trim();
     
-    const toTitleCase = (str) => {
-      if (!str) return 'Não informado';
-      return str.toLowerCase().replace(/\b\w/g, char => char.toUpperCase());
-    };
-    
-    unidade = toTitleCase(unidade);
-    categoria = toTitleCase(categoria);
-    momento = toTitleCase(momento);
+    unidade = toDisplayCase(unidade);
+    categoria = toDisplayCase(categoria);
+    momento = toDisplayCase(momento);
     
     const acao = acaoRaw || 'Não informado';
     
@@ -98,6 +93,28 @@ function normalizeRecords(rawData) {
     });
   }
   return records;
+}
+
+function toDisplayCase(str) {
+  if (!str) return 'Não informado';
+
+  const normalized = String(str)
+    .replace(/\s+/g, ' ')
+    .trim()
+    .toLocaleLowerCase('pt-BR');
+
+  if (!normalized) return 'Não informado';
+
+  const lowerWords = new Set(['de', 'da', 'do', 'das', 'dos', 'e', 'em', 'na', 'no', 'nas', 'nos', 'a', 'o']);
+
+  return normalized
+    .split(' ')
+    .map((word, idx) => {
+      if (!word) return word;
+      if (lowerWords.has(word) && idx > 0) return word;
+      return word.charAt(0).toLocaleUpperCase('pt-BR') + word.slice(1);
+    })
+    .join(' ');
 }
 
 // ====================== CLASSIFICAÇÃO ======================
@@ -274,10 +291,10 @@ function buildPieData(filtered, key) {
 function buildInsights(kpis, filtered, allRecords) {
   const list = [];
   
-  if (kpis.adesaoGeral >= 85) list.push('🎯 Excelente adesão institucional! Acima do padrão COSEP/OMS.');
-  else if (kpis.adesaoGeral >= 70) list.push('✅ Adesão boa. Dentro das metas institucionais.');
-  else if (kpis.adesaoGeral >= 50) list.push('⚠️ Adesão moderada. Recomenda-se ação corretiva.');
-  else list.push('🚨 Adesão crítica. Intervenção urgente necessária.');
+  if (kpis.adesaoGeral >= 85) list.push('Excelente adesão institucional. Acima do padrão COSEP/OMS.');
+  else if (kpis.adesaoGeral >= 70) list.push('Adesão boa. Dentro das metas institucionais.');
+  else if (kpis.adesaoGeral >= 50) list.push('Adesão moderada. Recomenda-se ação corretiva.');
+  else list.push('Adesão crítica. Intervenção urgente necessária.');
   
   list.push(`Foram processados <strong>${kpis.totalObservacoes}</strong> registros válidos.`);
   
@@ -285,12 +302,12 @@ function buildInsights(kpis, filtered, allRecords) {
     const unitData = buildGroupData(filtered, 'unidade');
     if (unitData.labels.length > 0) {
       const maxIdx = unitData.adesaoPercent.indexOf(Math.max(...unitData.adesaoPercent));
-      list.push(`🏆 Melhor unidade: <strong>${unitData.labels[maxIdx]}</strong> (${unitData.adesaoPercent[maxIdx]}%)`);
+      list.push(`Melhor unidade: <strong>${unitData.labels[maxIdx]}</strong> (${unitData.adesaoPercent[maxIdx]}%)`);
     }
   }
   
   if (kpis.taxaPreenchimentoCompleto < 85) {
-    list.push('📝 Atenção: Alta taxa de preenchimento incompleto. Verificar qualidade do formulário.');
+    list.push('Atenção: Alta taxa de preenchimento incompleto. Verificar qualidade do formulário.');
   }
   
   list.push(`Taxa de não realização: <strong>${kpis.taxaNaoRealizacao}%</strong>`);
