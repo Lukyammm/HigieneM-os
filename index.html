@@ -6,6 +6,7 @@
     <title>Análise de Higiene das Mãos - SCIH/HUC</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Space+Grotesk:wght@500&amp;display=swap');
 
@@ -33,6 +34,10 @@
 
         .chart-container.chart-tall {
             height: 360px;
+        }
+
+        .chart-container.chart-compact {
+            height: 220px;
         }
 
         .chart-container.chart-xlarge {
@@ -124,7 +129,7 @@
         <div id="main-content">
 
             <!-- KPI CARDS -->
-            <div id="kpi-grid" class="grid grid-cols-2 md:grid-cols-4 xl:grid-cols-8 gap-6 mb-10"></div>
+            <div id="kpi-grid" class="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-5 gap-6 mb-10"></div>
 
             <!-- FILTROS COMPACTOS -->
             <div class="bg-white rounded-3xl shadow-lg border border-slate-100 p-5 md:p-7 mb-10">
@@ -239,33 +244,33 @@
                     <div class="flex justify-between items-baseline mb-5">
                         <h3 class="font-semibold text-slate-800">Por Categoria Profissional</h3>
                     </div>
-                    <div class="chart-container chart-tall flex-1"><canvas id="categoriaChart"></canvas></div>
+                    <div class="chart-container chart-xlarge flex-1"><canvas id="categoriaChart"></canvas></div>
                 </div>
 
                 <div class="bg-white rounded-3xl shadow-lg p-6 flex flex-col">
                     <div class="flex justify-between items-baseline mb-5">
                         <h3 class="font-semibold text-slate-800">Distribuição por Situação</h3>
                     </div>
-                    <div class="chart-container flex-1"><canvas id="situacaoChart"></canvas></div>
+                    <div class="chart-container chart-compact flex-1"><canvas id="situacaoChart"></canvas></div>
                 </div>
 
                 <div class="bg-white rounded-3xl shadow-lg p-6 flex flex-col">
                     <div class="flex justify-between items-baseline mb-5">
                         <h3 class="font-semibold text-slate-800">Distribuição por Método</h3>
                     </div>
-                    <div class="chart-container flex-1"><canvas id="metodoChart"></canvas></div>
+                    <div class="chart-container chart-compact flex-1"><canvas id="metodoChart"></canvas></div>
                 </div>
             </div>
 
             <!-- INSIGHTS AUTOMÁTICOS -->
-            <div class="bg-gradient-to-r from-emerald-700 to-emerald-800 text-white rounded-3xl p-8 mb-12 shadow-xl">
-                <h2 class="text-xl font-semibold mb-6 flex items-center gap-x-3">
+            <div class="bg-gradient-to-r from-emerald-700 to-emerald-800 text-white rounded-2xl p-3 mb-8 shadow-lg">
+                <h2 class="text-base font-semibold mb-2 flex items-center gap-x-2">
                     <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M9 18h6m-5 3h4m-7-9a5 5 0 1110 0c0 1.9-.93 3.57-2.36 4.6-.62.45-1.14 1.13-1.14 1.9V19H10.5v-.5c0-.77-.52-1.45-1.14-1.9A5.64 5.64 0 017 12z" />
                     </svg>
                     Insights Automáticos
                 </h2>
-                <div id="insights-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+                <div id="insights-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2"></div>
             </div>
 
             <!-- TABELA DETALHADA -->
@@ -428,32 +433,8 @@
                 </div>
 
                 <div class="bg-white rounded-3xl p-6 shadow-inner card-hover kpi-card">
-                    <div class="flex justify-between">
-                        <div>
-                            <p class="uppercase text-xs tracking-widest text-amber-500">Incompleto</p>
-                            <p class="text-4xl font-semibold text-amber-600">${kpis.totalIncompleto.toLocaleString('pt-BR')}</p>
-                        </div>
-                        <div class="w-8 h-8 text-amber-500">
-                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
-                                <path fill-rule="evenodd" d="M9.4 3.55c1.15-1.98 4.01-1.98 5.16 0l6.37 10.95c1.15 1.98-.29 4.45-2.58 4.45H5.6c-2.29 0-3.73-2.47-2.58-4.45L9.4 3.55zM12 8.25a.75.75 0 00-.75.75v3.75a.75.75 0 001.5 0V9a.75.75 0 00-.75-.75zm0 8.25a.938.938 0 100-1.875.938.938 0 000 1.875z" clip-rule="evenodd" />
-                            </svg>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="bg-white rounded-3xl p-6 shadow-inner card-hover kpi-card">
                     <p class="uppercase text-xs tracking-widest text-red-400">Taxa de não realização</p>
                     <p class="text-5xl font-semibold text-red-600 mt-3">${kpis.taxaNaoRealizacao}%</p>
-                </div>
-
-                <div class="bg-white rounded-3xl p-6 shadow-inner card-hover kpi-card">
-                    <p class="uppercase text-xs tracking-widest text-sky-500">Preenchimento completo</p>
-                    <p class="text-5xl font-semibold text-sky-600 mt-3">${kpis.taxaPreenchimentoCompleto}%</p>
-                </div>
-
-                <div class="bg-white rounded-3xl p-6 shadow-inner card-hover kpi-card">
-                    <p class="uppercase text-xs tracking-widest text-orange-500">Preenchimento incompleto</p>
-                    <p class="text-5xl font-semibold text-orange-600 mt-3">${kpis.taxaPreenchimentoIncompleto}%</p>
                 </div>
             `;
         }
@@ -509,6 +490,10 @@
 
         // ====================== GRÁFICOS ======================
         function renderAllCharts(chartData) {
+            if (window.ChartDataLabels) {
+                Chart.register(ChartDataLabels);
+            }
+
             Object.keys(chartInstances).forEach(key => {
                 if (chartInstances[key]) chartInstances[key].destroy();
             });
@@ -525,7 +510,8 @@
                 }
             };
 
-            const formatPercentTicks = (value) => `${value}%`;
+            const formatPercentTicks = (value) => `${Math.round(Number(value) || 0)}%`;
+            const formatDataLabelPercent = (value) => `${Math.round(Number(value) || 0)}%`;
             const percentScaleY = {
                 beginAtZero: true,
                 min: 0,
@@ -539,7 +525,6 @@
                 beginAtZero: true,
                 min: 0,
                 max: 100,
-                grace: '5%',
                 ticks: {
                     callback: formatPercentTicks,
                     stepSize: 20
@@ -581,7 +566,16 @@
                 options: {
                     ...commonOptions,
                     scales: { y: percentScaleY },
-                    plugins: { legend: { display: false } }
+                    plugins: {
+                        legend: { display: false },
+                        datalabels: {
+                            anchor: 'end',
+                            align: 'top',
+                            color: '#0f172a',
+                            font: { weight: '600', size: 10 },
+                            formatter: formatDataLabelPercent
+                        }
+                    }
                 }
             });
 
@@ -681,6 +675,16 @@
                                 minRotation: 0
                             }
                         }
+                    },
+                    plugins: {
+                        ...commonOptions.plugins,
+                        datalabels: {
+                            anchor: 'end',
+                            align: 'top',
+                            color: '#0f172a',
+                            font: { weight: '600', size: 10 },
+                            formatter: formatDataLabelPercent
+                        }
                     }
                 }
             });
@@ -695,7 +699,21 @@
                         backgroundColor: ['#10b981', '#f43f5e', '#f59e0b']
                     }]
                 },
-                options: { ...commonOptions, plugins: { legend: { position: 'bottom' } } }
+                options: {
+                    ...commonOptions,
+                    plugins: {
+                        legend: { position: 'bottom' },
+                        datalabels: {
+                            color: '#ffffff',
+                            font: { weight: '700', size: 10 },
+                            formatter: (value, context) => {
+                                const total = context.dataset.data.reduce((sum, item) => sum + item, 0);
+                                if (!total) return '0%';
+                                return `${Math.round((value / total) * 100)}%`;
+                            }
+                        }
+                    }
+                }
             });
 
             // Distribuição Método
@@ -708,7 +726,21 @@
                         backgroundColor: ['#0ea5e9', '#8b5cf6', '#ec4899', '#f59e0b', '#64748b']
                     }]
                 },
-                options: { ...commonOptions, plugins: { legend: { position: 'bottom' } } }
+                options: {
+                    ...commonOptions,
+                    plugins: {
+                        legend: { position: 'bottom' },
+                        datalabels: {
+                            color: '#ffffff',
+                            font: { weight: '700', size: 10 },
+                            formatter: (value, context) => {
+                                const total = context.dataset.data.reduce((sum, item) => sum + item, 0);
+                                if (!total) return '0%';
+                                return `${Math.round((value / total) * 100)}%`;
+                            }
+                        }
+                    }
+                }
             });
         }
 
@@ -716,7 +748,7 @@
         function renderInsights(insights) {
             const container = document.getElementById('insights-container');
             container.innerHTML = insights.map(insight => `
-                <div class="bg-white/10 backdrop-blur-md border border-white/20 rounded-3xl p-5 text-sm leading-relaxed">
+                <div class="bg-white/10 backdrop-blur-sm border border-white/20 rounded-xl p-2 text-xs leading-snug">
                     ${insight}
                 </div>
             `).join('');
@@ -737,7 +769,7 @@
                     <td class="px-8 py-4">${row.momento}</td>
                     <td class="px-8 py-4 text-xs max-w-[220px] truncate">${row.acao}</td>
                     <td class="px-8 py-4">
-                        <span class="px-4 py-1 text-xs font-semibold rounded-3xl
+                        <span class="px-4 py-1 text-xs font-semibold rounded-3xl whitespace-nowrap inline-flex
                             ${row.situacao === 'Realizado' ? 'bg-emerald-100 text-emerald-700' :
                               row.situacao === 'Não realizado' ? 'bg-red-100 text-red-700' : 'bg-amber-100 text-amber-700'}">
                             ${row.situacao}
