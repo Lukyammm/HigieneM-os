@@ -1,4 +1,8 @@
 const CONFIG = {
+  // Opcional: para produção, prefira configurar em Script Properties (SPREADSHEET_ID).
+  // Se preenchido aqui, este valor terá prioridade.
+  SPREADSHEET_ID: '1Z6X27MIUZ87czGEKyZmJvnqxsarmSEmSt4ifYpp2yMk',
+
   DATA_SHEET_NAME: 'Respostas ao formulário 1',
   SETTINGS_SHEET_NAME: 'Configurações (Não Editar)',
 
@@ -26,7 +30,10 @@ function doGet() {
 }
 
 function openSpreadsheet_() {
-  const spreadsheetId = PropertiesService.getScriptProperties().getProperty('SPREADSHEET_ID');
+  const spreadsheetId =
+    String(CONFIG.SPREADSHEET_ID || '').trim() ||
+    String(PropertiesService.getScriptProperties().getProperty('SPREADSHEET_ID') || '').trim();
+
   if (spreadsheetId) {
     try {
       return SpreadsheetApp.openById(spreadsheetId);
@@ -44,6 +51,17 @@ function openSpreadsheet_() {
   throw new Error(
     'Planilha não vinculada ao projeto. Defina Script Property SPREADSHEET_ID com o ID da planilha para o Web App.'
   );
+}
+
+function testarAcesso() {
+  Logger.log(JSON.stringify(checkSpreadsheetAccess(), null, 2));
+  Logger.log(JSON.stringify(getSpreadsheetDebugInfo(), null, 2));
+}
+
+function testarBase() {
+  const rows = getBaseRows_();
+  Logger.log('Total de linhas: ' + rows.length);
+  Logger.log(JSON.stringify(rows.slice(0, 5), null, 2));
 }
 
 function getSpreadsheetDebugInfo() {
