@@ -6,7 +6,7 @@ const SHEET_NAME = 'Respostas ao formulário 1';
 function doGet() {
   return HtmlService.createTemplateFromFile('index')
     .evaluate()
-    .setTitle('Análise de Hig da SCIH - HUC')
+    .setTitle('Análise de Higiene das Mãos - SCIH/HUC')
     .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL)
     .setSandboxMode(HtmlService.SandboxMode.IFRAME);
 }
