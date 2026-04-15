@@ -45,7 +45,7 @@
         }
 
         .chart-container.chart-categoria {
-            height: 560px;
+            min-height: 420px;
         }
 
         .chart-container.chart-distribuicao {
@@ -506,6 +506,8 @@
                 if (chartInstances[key]) chartInstances[key].destroy();
             });
 
+            adjustCategoriaChartHeight(chartData?.porCategoria?.labels || []);
+
             const commonOptions = {
                 responsive: true,
                 maintainAspectRatio: false,
@@ -750,6 +752,18 @@
                     }
                 }
             });
+        }
+
+        function adjustCategoriaChartHeight(labels) {
+            const categoriaContainer = document.querySelector('#categoriaChart')?.closest('.chart-container');
+            if (!categoriaContainer) return;
+
+            const totalCategorias = Array.isArray(labels) ? labels.length : 0;
+            const alturaBase = 420;
+            const alturaPorCategoria = 56;
+            const alturaCalculada = Math.max(alturaBase, totalCategorias * alturaPorCategoria);
+
+            categoriaContainer.style.height = `${alturaCalculada}px`;
         }
 
         // ====================== INSIGHTS ======================
