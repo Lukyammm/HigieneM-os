@@ -515,7 +515,13 @@
                     legend: {
                         display: true,
                         position: 'top',
-                        labels: { boxWidth: 12, padding: 18, usePointStyle: true }
+                        labels: {
+                            boxWidth: 12,
+                            padding: 18,
+                            usePointStyle: true,
+                            color: '#0f172a',
+                            font: { size: 12, weight: '600' }
+                        }
                     }
                 }
             };
@@ -712,7 +718,14 @@
                 options: {
                     ...commonOptions,
                     plugins: {
-                        legend: { position: 'bottom' },
+                        legend: {
+                            ...commonOptions.plugins.legend,
+                            position: 'bottom',
+                            labels: {
+                                ...commonOptions.plugins.legend.labels,
+                                padding: 14
+                            }
+                        },
                         datalabels: {
                             color: '#ffffff',
                             font: { weight: '700', size: 10 },
@@ -739,7 +752,14 @@
                 options: {
                     ...commonOptions,
                     plugins: {
-                        legend: { position: 'bottom' },
+                        legend: {
+                            ...commonOptions.plugins.legend,
+                            position: 'bottom',
+                            labels: {
+                                ...commonOptions.plugins.legend.labels,
+                                padding: 14
+                            }
+                        },
                         datalabels: {
                             color: '#ffffff',
                             font: { weight: '700', size: 10 },
