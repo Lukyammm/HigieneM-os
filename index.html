@@ -8,38 +8,155 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Space+Grotesk:wght@500&amp;display=swap');
-        
+
         :root { --tw-color-primary: #10b981; }
-        
-        * { 
-            transition-property: color, background-color, border-color, text-decoration-color, fill, stroke; 
-            transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1); 
-            transition-duration: 150ms; 
+
+        * {
+            transition-property: color, background-color, border-color, text-decoration-color, fill, stroke;
+            transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+            transition-duration: 150ms;
         }
-        
-        .card-hover:hover { 
-            transform: translateY(-3px); 
-            box-shadow: 0 20px 25px -5px rgb(16 185 129), 0 8px 10px -6px rgb(16 185 129); 
+
+        .card-hover:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 14px 25px -18px rgb(2 132 199 / 60%), 0 8px 12px -10px rgb(15 23 42 / 20%);
         }
-        
-        .chart-container { 
-            height: 280px; 
-            position: relative; 
+
+        .chart-container {
+            height: 280px;
+            position: relative;
         }
-        
-        .kpi-card { 
-            min-height: 168px; 
+
+        .kpi-card {
+            min-height: 168px;
         }
-        
-        select[multiple] { 
-            height: 42px; 
-            overflow-y: auto; 
+
+        .filter-group-card {
+            border: 1px solid #e2e8f0;
+            border-radius: 1rem;
+            padding: 1rem;
+            background: #f8fafc;
         }
-        
+
+        .group-title {
+            font-size: 11px;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: #64748b;
+            margin-bottom: 0.75rem;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            font-weight: 600;
+        }
+
+        .chip {
+            border: 1px solid #cbd5e1;
+            color: #334155;
+            border-radius: 9999px;
+            font-size: 12px;
+            padding: 6px 12px;
+            background: #ffffff;
+            cursor: pointer;
+            font-weight: 500;
+        }
+
+        .chip:hover { border-color: #94a3b8; background: #f8fafc; }
+
+        .chip.active {
+            background: #059669;
+            color: #fff;
+            border-color: #059669;
+        }
+
+        .multi-select {
+            position: relative;
+        }
+
+        .multi-select-toggle {
+            width: 100%;
+            border: 1px solid #cbd5e1;
+            border-radius: 0.8rem;
+            background: white;
+            min-height: 42px;
+            padding: 10px 12px;
+            text-align: left;
+            font-size: 13px;
+            color: #0f172a;
+        }
+
+        .multi-select-menu {
+            position: absolute;
+            z-index: 20;
+            top: calc(100% + 8px);
+            left: 0;
+            right: 0;
+            background: #fff;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            box-shadow: 0 10px 24px -14px rgba(15, 23, 42, 0.3);
+            padding: 10px;
+            max-height: 260px;
+            overflow-y: auto;
+            display: none;
+        }
+
+        .multi-select.open .multi-select-menu { display: block; }
+
+        .multi-select-menu input[type="search"] {
+            width: 100%;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 8px 10px;
+            margin-bottom: 8px;
+            font-size: 13px;
+        }
+
+        .multi-option {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 6px;
+            border-radius: 8px;
+            font-size: 13px;
+            color: #1e293b;
+        }
+
+        .multi-option:hover { background: #f1f5f9; }
+
+        .filter-active-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            border: 1px solid #cbd5e1;
+            background: #fff;
+            border-radius: 9999px;
+            font-size: 12px;
+            padding: 6px 10px;
+            color: #1e293b;
+            cursor: pointer;
+        }
+
+        .filter-active-chip .x {
+            color: #64748b;
+            font-weight: 700;
+        }
+
         .loading-spinner {
             animation: spin 1.5s linear infinite;
         }
-        
+
+        .skeleton {
+            background: linear-gradient(90deg, #e2e8f0 25%, #f1f5f9 37%, #e2e8f0 63%);
+            background-size: 400% 100%;
+            animation: pulseLoad 1.4s ease infinite;
+        }
+
+        @keyframes pulseLoad {
+            0% { background-position: 100% 0; }
+            100% { background-position: -100% 0; }
+        }
+
         @keyframes spin {
             to { transform: rotate(360deg); }
         }
@@ -60,7 +177,7 @@
                     ANÁLISE EM TEMPO REAL
                 </div>
             </div>
-            
+
             <div class="flex items-center gap-x-8">
                 <div onclick="refreshAllData()" class="flex items-center gap-x-2 text-slate-600 hover:text-emerald-700 cursor-pointer text-sm font-medium">
                     <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -68,12 +185,12 @@
                     </svg>
                     ATUALIZAR DADOS
                 </div>
-                
+
                 <div class="flex items-center bg-slate-100 rounded-3xl px-4 py-1 text-xs font-medium text-slate-500">
                     <span class="bg-white text-emerald-700 px-3 py-px rounded-3xl mr-2">LIVE</span>
                     Aba: Respostas ao formulário 1
                 </div>
-                
+
                 <div class="text-right">
                     <div class="text-xs text-slate-400">Última atualização</div>
                     <div id="last-update" class="text-sm font-medium text-slate-600">Agora</div>
@@ -83,7 +200,7 @@
     </div>
 
     <div class="max-w-screen-2xl mx-auto px-8 py-8">
-        
+
         <!-- LOADING OVERLAY -->
         <div id="loading-screen" class="fixed inset-0 bg-white/80 backdrop-blur-xl flex items-center justify-center z-[9999] hidden">
             <div class="text-center">
@@ -93,7 +210,7 @@
         </div>
 
         <div id="main-content">
-            
+
             <!-- KPI CARDS -->
             <div id="kpi-grid" class="grid grid-cols-2 md:grid-cols-4 xl:grid-cols-8 gap-6 mb-10"></div>
 
@@ -101,80 +218,74 @@
             <div class="bg-white rounded-3xl shadow-lg border border-slate-100 p-7 mb-10">
                 <div class="flex items-center justify-between mb-6">
                     <h2 class="text-xl font-semibold text-slate-800 flex items-center gap-x-2">
-                        <span class="text-emerald-600">🔎</span> 
+                        <span class="text-emerald-600">🔎</span>
                         Filtros Inteligentes
                     </h2>
                     <div class="flex gap-x-4">
-                        <button onclick="clearAllFilters()" 
+                        <button onclick="clearAllFilters()"
                                 class="text-xs font-medium text-slate-400 hover:text-slate-600 flex items-center">
                             ⟳ LIMPAR TUDO
                         </button>
-                        <button onclick="applyCurrentFilters()" 
-                                class="px-6 py-2 bg-emerald-700 hover:bg-emerald-800 text-white rounded-2xl text-sm font-semibold">
+                        <button onclick="applyCurrentFilters()"
+                                class="px-5 py-2 bg-emerald-700 hover:bg-emerald-800 text-white rounded-2xl text-xs font-semibold">
                             APLICAR FILTROS →
                         </button>
                     </div>
                 </div>
-
-                <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-7 gap-6">
-                    <!-- Período -->
-                    <div>
-                        <label class="block text-xs font-medium text-slate-500 mb-2">PERÍODO</label>
-                        <div class="flex gap-3">
-                            <input id="dataInicio" type="date" 
-                                   class="flex-1 border border-slate-200 rounded-2xl px-4 py-3 text-sm focus:outline-none focus:border-emerald-400">
-                            <input id="dataFim" type="date" 
-                                   class="flex-1 border border-slate-200 rounded-2xl px-4 py-3 text-sm focus:outline-none focus:border-emerald-400">
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
+                    <div class="filter-group-card">
+                        <div class="group-title">📅 Período</div>
+                        <div class="grid grid-cols-2 gap-3">
+                            <input id="dataInicio" type="date" class="border border-slate-300 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-emerald-500">
+                            <input id="dataFim" type="date" class="border border-slate-300 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-emerald-500">
+                        </div>
+                        <div class="flex flex-wrap gap-2 mt-3">
+                            <button class="chip" data-preset="hoje">Hoje</button>
+                            <button class="chip" data-preset="7dias">Últimos 7 dias</button>
+                            <button class="chip" data-preset="mesAtual">Mês atual</button>
                         </div>
                     </div>
-                    
-                    <!-- Unidade -->
-                    <div>
-                        <label class="block text-xs font-medium text-slate-500 mb-2">UNIDADE DE INTERNAÇÃO</label>
-                        <select id="unidades" multiple 
-                                class="w-full border border-slate-200 rounded-2xl px-4 py-3 text-sm focus:outline-none focus:border-emerald-400"></select>
+
+                    <div class="filter-group-card">
+                        <div class="group-title">🏥 Contexto</div>
+                        <div class="space-y-3">
+                            <div>
+                                <label class="block text-[11px] text-slate-500 mb-1">UNIDADE DE INTERNAÇÃO</label>
+                                <div id="unidadesMulti" class="multi-select"></div>
+                            </div>
+                            <div>
+                                <label class="block text-[11px] text-slate-500 mb-1">CATEGORIA PROFISSIONAL</label>
+                                <div id="categoriasMulti" class="multi-select"></div>
+                            </div>
+                        </div>
                     </div>
-                    
-                    <!-- Categoria -->
-                    <div>
-                        <label class="block text-xs font-medium text-slate-500 mb-2">CATEGORIA PROFISSIONAL</label>
-                        <select id="categorias" multiple 
-                                class="w-full border border-slate-200 rounded-2xl px-4 py-3 text-sm focus:outline-none focus:border-emerald-400"></select>
+
+                    <div class="filter-group-card">
+                        <div class="group-title">⚙️ Ação</div>
+                        <div class="space-y-3">
+                            <div>
+                                <label class="block text-[11px] text-slate-500 mb-1">MOMENTO DE REALIZAÇÃO</label>
+                                <div id="momentosChips" class="flex flex-wrap gap-2"></div>
+                            </div>
+                            <div>
+                                <label class="block text-[11px] text-slate-500 mb-1">SITUAÇÃO</label>
+                                <div id="situacoesChips" class="flex flex-wrap gap-2"></div>
+                            </div>
+                            <div>
+                                <label class="block text-[11px] text-slate-500 mb-1">MÉTODO</label>
+                                <div id="metodosChips" class="flex flex-wrap gap-2"></div>
+                            </div>
+                            <div>
+                                <label class="block text-[11px] text-slate-500 mb-1">PREENCHIMENTO</label>
+                                <div id="preenchimentosChips" class="flex flex-wrap gap-2"></div>
+                            </div>
+                        </div>
                     </div>
-                    
-                    <!-- Momento -->
-                    <div>
-                        <label class="block text-xs font-medium text-slate-500 mb-2">MOMENTO DE REALIZAÇÃO</label>
-                        <select id="momentos" multiple 
-                                class="w-full border border-slate-200 rounded-2xl px-4 py-3 text-sm focus:outline-none focus:border-emerald-400"></select>
-                    </div>
-                    
-                    <!-- Situação -->
-                    <div>
-                        <label class="block text-xs font-medium text-slate-500 mb-2">SITUAÇÃO</label>
-                        <select id="situacoes" multiple 
-                                class="w-full border border-slate-200 rounded-2xl px-4 py-3 text-sm focus:outline-none focus:border-emerald-400">
-                            <option value="Realizado">Realizado</option>
-                            <option value="Não realizado">Não realizado</option>
-                            <option value="Incompleto">Incompleto</option>
-                        </select>
-                    </div>
-                    
-                    <!-- Método -->
-                    <div>
-                        <label class="block text-xs font-medium text-slate-500 mb-2">MÉTODO</label>
-                        <select id="metodos" multiple 
-                                class="w-full border border-slate-200 rounded-2xl px-4 py-3 text-sm focus:outline-none focus:border-emerald-400"></select>
-                    </div>
-                    
-                    <!-- Preenchimento -->
-                    <div>
-                        <label class="block text-xs font-medium text-slate-500 mb-2">PREENCHIMENTO</label>
-                        <select id="preenchimentos" multiple 
-                                class="w-full border border-slate-200 rounded-2xl px-4 py-3 text-sm focus:outline-none focus:border-emerald-400">
-                            <option value="Completo">Completo</option>
-                            <option value="Incompleto">Incompleto</option>
-                        </select>
+                </div>
+                <div class="mt-4">
+                    <p class="text-xs text-slate-500 mb-2">Filtros ativos</p>
+                    <div id="active-filters" class="flex flex-wrap gap-2 text-xs text-slate-600">
+                        <span class="text-slate-400">Nenhum filtro ativo.</span>
                     </div>
                 </div>
             </div>
@@ -187,38 +298,38 @@
                     </div>
                     <div class="chart-container flex-1"><canvas id="temporalChart"></canvas></div>
                 </div>
-                
+
                 <div class="bg-white rounded-3xl shadow-lg p-6 flex flex-col">
                     <div class="flex justify-between items-baseline mb-5">
                         <h3 class="font-semibold text-slate-800">Análise por Unidade</h3>
                     </div>
                     <div class="chart-container flex-1"><canvas id="unidadeChart"></canvas></div>
                 </div>
-                
+
                 <div class="bg-white rounded-3xl shadow-lg p-6 flex flex-col">
                     <div class="flex justify-between items-baseline mb-5">
-                        <h3 class="font-semibold text-slate-800">Por Categoria Profissional</h3>
+                        <h3 class="font-semibold text-slate-800">Adesão por Categoria Profissional</h3>
                     </div>
                     <div class="chart-container flex-1"><canvas id="categoriaChart"></canvas></div>
                 </div>
-                
+
                 <div class="bg-white rounded-3xl shadow-lg p-6 flex flex-col">
                     <div class="flex justify-between items-baseline mb-5">
-                        <h3 class="font-semibold text-slate-800">Análise por Momento</h3>
+                        <h3 class="font-semibold text-slate-800">Adesão por Momento</h3>
                     </div>
                     <div class="chart-container flex-1"><canvas id="momentoChart"></canvas></div>
                 </div>
-                
+
                 <div class="bg-white rounded-3xl shadow-lg p-6 flex flex-col">
                     <div class="flex justify-between items-baseline mb-5">
-                        <h3 class="font-semibold text-slate-800">Distribuição por Situação</h3>
+                        <h3 class="font-semibold text-slate-800">Situação (quantidade)</h3>
                     </div>
                     <div class="chart-container flex-1"><canvas id="situacaoChart"></canvas></div>
                 </div>
-                
+
                 <div class="bg-white rounded-3xl shadow-lg p-6 flex flex-col">
                     <div class="flex justify-between items-baseline mb-5">
-                        <h3 class="font-semibold text-slate-800">Distribuição por Método</h3>
+                        <h3 class="font-semibold text-slate-800">Método (quantidade)</h3>
                     </div>
                     <div class="chart-container flex-1"><canvas id="metodoChart"></canvas></div>
                 </div>
@@ -236,15 +347,15 @@
             <div class="bg-white rounded-3xl shadow-lg overflow-hidden border border-slate-100">
                 <div class="px-8 py-5 border-b flex items-center justify-between bg-slate-50">
                     <h2 class="font-semibold text-lg flex items-center">
-                        Tabela Detalhada 
+                        Tabela Detalhada
                         <span id="table-info" class="ml-3 text-xs font-mono bg-white px-3 py-1 rounded-3xl text-slate-500"></span>
                     </h2>
-                    <button onclick="exportToCSV()" 
+                    <button onclick="exportToCSV()"
                             class="text-xs flex items-center gap-x-2 px-5 py-2 border border-slate-300 hover:bg-slate-100 rounded-2xl font-medium">
                         📤 Exportar CSV
                     </button>
                 </div>
-                
+
                 <div class="overflow-auto max-h-[560px]">
                     <table class="w-full text-sm" id="detail-table">
                         <thead class="sticky top-0 bg-white z-10 shadow-sm">
@@ -280,54 +391,65 @@
                 }
             };
         }
-        
+
         // ====================== VARIÁVEIS GLOBAIS ======================
         let allRecords = null;
         let currentResponse = null;
         let chartInstances = {};
-        
+        let autoApplyTimer = null;
+        const filterState = {
+            dataInicio: null,
+            dataFim: null,
+            unidades: [],
+            categorias: [],
+            momentos: [],
+            situacoes: [],
+            metodos: [],
+            preenchimentos: []
+        };
+
         // ====================== CARREGAR DADOS ======================
         function loadData(filters = {}) {
             const loading = document.getElementById('loading-screen');
             loading.classList.remove('hidden');
-            
+
             google.script.run
                 .withSuccessHandler(onDataSuccess)
                 .withFailureHandler(onDataError)
                 .getAnalysis(filters);
         }
-        
+
         function onDataSuccess(response) {
             const loading = document.getElementById('loading-screen');
             loading.classList.add('hidden');
-            
+
             if (!response.success) {
                 showErrorModal(response.error);
                 return;
             }
-            
+
             currentResponse = response;
             allRecords = response.totalProcessed || 0;
-            
+
             // Popula filtros apenas na primeira carga
-            if (!document.getElementById('unidades').hasChildNodes()) {
+            if (!document.getElementById('unidadesMulti').hasChildNodes()) {
                 populateFilterOptions(response.filterOptions);
             }
-            
+
             renderKPIs(response.kpis);
             renderAllCharts(response.chartData);
             renderInsights(response.insights);
             renderDetailTable(response.tableData);
-            
+
             document.getElementById('last-update').textContent = new Date().toLocaleTimeString('pt-BR');
         }
-        
+
         function onDataError(err) {
             const loading = document.getElementById('loading-screen');
             loading.classList.add('hidden');
             showErrorModal(err.message || 'Erro de comunicação com o servidor');
         }
-        
+
         // ====================== RENDER KPIs ======================
         function renderKPIs(kpis) {
             const container = document.getElementById('kpi-grid');
@@ -341,7 +463,7 @@
                         <div class="text-5xl opacity-20">📋</div>
                     </div>
                 </div>
-                
+
                 <div class="bg-white rounded-3xl p-6 shadow-inner card-hover border border-emerald-200 kpi-card">
                     <div class="flex justify-between items-start">
                         <div>
@@ -354,7 +476,7 @@
                         <div class="h-2 bg-emerald-600 rounded-3xl" style="width: ${kpis.adesaoGeral}%"></div>
                     </div>
                 </div>
-                
+
                 <div class="bg-white rounded-3xl p-6 shadow-inner card-hover kpi-card">
                     <div class="flex justify-between">
                         <div>
@@ -364,7 +486,7 @@
                         <div>🧼</div>
                     </div>
                 </div>
-                
+
                 <div class="bg-white rounded-3xl p-6 shadow-inner card-hover kpi-card">
                     <div class="flex justify-between">
                         <div>
@@ -374,7 +496,7 @@
                         <div>⛔</div>
                     </div>
                 </div>
-                
+
                 <div class="bg-white rounded-3xl p-6 shadow-inner card-hover kpi-card">
                     <div class="flex justify-between">
                         <div>
@@ -384,91 +506,274 @@
                         <div>⚠️</div>
                     </div>
                 </div>
-                
+
                 <div class="bg-white rounded-3xl p-6 shadow-inner card-hover kpi-card">
                     <p class="uppercase text-xs tracking-widest text-red-400">Taxa de não realização</p>
                     <p class="text-5xl font-semibold text-red-600 mt-3">${kpis.taxaNaoRealizacao}%</p>
                 </div>
-                
+
                 <div class="bg-white rounded-3xl p-6 shadow-inner card-hover kpi-card">
                     <p class="uppercase text-xs tracking-widest text-sky-500">Preenchimento completo</p>
                     <p class="text-5xl font-semibold text-sky-600 mt-3">${kpis.taxaPreenchimentoCompleto}%</p>
                 </div>
-                
+
                 <div class="bg-white rounded-3xl p-6 shadow-inner card-hover kpi-card">
                     <p class="uppercase text-xs tracking-widest text-orange-500">Preenchimento incompleto</p>
                     <p class="text-5xl font-semibold text-orange-600 mt-3">${kpis.taxaPreenchimentoIncompleto}%</p>
                 </div>
             `;
         }
-        
+
         // ====================== POPULAR FILTROS ======================
         function populateFilterOptions(options) {
-            // Unidades
-            const unitSel = document.getElementById('unidades');
-            unitSel.innerHTML = options.unidades.map(u => `<option value="${u}">${u}</option>`).join('');
-            
-            // Categorias
-            const catSel = document.getElementById('categorias');
-            catSel.innerHTML = options.categorias.map(c => `<option value="${c}">${c}</option>`).join('');
-            
-            // Momentos
-            const momSel = document.getElementById('momentos');
-            momSel.innerHTML = options.momentos.map(m => `<option value="${m}">${m}</option>`).join('');
-            
-            // Métodos fixos
-            const metSel = document.getElementById('metodos');
-            const metodosFixos = ['Água e sabonete','Fricção com álcool','Não realizado','Realizado sem método detalhado','Não informado'];
-            metSel.innerHTML = metodosFixos.map(m => `<option value="${m}">${m}</option>`).join('');
+            createMultiSelect('unidadesMulti', options.unidades, 'unidades');
+            createMultiSelect('categoriasMulti', options.categorias, 'categorias');
+
+            createChipGroup('momentosChips', options.momentos, 'momentos');
+            createChipGroup('situacoesChips', ['Realizado', 'Não realizado', 'Incompleto'], 'situacoes');
+            createChipGroup('metodosChips', ['Água e sabonete', 'Fricção com álcool', 'Não realizado', 'Realizado sem método detalhado', 'Não informado'], 'metodos');
+            createChipGroup('preenchimentosChips', ['Completo', 'Incompleto'], 'preenchimentos');
+
+            setupDateAndPresetHandlers();
+            renderActiveFilters();
         }
-        
+
+        function createChipGroup(containerId, values, stateKey) {
+            const container = document.getElementById(containerId);
+            container.innerHTML = values.map(value => `<button class="chip" data-key="${stateKey}" data-value="${value}">${value}</button>`).join('');
+
+            container.querySelectorAll('.chip').forEach(chip => {
+                chip.addEventListener('click', () => {
+                    const value = chip.dataset.value;
+                    const idx = filterState[stateKey].indexOf(value);
+                    if (idx >= 0) {
+                        filterState[stateKey].splice(idx, 1);
+                        chip.classList.remove('active');
+                    } else {
+                        filterState[stateKey].push(value);
+                        chip.classList.add('active');
+                    }
+                    renderActiveFilters();
+                    scheduleAutoApply();
+                });
+            });
+        }
+
+        function createMultiSelect(containerId, values, stateKey) {
+            const container = document.getElementById(containerId);
+            container.innerHTML = `
+                <button type="button" class="multi-select-toggle">Selecionar...</button>
+                <div class="multi-select-menu">
+                    <input type="search" placeholder="Buscar..." />
+                    <div class="options"></div>
+                </div>
+            `;
+
+            const toggle = container.querySelector('.multi-select-toggle');
+            const menu = container.querySelector('.multi-select-menu');
+            const search = container.querySelector('input[type="search"]');
+            const optionsDiv = container.querySelector('.options');
+
+            const renderOptions = (query = '') => {
+                const filtered = values.filter(v => v.toLowerCase().includes(query.toLowerCase()));
+                optionsDiv.innerHTML = filtered.map(value => `
+                    <label class="multi-option">
+                        <input type="checkbox" value="${value}" ${filterState[stateKey].includes(value) ? 'checked' : ''}/>
+                        <span>${value}</span>
+                    </label>
+                `).join('') || '<div class="text-xs text-slate-400 px-1 py-2">Nenhum resultado.</div>';
+                optionsDiv.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
+                    checkbox.addEventListener('change', () => {
+                        if (checkbox.checked) {
+                            if (!filterState[stateKey].includes(checkbox.value)) filterState[stateKey].push(checkbox.value);
+                        } else {
+                            filterState[stateKey] = filterState[stateKey].filter(item => item !== checkbox.value);
+                        }
+                        updateMultiSelectLabel(containerId, stateKey);
+                        renderActiveFilters();
+                        scheduleAutoApply();
+                    });
+                });
+            };
+
+            toggle.addEventListener('click', () => {
+                document.querySelectorAll('.multi-select').forEach(ms => {
+                    if (ms !== container) ms.classList.remove('open');
+                });
+                container.classList.toggle('open');
+                search.focus();
+            });
+
+            search.addEventListener('input', () => renderOptions(search.value));
+            document.addEventListener('click', (event) => {
+                if (!container.contains(event.target)) container.classList.remove('open');
+            });
+
+            renderOptions();
+            updateMultiSelectLabel(containerId, stateKey);
+        }
+
+        function updateMultiSelectLabel(containerId, stateKey) {
+            const container = document.getElementById(containerId);
+            const toggle = container.querySelector('.multi-select-toggle');
+            const count = filterState[stateKey].length;
+            toggle.textContent = count === 0 ? 'Selecionar...' : `${count} selecionado(s)`;
+        }
+
+        function setupDateAndPresetHandlers() {
+            const dataInicio = document.getElementById('dataInicio');
+            const dataFim = document.getElementById('dataFim');
+            dataInicio.addEventListener('change', () => {
+                filterState.dataInicio = dataInicio.value || null;
+                renderActiveFilters();
+                scheduleAutoApply();
+            });
+            dataFim.addEventListener('change', () => {
+                filterState.dataFim = dataFim.value || null;
+                renderActiveFilters();
+                scheduleAutoApply();
+            });
+
+            document.querySelectorAll('[data-preset]').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const now = new Date();
+                    let inicio = null;
+                    let fim = new Date(now);
+                    if (btn.dataset.preset === 'hoje') {
+                        inicio = new Date(now);
+                    } else if (btn.dataset.preset === '7dias') {
+                        inicio = new Date(now);
+                        inicio.setDate(now.getDate() - 6);
+                    } else if (btn.dataset.preset === 'mesAtual') {
+                        inicio = new Date(now.getFullYear(), now.getMonth(), 1);
+                    }
+                    dataInicio.value = inicio ? inicio.toISOString().slice(0, 10) : '';
+                    dataFim.value = fim.toISOString().slice(0, 10);
+                    filterState.dataInicio = dataInicio.value || null;
+                    filterState.dataFim = dataFim.value || null;
+                    renderActiveFilters();
+                    scheduleAutoApply();
+                });
+            });
+        }
+
+        function renderActiveFilters() {
+            const container = document.getElementById('active-filters');
+            const chips = [];
+            const pushList = (key, prefix) => filterState[key].forEach(value => chips.push({ key, value, label: `${prefix}: ${value}` }));
+            if (filterState.dataInicio) chips.push({ key: 'dataInicio', value: filterState.dataInicio, label: `Início: ${filterState.dataInicio}` });
+            if (filterState.dataFim) chips.push({ key: 'dataFim', value: filterState.dataFim, label: `Fim: ${filterState.dataFim}` });
+            pushList('unidades', 'Unidade');
+            pushList('categorias', 'Categoria');
+            pushList('momentos', 'Momento');
+            pushList('situacoes', 'Situação');
+            pushList('metodos', 'Método');
+            pushList('preenchimentos', 'Preenchimento');
+
+            if (chips.length === 0) {
+                container.innerHTML = '<span class="text-slate-400">Nenhum filtro ativo.</span>';
+                return;
+            }
+
+            container.innerHTML = chips.map((chip, idx) => `
+                <button class="filter-active-chip" data-idx="${idx}">
+                    ${chip.label}
+                    <span class="x">✕</span>
+                </button>
+            `).join('');
+
+            container.querySelectorAll('.filter-active-chip').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const chip = chips[Number(btn.dataset.idx)];
+                    removeFilter(chip.key, chip.value);
+                    scheduleAutoApply();
+                });
+            });
+        }
+
+        function removeFilter(key, value) {
+            if (key === 'dataInicio' || key === 'dataFim') {
+                filterState[key] = null;
+                document.getElementById(key).value = '';
+            } else {
+                filterState[key] = filterState[key].filter(item => item !== value);
+            }
+            syncFilterUI();
+            renderActiveFilters();
+        }
+
+        function syncFilterUI() {
+            ['momentosChips','situacoesChips','metodosChips','preenchimentosChips'].forEach(groupId => {
+                document.querySelectorAll(`#${groupId} .chip`).forEach(chip => {
+                    const key = chip.dataset.key;
+                    chip.classList.toggle('active', filterState[key].includes(chip.dataset.value));
+                });
+            });
+            updateMultiSelectLabel('unidadesMulti', 'unidades');
+            updateMultiSelectLabel('categoriasMulti', 'categorias');
+            document.querySelectorAll('#unidadesMulti .multi-option input').forEach(input => {
+                input.checked = filterState.unidades.includes(input.value);
+            });
+            document.querySelectorAll('#categoriasMulti .multi-option input').forEach(input => {
+                input.checked = filterState.categorias.includes(input.value);
+            });
+        }
+
+        function scheduleAutoApply() {
+            if (autoApplyTimer) clearTimeout(autoApplyTimer);
+            autoApplyTimer = setTimeout(() => applyCurrentFilters(), 350);
+        }
+
         // ====================== PEGAR FILTROS ======================
         function getCurrentFilters() {
-            const getSelected = (id) => Array.from(document.getElementById(id).selectedOptions).map(o => o.value);
-            
             return {
-                dataInicio: document.getElementById('dataInicio').value || null,
-                dataFim: document.getElementById('dataFim').value || null,
-                unidades: getSelected('unidades'),
-                categorias: getSelected('categorias'),
-                momentos: getSelected('momentos'),
-                situacoes: getSelected('situacoes'),
-                metodos: getSelected('metodos'),
-                preenchimentos: getSelected('preenchimentos')
+                dataInicio: filterState.dataInicio,
+                dataFim: filterState.dataFim,
+                unidades: filterState.unidades,
+                categorias: filterState.categorias,
+                momentos: filterState.momentos,
+                situacoes: filterState.situacoes,
+                metodos: filterState.metodos,
+                preenchimentos: filterState.preenchimentos
             };
         }
-        
+
         function applyCurrentFilters() {
             loadData(getCurrentFilters());
         }
-        
+
         function clearAllFilters() {
             document.getElementById('dataInicio').value = '';
             document.getElementById('dataFim').value = '';
-            ['unidades','categorias','momentos','situacoes','metodos','preenchimentos'].forEach(id => {
-                document.getElementById(id).selectedIndex = -1;
-            });
+            Object.keys(filterState).forEach(key => filterState[key] = Array.isArray(filterState[key]) ? [] : null);
+            syncFilterUI();
+            renderActiveFilters();
             loadData({});
         }
-        
+
         // ====================== GRÁFICOS ======================
         function renderAllCharts(chartData) {
             Object.keys(chartInstances).forEach(key => {
                 if (chartInstances[key]) chartInstances[key].destroy();
             });
-            
+
             const commonOptions = {
                 responsive: true,
                 maintainAspectRatio: false,
-                plugins: { 
-                    legend: { 
-                        display: true, 
-                        position: 'top', 
-                        labels: { boxWidth: 12, padding: 18, usePointStyle: true } 
-                    } 
+                plugins: {
+                    legend: {
+                        display: false,
+                        position: 'top',
+                        labels: { boxWidth: 12, padding: 18, usePointStyle: true }
+                    },
+                    tooltip: { callbacks: { label: (ctx) => `${ctx.raw}%` } }
+                },
+                scales: {
+                    y: { beginAtZero: true, max: 100, ticks: { callback: v => `${v}%` }, grid: { color: '#e2e8f0' } },
+                    x: { ticks: { color: '#64748b' }, grid: { display: false } }
                 }
             };
-            
+
             // Evolução Temporal
             chartInstances.temporal = new Chart(document.getElementById('temporalChart'), {
                 type: 'line',
@@ -484,9 +789,17 @@
                         pointRadius: 4
                     }]
                 },
-                options: { ...commonOptions, plugins: { legend: { display: false } } }
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false }, tooltip: { callbacks: { label: (ctx) => `${ctx.raw}%` } } },
+                    scales: {
+                        y: { beginAtZero: true, max: 100, ticks: { callback: v => `${v}%` }, grid: { color: '#e2e8f0' } },
+                        x: { grid: { color: '#f1f5f9' } }
+                    }
+                }
             });
-            
+
             // Por Unidade
             chartInstances.unidade = new Chart(document.getElementById('unidadeChart'), {
                 type: 'bar',
@@ -499,9 +812,9 @@
                         borderRadius: 6
                     }]
                 },
-                options: { ...commonOptions, indexAxis: 'y', plugins: { legend: { display: false } } }
+                options: { ...commonOptions, indexAxis: 'y' }
             });
-            
+
             // Por Categoria
             chartInstances.categoria = new Chart(document.getElementById('categoriaChart'), {
                 type: 'bar',
@@ -510,12 +823,13 @@
                     datasets: [{
                         label: '% Adesão',
                         data: chartData.porCategoria.adesaoPercent,
-                        backgroundColor: '#0ea5e9'
+                        backgroundColor: '#0ea5e9',
+                        borderRadius: 6
                     }]
                 },
-                options: commonOptions
+                options: { ...commonOptions, indexAxis: 'y' }
             });
-            
+
             // Por Momento
             chartInstances.momento = new Chart(document.getElementById('momentoChart'), {
                 type: 'bar',
@@ -524,39 +838,60 @@
                     datasets: [{
                         label: '% Adesão',
                         data: chartData.porMomento.adesaoPercent,
-                        backgroundColor: '#8b5cf6'
+                        backgroundColor: '#8b5cf6',
+                        borderRadius: 6
                     }]
                 },
-                options: commonOptions
+                options: { ...commonOptions, indexAxis: 'y' }
             });
-            
+
             // Distribuição Situação
             chartInstances.situacao = new Chart(document.getElementById('situacaoChart'), {
-                type: 'pie',
+                type: 'bar',
                 data: {
                     labels: chartData.distribuicaoSituacao.labels,
                     datasets: [{
                         data: chartData.distribuicaoSituacao.data,
-                        backgroundColor: ['#10b981', '#f43f5e', '#f59e0b']
+                        backgroundColor: ['#10b981', '#ef4444', '#f59e0b'],
+                        borderRadius: 6
                     }]
                 },
-                options: { ...commonOptions, plugins: { legend: { position: 'bottom' } } }
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        x: { beginAtZero: true, grid: { color: '#e2e8f0' } },
+                        y: { grid: { display: false } }
+                    },
+                    indexAxis: 'y'
+                }
             });
-            
+
             // Distribuição Método
             chartInstances.metodo = new Chart(document.getElementById('metodoChart'), {
-                type: 'pie',
+                type: 'bar',
                 data: {
                     labels: chartData.distribuicaoMetodo.labels,
                     datasets: [{
                         data: chartData.distribuicaoMetodo.data,
-                        backgroundColor: ['#0ea5e9', '#8b5cf6', '#ec4899', '#f59e0b', '#64748b']
+                        backgroundColor: ['#06b6d4', '#3b82f6', '#10b981', '#ef4444', '#94a3b8'],
+                        borderRadius: 6
                     }]
                 },
-                options: { ...commonOptions, plugins: { legend: { position: 'bottom' } } }
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        x: { beginAtZero: true, grid: { color: '#e2e8f0' } },
+                        y: { grid: { display: false } }
+                    },
+                    indexAxis: 'y'
+                }
             });
         }
-        
+
         // ====================== INSIGHTS ======================
         function renderInsights(insights) {
             const container = document.getElementById('insights-container');
@@ -566,14 +901,14 @@
                 </div>
             `).join('');
         }
-        
+
         // ====================== TABELA ======================
         function renderDetailTable(tableData) {
             const tbody = document.getElementById('table-body');
             const info = document.getElementById('table-info');
-            
+
             info.innerHTML = `${tableData.length} registros • Total base: ${allRecords}`;
-            
+
             tbody.innerHTML = tableData.map(row => `
                 <tr class="hover:bg-emerald-50">
                     <td class="px-8 py-4 whitespace-nowrap text-xs font-medium">${row.data}</td>
@@ -582,34 +917,34 @@
                     <td class="px-8 py-4">${row.momento}</td>
                     <td class="px-8 py-4 text-xs max-w-[220px] truncate">${row.acao}</td>
                     <td class="px-8 py-4">
-                        <span class="px-4 py-1 text-xs font-semibold rounded-3xl 
-                            ${row.situacao === 'Realizado' ? 'bg-emerald-100 text-emerald-700' : 
+                        <span class="px-4 py-1 text-xs font-semibold rounded-3xl
+                            ${row.situacao === 'Realizado' ? 'bg-emerald-100 text-emerald-700' :
                               row.situacao === 'Não realizado' ? 'bg-red-100 text-red-700' : 'bg-amber-100 text-amber-700'}">
                             ${row.situacao}
                         </span>
                     </td>
                     <td class="px-8 py-4 text-xs">${row.metodo}</td>
                     <td class="px-8 py-4">
-                        <span class="px-4 py-1 text-xs font-semibold rounded-3xl 
+                        <span class="px-4 py-1 text-xs font-semibold rounded-3xl
                             ${row.preenchimento === 'Completo' ? 'bg-sky-100 text-sky-700' : 'bg-orange-100 text-orange-700'}">
                             ${row.preenchimento}
                         </span>
                     </td>
                 </tr>
             `).join('');
-            
+
             if (tableData.length === 0) {
                 tbody.innerHTML = `<tr><td colspan="8" class="px-8 py-12 text-center text-slate-400">Nenhum registro encontrado com os filtros aplicados.</td></tr>`;
             }
         }
-        
+
         // ====================== EXPORT CSV ======================
         function exportToCSV() {
             if (!currentResponse || !currentResponse.tableData) return;
-            
+
             const headers = ['Data', 'Unidade', 'Categoria Profissional', 'Momento', 'Ação', 'Situação', 'Método', 'Preenchimento'];
             let csv = headers.join(';') + '\n';
-            
+
             currentResponse.tableData.forEach(row => {
                 csv += [
                     `"${row.data}"`,
@@ -622,14 +957,14 @@
                     `"${row.preenchimento}"`
                 ].join(';') + '\n';
             });
-            
+
             const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
             const link = document.createElement('a');
             link.href = URL.createObjectURL(blob);
             link.download = `analise_higiene_maos_${new Date().toISOString().slice(0,10)}.csv`;
             link.click();
         }
-        
+
         // ====================== ERROR MODAL ======================
         function showErrorModal(message) {
             const modalHTML = `
@@ -638,7 +973,7 @@
                     <h3 class="text-red-600 text-xl font-semibold mb-2">⚠️ Algo deu errado</h3>
                     <p class="text-slate-600">${message}</p>
                     <p class="text-xs text-slate-400 mt-8">Verifique se a aba "Respostas ao formulário 1" existe e contém dados.</p>
-                    <button onclick="this.closest('.fixed').remove(); loadData({})" 
+                    <button onclick="this.closest('.fixed').remove(); loadData({})"
                             class="mt-8 w-full py-4 bg-slate-900 text-white rounded-3xl font-medium">
                         Tentar novamente
                     </button>
@@ -648,19 +983,21 @@
             div.innerHTML = modalHTML;
             document.body.appendChild(div);
         }
-        
+
         // ====================== REFRESH ======================
         function refreshAllData() {
             loadData(getCurrentFilters());
         }
-        
+
         // ====================== INICIALIZAÇÃO ======================
         function initializeSystem() {
             initTailwind();
+            const kpiGrid = document.getElementById('kpi-grid');
+            kpiGrid.innerHTML = Array(8).fill(0).map(() => '<div class="h-40 rounded-3xl skeleton"></div>').join('');
             loadData({}); // carrega todos os dados
             console.log('%c✅ Sistema de Higiene das Mãos - HTML completo carregado com layout corrigido', 'background:#10b981;color:white;padding:2px 6px;border-radius:4px');
         }
-        
+
         window.onload = initializeSystem;
     </script>
 </body>
