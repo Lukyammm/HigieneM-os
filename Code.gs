@@ -234,6 +234,7 @@ function buildChartData(filtered) {
 
 function buildTemporalData(filtered) {
   const groups = {};
+  const monthNames = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
   filtered.forEach(r => {
     const key = `${r.data.getFullYear()}-${String(r.data.getMonth() + 1).padStart(2, '0')}`;
     if (!groups[key]) groups[key] = { total: 0, realizado: 0 };
@@ -242,8 +243,15 @@ function buildTemporalData(filtered) {
   });
   
   const labels = Object.keys(groups).sort();
+  const formattedLabels = labels.map(key => {
+    const [year, month] = key.split('-');
+    const monthIndex = Number(month) - 1;
+    const monthName = monthNames[monthIndex] || month;
+    return `${monthName}/${year.slice(-2)}`;
+  });
+
   return {
-    labels: labels,
+    labels: formattedLabels,
     adesao: labels.map(k => groups[k].total ? Math.round((groups[k].realizado / groups[k].total) * 100) : 0)
   };
 }
