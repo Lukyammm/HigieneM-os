@@ -1,696 +1,317 @@
-const CONFIG = {
-  // Opcional: para produção, prefira configurar em Script Properties (SPREADSHEET_ID).
-  // Se preenchido aqui, este valor terá prioridade.
-  SPREADSHEET_ID: '1Z6X27MIUZ87czGEKyZmJvnqxsarmSEmSt4ifYpp2yMk',
+// ====================== CODE.gs (ATUALIZADO) ======================
 
-  DATA_SHEET_NAME: 'Respostas ao formulário 1',
-  SETTINGS_SHEET_NAME: 'Configurações (Não Editar)',
-
-  DATA_START_ROW: 2,
-  SETTINGS_START_ROW: 2,
-
-  // ABA DE DADOS
-  DATA_COLUMN_DATE: 1,      // A
-  DATA_COLUMN_UNIDADE: 2,   // B
-  DATA_COLUMN_CATEGORIA: 3, // C
-  DATA_COLUMN_MOMENTO: 4,   // D
-  DATA_COLUMN_ACAO: 5,      // E
-
-  // ABA DE CONFIGURAÇÕES
-  SETTINGS_COLUMN_UNIDADE: 1,   // A
-  SETTINGS_COLUMN_CATEGORIA: 2, // B
-  SETTINGS_COLUMN_MOMENTO: 3,   // C
-  SETTINGS_COLUMN_ACAO: 4       // D
-};
+const SPREADSHEET_ID = '1Z6X27MIUZ87czGEKyZmJvnqxsarmSEmSt4ifYpp2yMk';  // ← Planilha que você enviou
+const SHEET_NAME = 'Respostas ao formulário 1';
 
 function doGet() {
-  return HtmlService.createHtmlOutputFromFile('index')
-    .setTitle('Análise de Higiene das Mãos')
-    .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
+  return HtmlService.createTemplateFromFile('index')
+    .evaluate()
+    .setTitle('Análise de Higiene das Mãos • COSEP')
+    .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL)
+    .setSandboxMode(HtmlService.SandboxMode.IFRAME);
 }
 
-function openSpreadsheet_() {
-  const spreadsheetId =
-    String(CONFIG.SPREADSHEET_ID || '').trim() ||
-    String(PropertiesService.getScriptProperties().getProperty('SPREADSHEET_ID') || '').trim();
-
-  if (spreadsheetId) {
-    try {
-      return SpreadsheetApp.openById(spreadsheetId);
-    } catch (error) {
-      throw new Error(
-        'Não foi possível acessar a planilha (SPREADSHEET_ID=' + spreadsheetId + '). Verifique compartilhamento e permissões do Web App. Detalhe: ' +
-        (error && error.message ? error.message : error)
-      );
+// ====================== FUNÇÃO PRINCIPAL ======================
+function getAnalysis(filters = {}) {
+  try {
+    // Abre a planilha específica pelo ID (mais seguro e confiável)
+    const ss = SpreadsheetApp.openById(SPREADSHEET_ID);
+    const sheet = ss.getSheetByName(SHEET_NAME);
+    
+    if (!sheet) {
+      throw new Error(`Aba "${SHEET_NAME}" não encontrada na planilha informada.`);
     }
-  }
 
-  const active = SpreadsheetApp.getActiveSpreadsheet();
-  if (active) return active;
+    const rawData = sheet.getDataRange().getValues();
+    const records = normalizeRecords(rawData);
+    const filteredRecords = applyFilters(records, filters);
+    
+    const kpis = buildKPIs(filteredRecords);
+    const chartData = buildChartData(filteredRecords);
+    const insights = buildInsights(kpis, filteredRecords, records);
+    const tableData = prepareTableData(filteredRecords);
+    const filterOptions = getFilterOptions(records);
 
-  throw new Error(
-    'Planilha não vinculada ao projeto. Defina Script Property SPREADSHEET_ID com o ID da planilha para o Web App.'
-  );
-}
-
-function testarAcesso() {
-  Logger.log(JSON.stringify(checkSpreadsheetAccess(), null, 2));
-  Logger.log(JSON.stringify(getSpreadsheetDebugInfo(), null, 2));
-}
-
-function testarBase() {
-  const rows = getBaseRows_();
-  Logger.log('Total de linhas: ' + rows.length);
-  Logger.log(JSON.stringify(rows.slice(0, 5), null, 2));
-}
-
-function getSpreadsheetDebugInfo() {
-  const ss = openSpreadsheet_();
-  const sheet = resolveDataSheet_(ss);
-  const settings = resolveSettingsSheet_(ss);
-
-  return {
-    spreadsheetId: ss.getId(),
-    spreadsheetName: ss.getName(),
-    timezone: ss.getSpreadsheetTimeZone(),
-    dataSheetName: sheet ? sheet.getName() : '',
-    settingsSheetName: settings ? settings.getName() : '',
-    dataLastRow: sheet ? sheet.getLastRow() : 0,
-    dataLastColumn: sheet ? sheet.getLastColumn() : 0,
-    dataStartRow: CONFIG.DATA_START_ROW
-  };
-}
-
-function parseDateFromPtBrText_(value) {
-  const txt = String(value || '').trim();
-  if (!txt) return null;
-
-  const normalized = txt
-    .replace(/\u00A0/g, ' ')
-    .replace(/\s+/g, ' ')
-    .replace(/[T]/g, ' ')
-    .replace(/[.-]/g, '/');
-
-  const match = normalized.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})(?:\s+(\d{1,2}):(\d{2})(?::(\d{2}))?)?$/);
-  if (!match) return null;
-
-  const day = Number(match[1]);
-  const month = Number(match[2]);
-  const year = Number(match[3]);
-  const hour = Number(match[4] || 0);
-  const minute = Number(match[5] || 0);
-  const second = Number(match[6] || 0);
-
-  const d = new Date(year, month - 1, day, hour, minute, second);
-  if (isNaN(d.getTime())) return null;
-  if (d.getFullYear() !== year || d.getMonth() !== month - 1 || d.getDate() !== day) return null;
-
-  return d;
-}
-
-function hasDataContent_(row) {
-  return row.some(cell => cleanText_(cell) !== '');
-}
-
-function applyKnownHeaderOffsets_(rows) {
-  if (!rows || !rows.length) return rows;
-
-  const first = rows[0].map(cleanText_);
-  const firstColumn = (first[0] || '').toLowerCase();
-  const secondColumn = (first[1] || '').toLowerCase();
-
-  const startsWithTimestampHeader = firstColumn === 'carimbo de data/hora' || firstColumn === 'timestamp';
-  const startsWithUnidadeHeader = firstColumn === 'unidade de internação' || firstColumn === 'unidade de internacao';
-  const secondIsUnidade = secondColumn === 'unidade de internação' || secondColumn === 'unidade de internacao';
-
-  if (startsWithTimestampHeader || startsWithUnidadeHeader || secondIsUnidade) {
-    return rows.slice(1);
-  }
-
-  return rows;
-}
-
-function checkSpreadsheetAccess() {
-  const ss = openSpreadsheet_();
-  const sheets = ss.getSheets().map(s => s.getName());
-  const dataSheet = resolveDataSheet_(ss);
-  const settingsSheet = resolveSettingsSheet_(ss);
-
-  return {
-    spreadsheetId: ss.getId(),
-    spreadsheetName: ss.getName(),
-    dataSheetExists: !!dataSheet,
-    settingsSheetExists: !!settingsSheet,
-    dataSheetName: dataSheet ? dataSheet.getName() : '',
-    settingsSheetName: settingsSheet ? settingsSheet.getName() : '',
-    availableSheets: sheets
-  };
-}
-
-function getDashboardData(filters) {
-  filters = filters || {};
-
-  const baseRows = getBaseRows_();
-  const normalized = baseRows.map(normalizeDataRow_).filter(Boolean);
-  const filtered = applyFilters_(normalized, filters);
-  const settings = getSettingsData_();
-
-  return {
-    meta: {
-      generatedAt: new Date(),
-      totalBase: normalized.length,
-      totalFiltered: filtered.length,
-      availableFilters: buildAvailableFilters_(normalized, settings)
-    },
-    kpis: buildKpis_(filtered),
-    charts: {
-      timeline: buildTimeline_(filtered),
-      byUnidade: buildByField_(filtered, 'unidade'),
-      byCategoria: buildByField_(filtered, 'categoria'),
-      byMomento: buildByField_(filtered, 'momento'),
-      byStatus: buildByField_(filtered, 'status'),
-      byMetodo: buildByField_(filtered, 'metodo')
-    },
-    quality: buildQuality_(filtered),
-    insights: buildInsights_(filtered),
-    table: filtered.slice(0, 1000)
-  };
-}
-
-function getFilteredTable(filters) {
-  filters = filters || {};
-  const baseRows = getBaseRows_();
-  const normalized = baseRows.map(normalizeDataRow_).filter(Boolean);
-  return applyFilters_(normalized, filters).slice(0, 2000);
-}
-
-function getBaseRows_() {
-  const ss = openSpreadsheet_();
-  const sheet = resolveDataSheet_(ss);
-
-  if (!sheet) {
-    const available = ss.getSheets().map(s => s.getName()).join(', ');
-    throw new Error(
-      'A aba "' + CONFIG.DATA_SHEET_NAME + '" não foi encontrada. Abas disponíveis: ' + (available || 'nenhuma') + '.'
-    );
-  }
-
-  const lastRow = sheet.getLastRow();
-  if (lastRow < CONFIG.DATA_START_ROW) return [];
-
-  const columnIndexes = getDataColumnIndexes_(sheet);
-  const rawRows = sheet.getRange(
-    CONFIG.DATA_START_ROW,
-    1,
-    lastRow - CONFIG.DATA_START_ROW + 1,
-    sheet.getLastColumn()
-  ).getValues();
-
-  const normalizedRows = rawRows.map(row => ([
-    row[columnIndexes.date - 1],
-    row[columnIndexes.unidade - 1],
-    row[columnIndexes.categoria - 1],
-    row[columnIndexes.momento - 1],
-    row[columnIndexes.acao - 1]
-  ]));
-
-  const withoutKnownHeaders = applyKnownHeaderOffsets_(normalizedRows);
-  return withoutKnownHeaders.filter(hasDataContent_);
-}
-
-function getDataColumnIndexes_(sheet) {
-  const fallback = {
-    date: CONFIG.DATA_COLUMN_DATE,
-    unidade: CONFIG.DATA_COLUMN_UNIDADE,
-    categoria: CONFIG.DATA_COLUMN_CATEGORIA,
-    momento: CONFIG.DATA_COLUMN_MOMENTO,
-    acao: CONFIG.DATA_COLUMN_ACAO
-  };
-
-  const headerRange = sheet.getRange(1, 1, 1, sheet.getLastColumn());
-  const headers = headerRange.getDisplayValues()[0].map(h => normalizeSheetName_(h));
-  if (!headers.length) return fallback;
-
-  const findByKeywords = keywords => {
-    const idx = headers.findIndex(h => keywords.some(k => h.indexOf(k) !== -1));
-    return idx === -1 ? 0 : idx + 1;
-  };
-
-  return {
-    date: findByKeywords(['carimbo de data/hora', 'timestamp', 'data', 'data hora']) || fallback.date,
-    unidade: findByKeywords(['unidade de internacao', 'unidade de internação', 'unidade']) || fallback.unidade,
-    categoria: findByKeywords(['categoria profissional', 'categoria']) || fallback.categoria,
-    momento: findByKeywords(['momento']) || fallback.momento,
-    acao: findByKeywords(['acao', 'ação', 'higienizacao', 'higienização', 'realizacao']) || fallback.acao
-  };
-}
-
-function getSettingsData_() {
-  const ss = openSpreadsheet_();
-  const sheet = resolveSettingsSheet_(ss);
-
-  if (!sheet) {
     return {
-      unidade: [],
-      categoria: [],
-      momento: [],
-      acao: []
+      success: true,
+      kpis: kpis,
+      chartData: chartData,
+      insights: insights,
+      tableData: tableData,
+      filterOptions: filterOptions,
+      totalProcessed: records.length
+    };
+  } catch (error) {
+    console.error('Erro no getAnalysis:', error);
+    return {
+      success: false,
+      error: error.message
     };
   }
+}
 
-  const lastRow = sheet.getLastRow();
-  if (lastRow < CONFIG.SETTINGS_START_ROW) {
-    return {
-      unidade: [],
-      categoria: [],
-      momento: [],
-      acao: []
+// ====================== NORMALIZAR REGISTROS ======================
+function normalizeRecords(rawData) {
+  if (rawData.length < 2) return [];
+  
+  const records = [];
+  
+  for (let i = 1; i < rawData.length; i++) {
+    const row = rawData[i];
+    
+    const timestamp = row[0] ? new Date(row[0]) : null;
+    if (!timestamp) continue;
+    
+    let unidade = String(row[1] || '').trim();
+    let categoria = String(row[2] || '').trim();
+    let momento = String(row[3] || '').trim();
+    let acaoRaw = String(row[4] || '').trim();
+    
+    const toTitleCase = (str) => {
+      if (!str) return 'Não informado';
+      return str.toLowerCase().replace(/\b\w/g, char => char.toUpperCase());
     };
+    
+    unidade = toTitleCase(unidade);
+    categoria = toTitleCase(categoria);
+    momento = toTitleCase(momento);
+    
+    const acao = acaoRaw || 'Não informado';
+    
+    const situacao = determineSituacao(acaoRaw);
+    const metodo = determineMetodo(acaoRaw);
+    
+    const preenchimento = (unidade !== 'Não informado' && 
+                           categoria !== 'Não informado' && 
+                           momento !== 'Não informado' && 
+                           acao !== 'Não informado') ? 'Completo' : 'Incompleto';
+    
+    records.push({
+      data: timestamp,
+      unidade: unidade,
+      categoria: categoria,
+      momento: momento,
+      acao: acao,
+      situacao: situacao,
+      metodo: metodo,
+      preenchimento: preenchimento
+    });
   }
-
-  const values = sheet.getRange(
-    CONFIG.SETTINGS_START_ROW,
-    1,
-    lastRow - CONFIG.SETTINGS_START_ROW + 1,
-    CONFIG.SETTINGS_COLUMN_ACAO
-  ).getValues();
-
-  const unidade = [];
-  const categoria = [];
-  const momento = [];
-  const acao = [];
-
-  values.forEach(row => {
-    const u = cleanText_(row[CONFIG.SETTINGS_COLUMN_UNIDADE - 1]);
-    const c = cleanText_(row[CONFIG.SETTINGS_COLUMN_CATEGORIA - 1]);
-    const m = cleanText_(row[CONFIG.SETTINGS_COLUMN_MOMENTO - 1]);
-    const a = cleanText_(row[CONFIG.SETTINGS_COLUMN_ACAO - 1]);
-
-    if (u) unidade.push(u);
-    if (c) categoria.push(c);
-    if (m) momento.push(m);
-    if (a) acao.push(a);
-  });
-
-  return {
-    unidade: uniqueSorted_(unidade),
-    categoria: uniqueSorted_(categoria),
-    momento: uniqueSorted_(momento),
-    acao: uniqueSorted_(acao)
-  };
+  return records;
 }
 
-function normalizeDataRow_(row) {
-  const rawDate = row[CONFIG.DATA_COLUMN_DATE - 1];
-  const unidade = cleanText_(row[CONFIG.DATA_COLUMN_UNIDADE - 1]);
-  const categoria = cleanText_(row[CONFIG.DATA_COLUMN_CATEGORIA - 1]);
-  const momento = cleanText_(row[CONFIG.DATA_COLUMN_MOMENTO - 1]);
-  const acao = cleanText_(row[CONFIG.DATA_COLUMN_ACAO - 1]);
-
-  const parsedDate = parseDate_(rawDate);
-  const status = classifyStatus_(acao);
-  const metodo = classifyMethod_(acao);
-  const completeness = classifyCompleteness_(unidade, categoria, momento, acao);
-
-  return {
-    timestamp: parsedDate ? parsedDate.toISOString() : '',
-    data: parsedDate ? formatDateBr_(parsedDate) : '',
-    ano: parsedDate ? parsedDate.getFullYear() : '',
-    mesNumero: parsedDate ? parsedDate.getMonth() + 1 : '',
-    mesLabel: parsedDate ? Utilities.formatDate(parsedDate, Session.getScriptTimeZone(), 'MM/yyyy') : 'Sem data',
-    diaLabel: parsedDate ? Utilities.formatDate(parsedDate, Session.getScriptTimeZone(), 'dd/MM/yyyy') : 'Sem data',
-
-    unidade: unidade || 'Não informado',
-    categoria: categoria || 'Não informado',
-    momento: momento || 'Não informado',
-    acao: acao || 'Não informado',
-
-    status: status,
-    metodo: metodo,
-    completeness: completeness,
-
-    unidadeMissing: !unidade,
-    categoriaMissing: !categoria,
-    momentoMissing: !momento,
-    acaoMissing: !acao
-  };
+// ====================== CLASSIFICAÇÃO ======================
+function determineSituacao(acao) {
+  if (!acao || acao.trim() === '') return 'Incompleto';
+  
+  const lower = acao.toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '');
+  
+  if (lower.includes('nao realizado') || lower.includes('não realizado') || 
+      lower.includes('nao foi') || lower.includes('não foi') || 
+      lower.includes('omit') || lower.includes('recus')) {
+    return 'Não realizado';
+  }
+  
+  if (lower.includes('realizado')) {
+    return 'Realizado';
+  }
+  
+  return 'Incompleto';
 }
 
-function applyFilters_(rows, filters) {
-  return rows.filter(r => {
-    if (filters.unidade && filters.unidade !== 'TODOS' && r.unidade !== filters.unidade) return false;
-    if (filters.categoria && filters.categoria !== 'TODOS' && r.categoria !== filters.categoria) return false;
-    if (filters.momento && filters.momento !== 'TODOS' && r.momento !== filters.momento) return false;
-    if (filters.status && filters.status !== 'TODOS' && r.status !== filters.status) return false;
-    if (filters.metodo && filters.metodo !== 'TODOS' && r.metodo !== filters.metodo) return false;
-    if (filters.completeness && filters.completeness !== 'TODOS' && r.completeness !== filters.completeness) return false;
+function determineMetodo(acao) {
+  if (!acao || acao.trim() === '') return 'Não informado';
+  
+  const lower = acao.toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '');
+  
+  if (lower.includes('nao realizado') || lower.includes('não realizado')) {
+    return 'Não realizado';
+  }
+  
+  if (lower.includes('agua') || lower.includes('água') || 
+      lower.includes('sabao') || lower.includes('sabonete') || 
+      lower.includes('lavagem') || lower.includes('lavou')) {
+    return 'Água e sabonete';
+  }
+  
+  if (lower.includes('alcool') || lower.includes('álcool') || 
+      lower.includes('friccao') || lower.includes('fricção') || 
+      lower.includes('gel')) {
+    return 'Fricção com álcool';
+  }
+  
+  if (lower.includes('realizado')) {
+    return 'Realizado sem método detalhado';
+  }
+  
+  return 'Não informado';
+}
 
-    if (filters.startDate) {
-      const start = new Date(filters.startDate + 'T00:00:00');
-      if (!r.timestamp || new Date(r.timestamp) < start) return false;
+// ====================== APLICAR FILTROS ======================
+function applyFilters(records, filters) {
+  return records.filter(record => {
+    if (filters.dataInicio) {
+      if (record.data < new Date(filters.dataInicio)) return false;
     }
-
-    if (filters.endDate) {
-      const end = new Date(filters.endDate + 'T23:59:59');
-      if (!r.timestamp || new Date(r.timestamp) > end) return false;
+    if (filters.dataFim) {
+      const fim = new Date(filters.dataFim);
+      fim.setHours(23, 59, 59, 999);
+      if (record.data > fim) return false;
     }
-
+    
+    const check = (list, value) => !list || list.length === 0 || list.includes(value);
+    
+    if (!check(filters.unidades, record.unidade)) return false;
+    if (!check(filters.categorias, record.categoria)) return false;
+    if (!check(filters.momentos, record.momento)) return false;
+    if (!check(filters.situacoes, record.situacao)) return false;
+    if (!check(filters.metodos, record.metodo)) return false;
+    if (!check(filters.preenchimentos, record.preenchimento)) return false;
+    
     return true;
   });
 }
 
-function buildAvailableFilters_(rows, settings) {
-  const dataFilters = {
-    unidade: uniqueSorted_(rows.map(r => r.unidade).filter(v => v && v !== 'Não informado')),
-    categoria: uniqueSorted_(rows.map(r => r.categoria).filter(v => v && v !== 'Não informado')),
-    momento: uniqueSorted_(rows.map(r => r.momento).filter(v => v && v !== 'Não informado')),
-    status: uniqueSorted_(rows.map(r => r.status)),
-    metodo: uniqueSorted_(rows.map(r => r.metodo)),
-    completeness: uniqueSorted_(rows.map(r => r.completeness))
-  };
-
-  return {
-    unidade: mergeUniqueSorted_(settings.unidade, dataFilters.unidade),
-    categoria: mergeUniqueSorted_(settings.categoria, dataFilters.categoria),
-    momento: mergeUniqueSorted_(settings.momento, dataFilters.momento),
-    status: dataFilters.status,
-    metodo: dataFilters.metodo,
-    completeness: dataFilters.completeness
-  };
-}
-
-function buildKpis_(rows) {
-  const total = rows.length;
-  const realizados = rows.filter(r => r.status === 'Realizado').length;
-  const naoRealizados = rows.filter(r => r.status === 'Não realizado').length;
-  const incompletos = rows.filter(r => r.status === 'Incompleto').length;
-
-  const preenchimentoCompleto = rows.filter(r => r.completeness === 'Completo').length;
-  const preenchimentoIncompleto = rows.filter(r => r.completeness === 'Incompleto').length;
-
+// ====================== CONSTRUIR KPIs ======================
+function buildKPIs(filtered) {
+  const total = filtered.length;
+  if (total === 0) return { totalObservacoes: 0, totalRealizado: 0, totalNaoRealizado: 0, totalIncompleto: 0, adesaoGeral: 0, taxaNaoRealizacao: 0, taxaPreenchimentoCompleto: 0, taxaPreenchimentoIncompleto: 0 };
+  
+  const realizado = filtered.filter(r => r.situacao === 'Realizado').length;
+  const naoRealizado = filtered.filter(r => r.situacao === 'Não realizado').length;
+  const incompleto = filtered.filter(r => r.situacao === 'Incompleto').length;
+  
+  const adesaoGeral = Math.round((realizado / total) * 100) || 0;
+  const taxaNaoRealizacao = Math.round((naoRealizado / total) * 100) || 0;
+  
+  const completos = filtered.filter(r => r.preenchimento === 'Completo').length;
+  const taxaPreenchimentoCompleto = Math.round((completos / total) * 100) || 0;
+  
   return {
     totalObservacoes: total,
-    realizados: realizados,
-    naoRealizados: naoRealizados,
-    incompletos: incompletos,
-    adesaoGeral: percentage_(realizados, total),
-    taxaNaoRealizacao: percentage_(naoRealizados, total),
-    taxaIncompletos: percentage_(incompletos, total),
-    taxaPreenchimentoCompleto: percentage_(preenchimentoCompleto, total),
-    taxaPreenchimentoIncompleto: percentage_(preenchimentoIncompleto, total)
+    totalRealizado: realizado,
+    totalNaoRealizado: naoRealizado,
+    totalIncompleto: incompleto,
+    adesaoGeral: adesaoGeral,
+    taxaNaoRealizacao: taxaNaoRealizacao,
+    taxaPreenchimentoCompleto: taxaPreenchimentoCompleto,
+    taxaPreenchimentoIncompleto: 100 - taxaPreenchimentoCompleto
   };
 }
 
-function buildTimeline_(rows) {
-  const map = {};
+// ====================== CONSTRUIR GRÁFICOS ======================
+function buildChartData(filtered) {
+  return {
+    temporal: buildTemporalData(filtered),
+    porUnidade: buildGroupData(filtered, 'unidade'),
+    porCategoria: buildGroupData(filtered, 'categoria'),
+    porMomento: buildGroupData(filtered, 'momento'),
+    distribuicaoSituacao: buildPieData(filtered, 'situacao'),
+    distribuicaoMetodo: buildPieData(filtered, 'metodo')
+  };
+}
 
-  rows.forEach(r => {
-    const key = r.mesLabel || 'Sem data';
-
-    if (!map[key]) {
-      map[key] = {
-        label: key,
-        total: 0,
-        realizado: 0,
-        naoRealizado: 0,
-        incompleto: 0
-      };
-    }
-
-    map[key].total++;
-    if (r.status === 'Realizado') map[key].realizado++;
-    if (r.status === 'Não realizado') map[key].naoRealizado++;
-    if (r.status === 'Incompleto') map[key].incompleto++;
+function buildTemporalData(filtered) {
+  const groups = {};
+  filtered.forEach(r => {
+    const key = `${r.data.getFullYear()}-${String(r.data.getMonth() + 1).padStart(2, '0')}`;
+    if (!groups[key]) groups[key] = { total: 0, realizado: 0 };
+    groups[key].total++;
+    if (r.situacao === 'Realizado') groups[key].realizado++;
   });
+  
+  const labels = Object.keys(groups).sort();
+  return {
+    labels: labels,
+    adesao: labels.map(k => groups[k].total ? Math.round((groups[k].realizado / groups[k].total) * 100) : 0)
+  };
+}
 
-  return Object.values(map)
-    .sort((a, b) => sortMonthLabel_(a.label, b.label))
-    .map(item => ({
-      label: item.label,
-      total: item.total,
-      realizado: item.realizado,
-      naoRealizado: item.naoRealizado,
-      incompleto: item.incompleto,
-      adesao: percentageNumber_(item.realizado, item.total)
+function buildGroupData(filtered, key) {
+  const groups = {};
+  filtered.forEach(r => {
+    const val = r[key] || 'Não informado';
+    if (!groups[val]) groups[val] = { total: 0, realizado: 0 };
+    groups[val].total++;
+    if (r.situacao === 'Realizado') groups[val].realizado++;
+  });
+  
+  const labels = Object.keys(groups).sort();
+  return {
+    labels: labels,
+    adesaoPercent: labels.map(l => groups[l].total ? Math.round((groups[l].realizado / groups[l].total) * 100) : 0)
+  };
+}
+
+function buildPieData(filtered, key) {
+  const counts = {};
+  filtered.forEach(r => {
+    counts[r[key]] = (counts[r[key]] || 0) + 1;
+  });
+  const labels = Object.keys(counts);
+  return {
+    labels: labels,
+    data: labels.map(l => counts[l])
+  };
+}
+
+// ====================== INSIGHTS ======================
+function buildInsights(kpis, filtered, allRecords) {
+  const list = [];
+  
+  if (kpis.adesaoGeral >= 85) list.push('🎯 Excelente adesão institucional! Acima do padrão COSEP/OMS.');
+  else if (kpis.adesaoGeral >= 70) list.push('✅ Adesão boa. Dentro das metas institucionais.');
+  else if (kpis.adesaoGeral >= 50) list.push('⚠️ Adesão moderada. Recomenda-se ação corretiva.');
+  else list.push('🚨 Adesão crítica. Intervenção urgente necessária.');
+  
+  list.push(`Foram processados <strong>${kpis.totalObservacoes}</strong> registros válidos.`);
+  
+  if (filtered.length > 0) {
+    const unitData = buildGroupData(filtered, 'unidade');
+    if (unitData.labels.length > 0) {
+      const maxIdx = unitData.adesaoPercent.indexOf(Math.max(...unitData.adesaoPercent));
+      list.push(`🏆 Melhor unidade: <strong>${unitData.labels[maxIdx]}</strong> (${unitData.adesaoPercent[maxIdx]}%)`);
+    }
+  }
+  
+  if (kpis.taxaPreenchimentoCompleto < 85) {
+    list.push('📝 Atenção: Alta taxa de preenchimento incompleto. Verificar qualidade do formulário.');
+  }
+  
+  list.push(`Taxa de não realização: <strong>${kpis.taxaNaoRealizacao}%</strong>`);
+  
+  return list;
+}
+
+// ====================== TABELA ======================
+function prepareTableData(filteredRecords) {
+  return filteredRecords
+    .sort((a, b) => b.data.getTime() - a.data.getTime())
+    .map(r => ({
+      data: r.data.toLocaleDateString('pt-BR') + ' ' + r.data.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }),
+      unidade: r.unidade,
+      categoriaProfissional: r.categoria,
+      momento: r.momento,
+      acao: r.acao,
+      situacao: r.situacao,
+      metodo: r.metodo,
+      preenchimento: r.preenchimento
     }));
 }
 
-function buildByField_(rows, field) {
-  const map = {};
-
-  rows.forEach(r => {
-    const key = r[field] || 'Não informado';
-
-    if (!map[key]) {
-      map[key] = {
-        label: key,
-        total: 0,
-        realizado: 0,
-        naoRealizado: 0,
-        incompleto: 0
-      };
-    }
-
-    map[key].total++;
-    if (r.status === 'Realizado') map[key].realizado++;
-    if (r.status === 'Não realizado') map[key].naoRealizado++;
-    if (r.status === 'Incompleto') map[key].incompleto++;
-  });
-
-  return Object.values(map)
-    .map(item => ({
-      label: item.label,
-      total: item.total,
-      realizado: item.realizado,
-      naoRealizado: item.naoRealizado,
-      incompleto: item.incompleto,
-      adesao: percentageNumber_(item.realizado, item.total),
-      taxaNaoRealizacao: percentageNumber_(item.naoRealizado, item.total),
-      taxaIncompletos: percentageNumber_(item.incompleto, item.total)
-    }))
-    .sort((a, b) => b.total - a.total);
-}
-
-function buildQuality_(rows) {
-  const total = rows.length;
-
-  const missingUnidade = rows.filter(r => r.unidadeMissing).length;
-  const missingCategoria = rows.filter(r => r.categoriaMissing).length;
-  const missingMomento = rows.filter(r => r.momentoMissing).length;
-  const missingAcao = rows.filter(r => r.acaoMissing).length;
-
+// ====================== FILTROS ======================
+function getFilterOptions(records) {
+  const getUnique = (field) => [...new Set(records.map(r => r[field]))]
+    .filter(v => v && v !== 'Não informado')
+    .sort();
+  
   return {
-    total: total,
-    missingUnidade: missingUnidade,
-    missingCategoria: missingCategoria,
-    missingMomento: missingMomento,
-    missingAcao: missingAcao,
-    pctMissingUnidade: percentage_(missingUnidade, total),
-    pctMissingCategoria: percentage_(missingCategoria, total),
-    pctMissingMomento: percentage_(missingMomento, total),
-    pctMissingAcao: percentage_(missingAcao, total)
+    unidades: getUnique('unidade'),
+    categorias: getUnique('categoria'),
+    momentos: getUnique('momento')
   };
-}
-
-function buildInsights_(rows) {
-  if (!rows.length) {
-    return ['Nenhum registro encontrado com os filtros aplicados.'];
-  }
-
-  const byUnidade = buildByField_(rows, 'unidade')
-    .filter(x => x.label !== 'Não informado' && x.total >= 3);
-
-  const byCategoria = buildByField_(rows, 'categoria')
-    .filter(x => x.label !== 'Não informado' && x.total >= 3);
-
-  const byMomento = buildByField_(rows, 'momento')
-    .filter(x => x.label !== 'Não informado' && x.total >= 3);
-
-  const worstUnidade = byUnidade.slice().sort((a, b) => b.taxaNaoRealizacao - a.taxaNaoRealizacao)[0];
-  const bestUnidade = byUnidade.slice().sort((a, b) => b.adesao - a.adesao)[0];
-  const worstCategoria = byCategoria.slice().sort((a, b) => b.taxaNaoRealizacao - a.taxaNaoRealizacao)[0];
-  const worstMomento = byMomento.slice().sort((a, b) => b.taxaNaoRealizacao - a.taxaNaoRealizacao)[0];
-  const mostIncompleteMomento = byMomento.slice().sort((a, b) => b.taxaIncompletos - a.taxaIncompletos)[0];
-
-  const total = rows.length;
-  const realizados = rows.filter(r => r.status === 'Realizado').length;
-  const naoRealizados = rows.filter(r => r.status === 'Não realizado').length;
-  const incompletos = rows.filter(r => r.status === 'Incompleto').length;
-
-  const insights = [];
-
-  insights.push(
-    `A adesão geral no recorte atual está em ${percentage_(realizados, total)}, com ${naoRealizados} registro(s) de não realização e ${incompletos} registro(s) incompleto(s).`
-  );
-
-  if (worstUnidade) {
-    insights.push(
-      `A unidade com maior taxa de não realização é "${worstUnidade.label}", com ${formatPct_(worstUnidade.taxaNaoRealizacao)} em ${worstUnidade.total} observação(ões).`
-    );
-  }
-
-  if (bestUnidade) {
-    insights.push(
-      `A melhor adesão entre as unidades analisadas aparece em "${bestUnidade.label}", com ${formatPct_(bestUnidade.adesao)} de realização.`
-    );
-  }
-
-  if (worstCategoria) {
-    insights.push(
-      `A categoria profissional mais crítica no recorte atual é "${worstCategoria.label}", com ${formatPct_(worstCategoria.taxaNaoRealizacao)} de não realização.`
-    );
-  }
-
-  if (worstMomento) {
-    insights.push(
-      `O momento com pior desempenho é "${worstMomento.label}", com ${formatPct_(worstMomento.taxaNaoRealizacao)} de não realização.`
-    );
-  }
-
-  if (mostIncompleteMomento) {
-    insights.push(
-      `O maior percentual de registros incompletos aparece em "${mostIncompleteMomento.label}", com ${formatPct_(mostIncompleteMomento.taxaIncompletos)}.`
-    );
-  }
-
-  return insights;
-}
-
-function classifyStatus_(acao) {
-  const value = (acao || '').toLowerCase().trim();
-
-  if (!value) return 'Incompleto';
-  if (value.indexOf('não realizado') !== -1 || value.indexOf('nao realizado') !== -1) return 'Não realizado';
-  if (value.indexOf('realizado') !== -1) return 'Realizado';
-
-  return 'Incompleto';
-}
-
-function classifyMethod_(acao) {
-  const value = (acao || '').toLowerCase().trim();
-
-  if (!value) return 'Não informado';
-  if (value.indexOf('água') !== -1 || value.indexOf('agua') !== -1 || value.indexOf('sabonete') !== -1) return 'Água e sabonete';
-  if (value.indexOf('álcool') !== -1 || value.indexOf('alcool') !== -1 || value.indexOf('fricção') !== -1 || value.indexOf('friccao') !== -1) return 'Fricção com álcool';
-  if (value.indexOf('não realizado') !== -1 || value.indexOf('nao realizado') !== -1) return 'Não realizado';
-  if (value.indexOf('realizado') !== -1) return 'Realizado sem método detalhado';
-
-  return 'Não informado';
-}
-
-function classifyCompleteness_(unidade, categoria, momento, acao) {
-  return (unidade && categoria && momento && acao) ? 'Completo' : 'Incompleto';
-}
-
-function parseDate_(value) {
-  if (!value) return null;
-
-  if (Object.prototype.toString.call(value) === '[object Date]' && !isNaN(value)) {
-    return value;
-  }
-
-  const parsedPtBr = parseDateFromPtBrText_(value);
-  if (parsedPtBr) return parsedPtBr;
-
-  const d = new Date(value);
-  if (!isNaN(d)) return d;
-
-  return null;
-}
-
-function resolveDataSheet_(ss) {
-  const exact = ss.getSheetByName(CONFIG.DATA_SHEET_NAME);
-  if (exact) return exact;
-
-  const normalizedExpected = normalizeSheetName_(CONFIG.DATA_SHEET_NAME);
-  const byNormalized = ss.getSheets().find(s => normalizeSheetName_(s.getName()) === normalizedExpected);
-  if (byNormalized) return byNormalized;
-
-  const byPrefix = ss.getSheets().find(s => normalizeSheetName_(s.getName()).indexOf('respostas ao formulario') === 0);
-  if (byPrefix) return byPrefix;
-
-  const byEnglishPrefix = ss.getSheets().find(s => {
-    const n = normalizeSheetName_(s.getName());
-    return n.indexOf('form responses') === 0 || n.indexOf('form_responses') === 0;
-  });
-  if (byEnglishPrefix) return byEnglishPrefix;
-
-  return null;
-}
-
-function resolveSettingsSheet_(ss) {
-  const exact = ss.getSheetByName(CONFIG.SETTINGS_SHEET_NAME);
-  if (exact) return exact;
-
-  const normalizedExpected = normalizeSheetName_(CONFIG.SETTINGS_SHEET_NAME);
-  const byNormalized = ss.getSheets().find(s => normalizeSheetName_(s.getName()) === normalizedExpected);
-  if (byNormalized) return byNormalized;
-
-  const byPrefix = ss.getSheets().find(s => normalizeSheetName_(s.getName()).indexOf('configuracoes') === 0);
-  if (byPrefix) return byPrefix;
-
-  return null;
-}
-
-function normalizeSheetName_(value) {
-  return String(value || '')
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .toLowerCase()
-    .replace(/\s+/g, ' ')
-    .trim();
-}
-
-function cleanText_(value) {
-  if (Object.prototype.toString.call(value) === '[object Date]' && !isNaN(value)) {
-    return Utilities.formatDate(value, Session.getScriptTimeZone(), 'dd/MM/yyyy HH:mm:ss');
-  }
-
-  return String(value || '')
-    .replace(/\s+/g, ' ')
-    .replace(/\u00A0/g, ' ')
-    .trim();
-}
-
-function uniqueSorted_(arr) {
-  return [...new Set(arr.filter(Boolean))].sort((a, b) => String(a).localeCompare(String(b), 'pt-BR'));
-}
-
-function mergeUniqueSorted_(arr1, arr2) {
-  return [...new Set([...(arr1 || []), ...(arr2 || [])])]
-    .filter(Boolean)
-    .sort((a, b) => String(a).localeCompare(String(b), 'pt-BR'));
-}
-
-function percentage_(part, total) {
-  if (!total) return '0,0%';
-  return ((part / total) * 100).toFixed(1).replace('.', ',') + '%';
-}
-
-function percentageNumber_(part, total) {
-  if (!total) return 0;
-  return Number(((part / total) * 100).toFixed(1));
-}
-
-function formatPct_(n) {
-  return String((n || 0).toFixed(1)).replace('.', ',') + '%';
-}
-
-function formatDateBr_(date) {
-  return Utilities.formatDate(date, Session.getScriptTimeZone(), 'dd/MM/yyyy HH:mm');
-}
-
-function sortMonthLabel_(a, b) {
-  if (a === 'Sem data') return 1;
-  if (b === 'Sem data') return -1;
-
-  const pa = a.split('/');
-  const pb = b.split('/');
-
-  if (pa.length !== 2 || pb.length !== 2) return String(a).localeCompare(String(b), 'pt-BR');
-
-  const da = new Date(Number(pa[1]), Number(pa[0]) - 1, 1).getTime();
-  const db = new Date(Number(pb[1]), Number(pb[0]) - 1, 1).getTime();
-
-  return da - db;
 }
