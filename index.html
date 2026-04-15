@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Análise de Hig da SCIH - HUC</title>
+    <title>Análise de Higiene das Mãos - SCIH/HUC</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
     <style>
@@ -22,8 +22,12 @@
             box-shadow: 0 20px 25px -5px rgb(16 185 129), 0 8px 10px -6px rgb(16 185 129);
         }
 
+        .card-hover {
+            transition-property: transform, box-shadow, color, background-color, border-color;
+        }
+
         .chart-container {
-            height: 280px;
+            height: 320px;
             position: relative;
         }
 
@@ -40,8 +44,16 @@
         }
 
         select[multiple] {
-            height: 42px;
+            min-height: 136px;
             overflow-y: auto;
+        }
+
+        @media (max-width: 1024px) {
+            .chart-container,
+            .chart-container.chart-tall,
+            .chart-container.chart-xlarge {
+                height: 300px;
+            }
         }
 
         .loading-spinner {
@@ -56,20 +68,20 @@
 <body class="bg-slate-50 font-sans">
     <!-- HEADER INSTITUCIONAL -->
     <div class="bg-white border-b border-slate-200 shadow-sm sticky top-0 z-50">
-        <div class="max-w-screen-2xl mx-auto px-8 py-5 flex items-center justify-between">
+        <div class="max-w-screen-2xl mx-auto px-4 md:px-8 py-5 flex flex-col lg:flex-row lg:items-center gap-4 lg:justify-between">
             <div class="flex items-center gap-x-4">
                 <div class="flex items-center justify-center w-11 h-11 bg-emerald-600 text-white rounded-2xl text-3xl shadow-inner">🧼</div>
                 <div>
                     <h1 class="text-3xl font-semibold tracking-[-0.5px] text-slate-800" style="font-family: 'Space Grotesk', sans-serif;">Higiene das Mãos</h1>
-                    <p class="text-emerald-700 text-sm font-medium tracking-widest -mt-1">ANÁLISE DE HIG • SCIH - HUC</p>
+                    <p class="text-emerald-700 text-sm font-medium tracking-widest -mt-1">ANÁLISE DE HIGIENE DAS MÃOS • SCIH - HUC</p>
                 </div>
                 <div class="ml-3 px-3 py-1 bg-emerald-100 text-emerald-700 text-xs font-semibold rounded-3xl flex items-center gap-x-1">
                     <div class="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></div>
-                    ANÁLISE EM TEMPO REAL
+                    DADOS EM TEMPO REAL
                 </div>
             </div>
 
-            <div class="flex items-center gap-x-8">
+            <div class="flex flex-wrap items-center gap-3 md:gap-x-8">
                 <div onclick="refreshAllData()" class="flex items-center gap-x-2 text-slate-600 hover:text-emerald-700 cursor-pointer text-sm font-medium">
                     <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.058 11H1M12 3v2m0 16v2m9-9H15m-6 0a8 8 0 01-7.714-6.314" />
@@ -90,7 +102,7 @@
         </div>
     </div>
 
-    <div class="max-w-screen-2xl mx-auto px-8 py-8">
+    <div class="max-w-screen-2xl mx-auto px-4 md:px-8 py-8">
 
         <!-- LOADING OVERLAY -->
         <div id="loading-screen" class="fixed inset-0 bg-white/80 backdrop-blur-xl flex items-center justify-center z-[9999] hidden">
@@ -106,7 +118,7 @@
             <div id="kpi-grid" class="grid grid-cols-2 md:grid-cols-4 xl:grid-cols-8 gap-6 mb-10"></div>
 
             <!-- FILTROS COMPACTOS -->
-            <div class="bg-white rounded-3xl shadow-lg border border-slate-100 p-7 mb-10">
+            <div class="bg-white rounded-3xl shadow-lg border border-slate-100 p-5 md:p-7 mb-10">
                 <div class="flex items-center justify-between mb-6">
                     <h2 class="text-xl font-semibold text-slate-800 flex items-center gap-x-2">
                         <span class="text-emerald-600">🔎</span>
@@ -124,7 +136,7 @@
                     </div>
                 </div>
 
-                <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-7 gap-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-7 gap-6">
                     <!-- Período -->
                     <div>
                         <label class="block text-xs font-medium text-slate-500 mb-2">PERÍODO</label>
@@ -198,7 +210,7 @@
 
                 <div class="bg-white rounded-3xl shadow-lg p-6 flex flex-col lg:col-span-2">
                     <div class="flex justify-between items-baseline mb-5">
-                        <h3 class="font-semibold text-slate-800">Análise por Unidade</h3>
+                        <h3 class="font-semibold text-slate-800">Adesão por Unidade</h3>
                     </div>
                     <div class="chart-container chart-tall flex-1"><canvas id="unidadeChart"></canvas></div>
                 </div>
@@ -212,7 +224,7 @@
 
                 <div class="bg-white rounded-3xl shadow-lg p-6 flex flex-col xl:col-span-2">
                     <div class="flex justify-between items-baseline mb-5">
-                        <h3 class="font-semibold text-slate-800">Análise por Momento</h3>
+                        <h3 class="font-semibold text-slate-800">Adesão por Momento</h3>
                     </div>
                     <div class="chart-container chart-xlarge flex-1"><canvas id="momentoChart"></canvas></div>
                 </div>
@@ -577,7 +589,8 @@
                                     const originalLabel = this.getLabelForValue(value);
                                     return wrapLabel(originalLabel, 16);
                                 },
-                                autoSkip: false,
+                                autoSkip: true,
+                                maxTicksLimit: 10,
                                 maxRotation: 0,
                                 minRotation: 0
                             }
@@ -607,7 +620,8 @@
                                     const originalLabel = this.getLabelForValue(value);
                                     return wrapLabel(originalLabel, 18);
                                 },
-                                autoSkip: false,
+                                autoSkip: true,
+                                maxTicksLimit: 12,
                                 maxRotation: 0,
                                 minRotation: 0
                             }
@@ -744,7 +758,7 @@
         function initializeSystem() {
             initTailwind();
             loadData({}); // carrega todos os dados
-            console.log('%c✅ Sistema de Higiene das Mãos - HTML completo carregado com layout corrigido', 'background:#10b981;color:white;padding:2px 6px;border-radius:4px');
+            console.log('%c✅ Sistema de Higiene das Mãos carregado com layout e gráficos otimizados', 'background:#10b981;color:white;padding:2px 6px;border-radius:4px');
         }
 
         window.onload = initializeSystem;
