@@ -39,6 +39,10 @@
             height: 420px;
         }
 
+        .chart-container.chart-xxlarge {
+            height: 560px;
+        }
+
         .kpi-card {
             min-height: 168px;
         }
@@ -51,7 +55,8 @@
         @media (max-width: 1024px) {
             .chart-container,
             .chart-container.chart-tall,
-            .chart-container.chart-xlarge {
+            .chart-container.chart-xlarge,
+            .chart-container.chart-xxlarge {
                 height: 300px;
             }
         }
@@ -123,39 +128,41 @@
 
             <!-- FILTROS COMPACTOS -->
             <div class="bg-white rounded-3xl shadow-lg border border-slate-100 p-5 md:p-7 mb-10">
-                <div class="flex items-center justify-between mb-6">
+                <div class="flex flex-col gap-4 mb-6">
                     <h2 class="text-xl font-semibold text-slate-800 flex items-center gap-x-2">
                         <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="m21 21-4.35-4.35m1.6-5.15a6.75 6.75 0 11-13.5 0 6.75 6.75 0 0113.5 0z" />
                         </svg>
                         Filtros Inteligentes
                     </h2>
-                    <div class="flex gap-x-4">
-                        <button onclick="clearAllFilters()"
-                                class="text-xs font-medium text-slate-400 hover:text-slate-600 flex items-center">
-                            LIMPAR TUDO
-                        </button>
-                        <button onclick="applyCurrentFilters()"
-                                class="px-6 py-2 bg-emerald-700 hover:bg-emerald-800 text-white rounded-2xl text-sm font-semibold">
-                            APLICAR FILTROS
-                        </button>
+
+                    <div class="flex flex-col xl:flex-row xl:items-end xl:justify-between gap-4">
+                        <div class="bg-emerald-50/80 border border-emerald-200 rounded-2xl p-4">
+                            <label class="block text-xs font-semibold tracking-wide text-emerald-700 mb-2">PERÍODO</label>
+                            <div class="flex flex-col sm:flex-row gap-3">
+                                <input id="dataInicio" type="date"
+                                       class="border border-emerald-200 bg-white rounded-2xl px-4 py-3 text-sm focus:outline-none focus:border-emerald-500">
+                                <input id="dataFim" type="date"
+                                       class="border border-emerald-200 bg-white rounded-2xl px-4 py-3 text-sm focus:outline-none focus:border-emerald-500">
+                            </div>
+                        </div>
+
+                        <div class="flex gap-x-4">
+                            <button onclick="clearAllFilters()"
+                                    class="text-xs font-medium text-slate-400 hover:text-slate-600 flex items-center">
+                                LIMPAR TUDO
+                            </button>
+                            <button onclick="applyCurrentFilters()"
+                                    class="px-6 py-2 bg-emerald-700 hover:bg-emerald-800 text-white rounded-2xl text-sm font-semibold">
+                                APLICAR FILTROS
+                            </button>
+                        </div>
                     </div>
                 </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-7 gap-6">
-                    <!-- Período -->
-                    <div class="lg:col-span-2 order-1">
-                        <label class="block text-xs font-medium text-slate-500 mb-2">PERÍODO</label>
-                        <div class="flex gap-3">
-                            <input id="dataInicio" type="date"
-                                   class="flex-1 border border-slate-200 rounded-2xl px-4 py-3 text-sm focus:outline-none focus:border-emerald-400">
-                            <input id="dataFim" type="date"
-                                   class="flex-1 border border-slate-200 rounded-2xl px-4 py-3 text-sm focus:outline-none focus:border-emerald-400">
-                        </div>
-                    </div>
-
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-6">
                     <!-- Unidade -->
-                    <div class="order-2">
+                    <div>
                         <label class="block text-xs font-medium text-slate-500 mb-2">UNIDADE DE INTERNAÇÃO</label>
                         <select id="unidades" multiple
                                 class="w-full border border-slate-200 rounded-2xl px-4 py-3 text-sm focus:outline-none focus:border-emerald-400"></select>
@@ -214,11 +221,11 @@
                     <div class="chart-container flex-1"><canvas id="temporalChart"></canvas></div>
                 </div>
 
-                <div class="bg-white rounded-3xl shadow-lg p-6 flex flex-col lg:col-span-2">
+                <div class="bg-white rounded-3xl shadow-lg p-6 flex flex-col lg:col-span-2 xl:col-span-3">
                     <div class="flex justify-between items-baseline mb-5">
                         <h3 class="font-semibold text-slate-800">Adesão por Unidade</h3>
                     </div>
-                    <div class="chart-container chart-tall flex-1"><canvas id="unidadeChart"></canvas></div>
+                    <div class="chart-container chart-xxlarge flex-1"><canvas id="unidadeChart"></canvas></div>
                 </div>
 
                 <div class="bg-white rounded-3xl shadow-lg p-6 flex flex-col">
@@ -592,7 +599,22 @@
                 options: {
                     ...commonOptions,
                     indexAxis: 'y',
-                    scales: { x: percentScaleX },
+                    layout: {
+                        padding: {
+                            left: 8
+                        }
+                    },
+                    scales: {
+                        x: percentScaleX,
+                        y: {
+                            ticks: {
+                                autoSkip: false,
+                                font: {
+                                    size: 11
+                                }
+                            }
+                        }
+                    },
                     plugins: { legend: { display: false } }
                 }
             });
