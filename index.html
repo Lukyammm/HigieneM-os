@@ -593,7 +593,14 @@
                         legend: { display: false },
                         datalabels: {
                             anchor: 'end',
-                            align: 'top',
+                            align: (context) => {
+                                if (context.dataIndex === 0) return 'right';
+                                if (context.dataIndex === context.dataset.data.length - 1) return 'left';
+                                return 'top';
+                            },
+                            offset: (context) => context.dataIndex === 0 ? 10 : 6,
+                            clamp: true,
+                            clip: true,
                             ...getDataLabelStyle('#0f172a'),
                             font: { weight: '600', size: 20 },
                             formatter: formatDataLabelPercent
