@@ -136,15 +136,25 @@
             <!-- FILTROS COMPACTOS -->
             <div class="bg-white rounded-3xl shadow-lg border border-slate-100 p-5 md:p-7 mb-10">
                 <div class="flex flex-col gap-3 mb-4">
-                    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                    <div class="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-3">
                         <h2 class="text-xl font-semibold text-slate-800 flex items-center gap-x-2">
                             <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="m21 21-4.35-4.35m1.6-5.15a6.75 6.75 0 11-13.5 0 6.75 6.75 0 0113.5 0z" />
                             </svg>
-                            Filtros Inteligentes
+                            Filtros
                         </h2>
 
-                        <div class="flex gap-x-4">
+                        <div class="bg-emerald-50/80 border border-emerald-200 rounded-2xl p-3">
+                            <label class="block text-xs font-semibold tracking-wide text-emerald-700 mb-2">PERÍODO</label>
+                            <div class="flex flex-col sm:flex-row gap-2">
+                                <input id="dataInicio" type="date"
+                                       class="border border-emerald-200 bg-white rounded-2xl px-4 py-2 text-sm focus:outline-none focus:border-emerald-500">
+                                <input id="dataFim" type="date"
+                                       class="border border-emerald-200 bg-white rounded-2xl px-4 py-2 text-sm focus:outline-none focus:border-emerald-500">
+                            </div>
+                        </div>
+
+                        <div class="flex gap-x-4 items-center">
                             <button onclick="clearAllFilters()"
                                     class="text-xs font-medium text-slate-400 hover:text-slate-600 flex items-center">
                                 LIMPAR TUDO
@@ -156,15 +166,6 @@
                         </div>
                     </div>
 
-                    <div class="bg-emerald-50/80 border border-emerald-200 rounded-2xl p-3">
-                        <label class="block text-xs font-semibold tracking-wide text-emerald-700 mb-2">PERÍODO</label>
-                        <div class="flex flex-col sm:flex-row gap-2">
-                            <input id="dataInicio" type="date"
-                                   class="border border-emerald-200 bg-white rounded-2xl px-4 py-2 text-sm focus:outline-none focus:border-emerald-500">
-                            <input id="dataFim" type="date"
-                                   class="border border-emerald-200 bg-white rounded-2xl px-4 py-2 text-sm focus:outline-none focus:border-emerald-500">
-                        </div>
-                    </div>
                 </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
