@@ -2,6 +2,8 @@
 
 const SPREADSHEET_ID = '1Z6X27MIUZ87czGEKyZmJvnqxsarmSEmSt4ifYpp2yMk';  // ← Planilha que você enviou
 const SHEET_NAME = 'Respostas ao formulário 1';
+const MIN_REQUIRED_COLUMNS = 5;
+const LOWERCASE_CONNECTORS = new Set(['de', 'da', 'do', 'das', 'dos', 'e', 'em', 'na', 'no', 'nas', 'nos', 'a', 'o']);
 
 function doGet() {
   return HtmlService.createTemplateFromFile('index')
@@ -14,16 +16,7 @@ function doGet() {
 // ====================== FUNÇÃO PRINCIPAL ======================
 function getAnalysis(filters = {}) {
   try {
-    // Abre a planilha específica pelo ID (mais seguro e confiável)
-    const ss = SpreadsheetApp.openById(SPREADSHEET_ID);
-    const sheet = ss.getSheetByName(SHEET_NAME);
-    
-    if (!sheet) {
-      throw new Error(`Aba "${SHEET_NAME}" não encontrada na planilha informada.`);
-    }
-
-    const rawData = sheet.getDataRange().getValues();
-    const records = normalizeRecords(rawData);
+    const records = loadNormalizedRecords();
     const filteredRecords = applyFilters(records, filters);
     
     const kpis = buildKPIs(filteredRecords);
@@ -50,6 +43,22 @@ function getAnalysis(filters = {}) {
   }
 }
 
+function loadNormalizedRecords() {
+  const ss = SpreadsheetApp.openById(SPREADSHEET_ID);
+  const sheet = ss.getSheetByName(SHEET_NAME);
+
+  if (!sheet) {
+    throw new Error(`Aba "${SHEET_NAME}" não encontrada na planilha informada.`);
+  }
+
+  const lastRow = sheet.getLastRow();
+  if (lastRow < 2) return [];
+
+  const lastColumn = Math.max(MIN_REQUIRED_COLUMNS, sheet.getLastColumn());
+  const rawData = sheet.getRange(1, 1, lastRow, lastColumn).getValues();
+  return normalizeRecords(rawData);
+}
+
 // ====================== NORMALIZAR REGISTROS ======================
 function normalizeRecords(rawData) {
   if (rawData.length < 2) return [];
@@ -73,8 +82,9 @@ function normalizeRecords(rawData) {
     
     const acao = acaoRaw || 'Não informado';
     
-    const situacao = determineSituacao(acaoRaw);
-    const metodo = determineMetodo(acaoRaw);
+    const actionClassification = classifyAction(acaoRaw);
+    const situacao = actionClassification.situacao;
+    const metodo = actionClassification.metodo;
     
     const preenchimento = (unidade !== 'Não informado' && 
                            categoria !== 'Não informado' && 
@@ -105,89 +115,91 @@ function toDisplayCase(str) {
 
   if (!normalized) return 'Não informado';
 
-  const lowerWords = new Set(['de', 'da', 'do', 'das', 'dos', 'e', 'em', 'na', 'no', 'nas', 'nos', 'a', 'o']);
-
   return normalized
     .split(' ')
     .map((word, idx) => {
       if (!word) return word;
-      if (lowerWords.has(word) && idx > 0) return word;
+      if (LOWERCASE_CONNECTORS.has(word) && idx > 0) return word;
       return word.charAt(0).toLocaleUpperCase('pt-BR') + word.slice(1);
     })
     .join(' ');
 }
 
 // ====================== CLASSIFICAÇÃO ======================
-function determineSituacao(acao) {
-  if (!acao || acao.trim() === '') return 'Incompleto';
-  
-  const lower = acao.toLowerCase()
+function normalizeActionText(acao) {
+  return String(acao || '')
+    .trim()
+    .toLocaleLowerCase('pt-BR')
     .normalize('NFD')
     .replace(/[\u0300-\u036f]/g, '');
-  
-  if (lower.includes('nao realizado') || lower.includes('não realizado') || 
-      lower.includes('nao foi') || lower.includes('não foi') || 
-      lower.includes('omit') || lower.includes('recus')) {
-    return 'Não realizado';
-  }
-  
-  if (lower.includes('realizado')) {
-    return 'Realizado';
-  }
-  
-  return 'Incompleto';
 }
 
-function determineMetodo(acao) {
-  if (!acao || acao.trim() === '') return 'Não informado';
-  
-  const lower = acao.toLowerCase()
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '');
-  
-  if (lower.includes('nao realizado') || lower.includes('não realizado')) {
-    return 'Não realizado';
+function classifyAction(acao) {
+  const normalized = normalizeActionText(acao);
+
+  if (!normalized) {
+    return { situacao: 'Incompleto', metodo: 'Não informado' };
   }
-  
-  if (lower.includes('agua') || lower.includes('água') || 
-      lower.includes('sabao') || lower.includes('sabonete') || 
-      lower.includes('lavagem') || lower.includes('lavou')) {
-    return 'Água e sabonete';
+
+  const isNotDone = normalized.includes('nao realizado') ||
+    normalized.includes('nao foi') ||
+    normalized.includes('omit') ||
+    normalized.includes('recus');
+
+  if (isNotDone) {
+    return { situacao: 'Não realizado', metodo: 'Não realizado' };
   }
-  
-  if (lower.includes('alcool') || lower.includes('álcool') || 
-      lower.includes('friccao') || lower.includes('fricção') || 
-      lower.includes('gel')) {
-    return 'Fricção com álcool';
+
+  const usedSoapAndWater = normalized.includes('agua') ||
+    normalized.includes('sabao') ||
+    normalized.includes('sabonete') ||
+    normalized.includes('lavagem') ||
+    normalized.includes('lavou');
+
+  if (usedSoapAndWater) {
+    return { situacao: 'Realizado', metodo: 'Água e sabonete' };
   }
-  
-  if (lower.includes('realizado')) {
-    return 'Realizado sem método detalhado';
+
+  const usedAlcohol = normalized.includes('alcool') ||
+    normalized.includes('friccao') ||
+    normalized.includes('gel');
+
+  if (usedAlcohol) {
+    return { situacao: 'Realizado', metodo: 'Fricção com álcool' };
   }
-  
-  return 'Não informado';
+
+  if (normalized.includes('realizado')) {
+    return { situacao: 'Realizado', metodo: 'Realizado sem método detalhado' };
+  }
+
+  return { situacao: 'Incompleto', metodo: 'Não informado' };
 }
 
 // ====================== APLICAR FILTROS ======================
 function applyFilters(records, filters) {
+  const startDate = filters.dataInicio ? new Date(filters.dataInicio) : null;
+  const endDate = filters.dataFim ? new Date(filters.dataFim) : null;
+
+  if (endDate) {
+    endDate.setHours(23, 59, 59, 999);
+  }
+
+  const units = filters.unidades?.length ? new Set(filters.unidades) : null;
+  const categories = filters.categorias?.length ? new Set(filters.categorias) : null;
+  const moments = filters.momentos?.length ? new Set(filters.momentos) : null;
+  const situations = filters.situacoes?.length ? new Set(filters.situacoes) : null;
+  const methods = filters.metodos?.length ? new Set(filters.metodos) : null;
+  const fillStatus = filters.preenchimentos?.length ? new Set(filters.preenchimentos) : null;
+
   return records.filter(record => {
-    if (filters.dataInicio) {
-      if (record.data < new Date(filters.dataInicio)) return false;
-    }
-    if (filters.dataFim) {
-      const fim = new Date(filters.dataFim);
-      fim.setHours(23, 59, 59, 999);
-      if (record.data > fim) return false;
-    }
-    
-    const check = (list, value) => !list || list.length === 0 || list.includes(value);
-    
-    if (!check(filters.unidades, record.unidade)) return false;
-    if (!check(filters.categorias, record.categoria)) return false;
-    if (!check(filters.momentos, record.momento)) return false;
-    if (!check(filters.situacoes, record.situacao)) return false;
-    if (!check(filters.metodos, record.metodo)) return false;
-    if (!check(filters.preenchimentos, record.preenchimento)) return false;
+    if (startDate && record.data < startDate) return false;
+    if (endDate && record.data > endDate) return false;
+    if (units && !units.has(record.unidade)) return false;
+    if (categories && !categories.has(record.categoria)) return false;
+    if (moments && !moments.has(record.momento)) return false;
+    if (situations && !situations.has(record.situacao)) return false;
+    if (methods && !methods.has(record.metodo)) return false;
+    if (fillStatus && !fillStatus.has(record.preenchimento)) return false;
     
     return true;
   });
@@ -196,16 +208,34 @@ function applyFilters(records, filters) {
 // ====================== CONSTRUIR KPIs ======================
 function buildKPIs(filtered) {
   const total = filtered.length;
-  if (total === 0) return { totalObservacoes: 0, totalRealizado: 0, totalNaoRealizado: 0, totalIncompleto: 0, adesaoGeral: 0, taxaNaoRealizacao: 0, taxaPreenchimentoCompleto: 0, taxaPreenchimentoIncompleto: 0 };
-  
-  const realizado = filtered.filter(r => r.situacao === 'Realizado').length;
-  const naoRealizado = filtered.filter(r => r.situacao === 'Não realizado').length;
-  const incompleto = filtered.filter(r => r.situacao === 'Incompleto').length;
+  if (total === 0) {
+    return {
+      totalObservacoes: 0,
+      totalRealizado: 0,
+      totalNaoRealizado: 0,
+      totalIncompleto: 0,
+      adesaoGeral: 0,
+      taxaNaoRealizacao: 0,
+      taxaPreenchimentoCompleto: 0,
+      taxaPreenchimentoIncompleto: 0
+    };
+  }
+
+  let realizado = 0;
+  let naoRealizado = 0;
+  let incompleto = 0;
+  let completos = 0;
+
+  for (const record of filtered) {
+    if (record.situacao === 'Realizado') realizado++;
+    else if (record.situacao === 'Não realizado') naoRealizado++;
+    else incompleto++;
+
+    if (record.preenchimento === 'Completo') completos++;
+  }
   
   const adesaoGeral = Math.round((realizado / total) * 100) || 0;
   const taxaNaoRealizacao = Math.round((naoRealizado / total) * 100) || 0;
-  
-  const completos = filtered.filter(r => r.preenchimento === 'Completo').length;
   const taxaPreenchimentoCompleto = Math.round((completos / total) * 100) || 0;
   
   return {
