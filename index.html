@@ -54,8 +54,37 @@
             min-height: 168px;
         }
 
-        select[multiple] {
-            min-height: 136px;
+        .filter-collapse {
+            overflow: hidden;
+            max-height: 0;
+            opacity: 0;
+            transition: max-height 0.35s ease, opacity 0.25s ease;
+        }
+
+        .filter-collapse.expanded {
+            max-height: 1200px;
+            opacity: 1;
+        }
+
+        .filter-toggle svg {
+            transition: transform 0.25s ease;
+        }
+
+        .filter-toggle[aria-expanded="true"] svg {
+            transform: rotate(180deg);
+        }
+
+        .multi-filter-panel {
+            border: 1px solid #e2e8f0;
+            border-radius: 1rem;
+            background: #fff;
+            min-height: 170px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .multi-filter-options {
+            max-height: 140px;
             overflow-y: auto;
         }
 
@@ -135,15 +164,30 @@
 
             <!-- FILTROS COMPACTOS -->
             <div class="bg-white rounded-3xl shadow-lg border border-slate-100 p-5 md:p-7 mb-10">
-                <div class="flex flex-col gap-3 mb-4">
-                    <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3 w-full">
-                        <h2 class="text-xl font-semibold text-slate-800 flex items-center gap-x-2">
+                <div class="flex flex-col gap-3 mb-3">
+                    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3 w-full">
+                        <button id="filters-toggle"
+                                type="button"
+                                class="filter-toggle inline-flex items-center gap-2 text-xl font-semibold text-slate-800 text-left"
+                                aria-expanded="true"
+                                onclick="toggleFiltersPanel()">
                             <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="m21 21-4.35-4.35m1.6-5.15a6.75 6.75 0 11-13.5 0 6.75 6.75 0 0113.5 0z" />
                             </svg>
                             Filtros
-                        </h2>
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
+                            </svg>
+                        </button>
 
+                        <div class="text-xs text-slate-500">
+                            <span id="filters-summary">Nenhum filtro selecionado</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="filters-collapse" class="filter-collapse expanded">
+                    <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3 w-full mb-6">
                         <div class="p-0 lg:flex-1">
                             <div class="flex flex-wrap items-center justify-start lg:justify-center gap-2">
                                 <label class="text-xs font-semibold tracking-wide text-emerald-700 mr-1">PERÍODO</label>
@@ -166,48 +210,37 @@
                         </div>
                     </div>
 
-                </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
+                        <div>
+                            <label class="block text-xs font-medium text-slate-500 mb-2">UNIDADE DE INTERNAÇÃO</label>
+                            <div id="unidades-panel" class="multi-filter-panel"></div>
+                            <select id="unidades" multiple class="hidden"></select>
+                        </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
-                    <!-- Unidade -->
-                    <div>
-                        <label class="block text-xs font-medium text-slate-500 mb-2">UNIDADE DE INTERNAÇÃO</label>
-                        <select id="unidades" multiple
-                                class="w-full border border-slate-200 rounded-2xl px-4 py-3 text-sm focus:outline-none focus:border-emerald-400"></select>
+                        <div>
+                            <label class="block text-xs font-medium text-slate-500 mb-2">CATEGORIA PROFISSIONAL</label>
+                            <div id="categorias-panel" class="multi-filter-panel"></div>
+                            <select id="categorias" multiple class="hidden"></select>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-medium text-slate-500 mb-2">MOMENTO DE REALIZAÇÃO</label>
+                            <div id="momentos-panel" class="multi-filter-panel"></div>
+                            <select id="momentos" multiple class="hidden"></select>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-medium text-slate-500 mb-2">SITUAÇÃO</label>
+                            <div id="situacoes-panel" class="multi-filter-panel"></div>
+                            <select id="situacoes" multiple class="hidden"></select>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-medium text-slate-500 mb-2">MÉTODO</label>
+                            <div id="metodos-panel" class="multi-filter-panel"></div>
+                            <select id="metodos" multiple class="hidden"></select>
+                        </div>
                     </div>
-
-                    <!-- Categoria -->
-                    <div>
-                        <label class="block text-xs font-medium text-slate-500 mb-2">CATEGORIA PROFISSIONAL</label>
-                        <select id="categorias" multiple
-                                class="w-full border border-slate-200 rounded-2xl px-4 py-3 text-sm focus:outline-none focus:border-emerald-400"></select>
-                    </div>
-
-                    <!-- Momento -->
-                    <div>
-                        <label class="block text-xs font-medium text-slate-500 mb-2">MOMENTO DE REALIZAÇÃO</label>
-                        <select id="momentos" multiple
-                                class="w-full border border-slate-200 rounded-2xl px-4 py-3 text-sm focus:outline-none focus:border-emerald-400"></select>
-                    </div>
-
-                    <!-- Situação -->
-                    <div>
-                        <label class="block text-xs font-medium text-slate-500 mb-2">SITUAÇÃO</label>
-                        <select id="situacoes" multiple
-                                class="w-full border border-slate-200 rounded-2xl px-4 py-3 text-sm focus:outline-none focus:border-emerald-400">
-                            <option value="Realizado">Realizado</option>
-                            <option value="Não realizado">Não realizado</option>
-                            <option value="Incompleto">Incompleto</option>
-                        </select>
-                    </div>
-
-                    <!-- Método -->
-                    <div>
-                        <label class="block text-xs font-medium text-slate-500 mb-2">MÉTODO</label>
-                        <select id="metodos" multiple
-                                class="w-full border border-slate-200 rounded-2xl px-4 py-3 text-sm focus:outline-none focus:border-emerald-400"></select>
-                    </div>
-
                 </div>
             </div>
 
@@ -322,6 +355,13 @@
         let chartInstances = {};
         let chartPluginsRegistered = false;
         const MAX_TABLE_ROWS_RENDER = 1000;
+        const FILTER_MULTSELECT_CONFIG = [
+            { id: 'unidades', panelId: 'unidades-panel' },
+            { id: 'categorias', panelId: 'categorias-panel' },
+            { id: 'momentos', panelId: 'momentos-panel' },
+            { id: 'situacoes', panelId: 'situacoes-panel' },
+            { id: 'metodos', panelId: 'metodos-panel' }
+        ];
 
         // ====================== CARREGAR DADOS ======================
         function loadData(filters = {}) {
@@ -449,10 +489,81 @@
             const momSel = document.getElementById('momentos');
             momSel.innerHTML = options.momentos.map(m => `<option value="${m}">${m}</option>`).join('');
 
+            const sitSel = document.getElementById('situacoes');
+            const situacoesFixas = ['Realizado', 'Não realizado', 'Incompleto'];
+            sitSel.innerHTML = situacoesFixas.map(s => `<option value="${s}">${s}</option>`).join('');
+
             // Métodos fixos
             const metSel = document.getElementById('metodos');
             const metodosFixos = ['Água e sabonete','Fricção com álcool','Não realizado','Realizado sem método detalhado','Não informado'];
             metSel.innerHTML = metodosFixos.map(m => `<option value="${m}">${m}</option>`).join('');
+
+            initializeMultiSelectPanels();
+            updateFiltersSummary();
+        }
+
+        function initializeMultiSelectPanels() {
+            FILTER_MULTSELECT_CONFIG.forEach(config => renderMultiSelectPanel(config.id, config.panelId));
+        }
+
+        function renderMultiSelectPanel(selectId, panelId) {
+            const selectEl = document.getElementById(selectId);
+            const panelEl = document.getElementById(panelId);
+            if (!selectEl || !panelEl) return;
+
+            const options = Array.from(selectEl.options);
+            const optionsHtml = options.map(option => `
+                <label class="flex items-center gap-2 text-sm text-slate-700 hover:bg-slate-50 px-2 py-1 rounded-lg cursor-pointer">
+                    <input type="checkbox"
+                           data-select-id="${selectId}"
+                           value="${option.value}"
+                           ${option.selected ? 'checked' : ''}
+                           class="h-4 w-4 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500">
+                    <span class="leading-tight">${option.text}</span>
+                </label>
+            `).join('');
+
+            panelEl.innerHTML = `
+                <div class="px-3 py-2 border-b border-slate-100 text-[11px] font-medium text-slate-500 flex items-center justify-between">
+                    <button type="button" class="hover:text-emerald-700" onclick="selectAllFilterOptions('${selectId}')">Selecionar todos</button>
+                    <button type="button" class="hover:text-slate-700" onclick="clearFilterOptions('${selectId}')">Limpar</button>
+                </div>
+                <div class="multi-filter-options p-2 space-y-1">${optionsHtml || '<p class="text-xs text-slate-400 px-2 py-1">Sem opções disponíveis.</p>'}</div>
+            `;
+
+            panelEl.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
+                checkbox.addEventListener('change', () => {
+                    syncSelectFromCheckboxes(selectId);
+                    updateFiltersSummary();
+                });
+            });
+        }
+
+        function syncSelectFromCheckboxes(selectId) {
+            const selectEl = document.getElementById(selectId);
+            if (!selectEl) return;
+            const selectedValues = new Set(Array.from(document.querySelectorAll(`input[data-select-id="${selectId}"]:checked`)).map(input => input.value));
+            Array.from(selectEl.options).forEach(option => {
+                option.selected = selectedValues.has(option.value);
+            });
+        }
+
+        function selectAllFilterOptions(selectId) {
+            const checkboxes = document.querySelectorAll(`input[data-select-id="${selectId}"]`);
+            checkboxes.forEach(checkbox => {
+                checkbox.checked = true;
+            });
+            syncSelectFromCheckboxes(selectId);
+            updateFiltersSummary();
+        }
+
+        function clearFilterOptions(selectId) {
+            const checkboxes = document.querySelectorAll(`input[data-select-id="${selectId}"]`);
+            checkboxes.forEach(checkbox => {
+                checkbox.checked = false;
+            });
+            syncSelectFromCheckboxes(selectId);
+            updateFiltersSummary();
         }
 
         // ====================== PEGAR FILTROS ======================
@@ -474,12 +585,45 @@
             loadData(getCurrentFilters());
         }
 
+        function toggleFiltersPanel(forceState) {
+            const collapseEl = document.getElementById('filters-collapse');
+            const toggleBtn = document.getElementById('filters-toggle');
+            if (!collapseEl || !toggleBtn) return;
+
+            const shouldExpand = typeof forceState === 'boolean'
+                ? forceState
+                : !collapseEl.classList.contains('expanded');
+
+            collapseEl.classList.toggle('expanded', shouldExpand);
+            toggleBtn.setAttribute('aria-expanded', String(shouldExpand));
+        }
+
+        function updateFiltersSummary() {
+            const filters = getCurrentFilters();
+            const selectedTotal = ['unidades', 'categorias', 'momentos', 'situacoes', 'metodos']
+                .reduce((total, key) => total + (filters[key]?.length || 0), 0);
+            const hasDateRange = Boolean(filters.dataInicio || filters.dataFim);
+            const summary = document.getElementById('filters-summary');
+            if (!summary) return;
+
+            if (!selectedTotal && !hasDateRange) {
+                summary.textContent = 'Nenhum filtro selecionado';
+                return;
+            }
+
+            const parts = [];
+            if (selectedTotal) parts.push(`${selectedTotal} opção(ões) marcada(s)`);
+            if (hasDateRange) parts.push('período definido');
+            summary.textContent = parts.join(' • ');
+        }
+
         function clearAllFilters() {
             document.getElementById('dataInicio').value = '';
             document.getElementById('dataFim').value = '';
             ['unidades','categorias','momentos','situacoes','metodos'].forEach(id => {
-                document.getElementById(id).selectedIndex = -1;
+                clearFilterOptions(id);
             });
+            updateFiltersSummary();
             loadData({});
         }
 
@@ -911,6 +1055,9 @@
         // ====================== INICIALIZAÇÃO ======================
         function initializeSystem() {
             initTailwind();
+            document.getElementById('dataInicio').addEventListener('change', updateFiltersSummary);
+            document.getElementById('dataFim').addEventListener('change', updateFiltersSummary);
+            toggleFiltersPanel(window.innerWidth >= 768);
             loadData({}); // carrega todos os dados
             console.log('Sistema de Higiene das Mãos carregado com layout e gráficos otimizados.');
         }
