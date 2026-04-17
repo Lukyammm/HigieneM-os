@@ -12,12 +12,6 @@
 
         :root { --tw-color-primary: #10b981; }
 
-        * {
-            transition-property: color, background-color, border-color, text-decoration-color, fill, stroke;
-            transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
-            transition-duration: 150ms;
-        }
-
         .card-hover:hover {
             transform: translateY(-3px);
             box-shadow: 0 20px 25px -5px rgb(16 185 129), 0 8px 10px -6px rgb(16 185 129);
@@ -334,6 +328,8 @@
         let allRecords = null;
         let currentResponse = null;
         let chartInstances = {};
+        let chartPluginsRegistered = false;
+        const MAX_TABLE_ROWS_RENDER = 1000;
 
         // ====================== CARREGAR DADOS ======================
         function loadData(filters = {}) {
@@ -498,8 +494,9 @@
 
         // ====================== GRÁFICOS ======================
         function renderAllCharts(chartData) {
-            if (window.ChartDataLabels) {
+            if (!chartPluginsRegistered && window.ChartDataLabels) {
                 Chart.register(ChartDataLabels);
+                chartPluginsRegistered = true;
             }
 
             Object.keys(chartInstances).forEach(key => {
@@ -814,10 +811,12 @@
         function renderDetailTable(tableData) {
             const tbody = document.getElementById('table-body');
             const info = document.getElementById('table-info');
+            const totalRows = tableData.length;
+            const visibleRows = tableData.slice(0, MAX_TABLE_ROWS_RENDER);
 
-            info.innerHTML = `${tableData.length} registros • Total base: ${allRecords}`;
+            info.innerHTML = `${visibleRows.length} de ${totalRows} registros • Total base: ${allRecords}`;
 
-            tbody.innerHTML = tableData.map(row => `
+            tbody.innerHTML = visibleRows.map(row => `
                 <tr class="hover:bg-emerald-50">
                     <td class="px-8 py-4 whitespace-nowrap text-xs font-medium">${row.data}</td>
                     <td class="px-8 py-4">${row.unidade}</td>
@@ -840,6 +839,10 @@
                     </td>
                 </tr>
             `).join('');
+
+            if (totalRows > MAX_TABLE_ROWS_RENDER) {
+                tbody.innerHTML += `<tr><td colspan="8" class="px-8 py-4 text-center text-amber-700 bg-amber-50 text-xs font-medium">Exibindo os primeiros ${MAX_TABLE_ROWS_RENDER} registros para manter a interface rápida. O CSV exporta todos os registros filtrados.</td></tr>`;
+            }
 
             if (tableData.length === 0) {
                 tbody.innerHTML = `<tr><td colspan="8" class="px-8 py-12 text-center text-slate-400">Nenhum registro encontrado com os filtros aplicados.</td></tr>`;
