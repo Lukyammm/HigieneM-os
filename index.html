@@ -528,6 +528,16 @@
 
             const formatPercentTicks = (value) => `${Math.round(Number(value) || 0)}%`;
             const formatDataLabelPercent = (value) => `${Math.round(Number(value) || 0)}%`;
+            const getDataLabelStyle = (textColor) => {
+                const normalizedColor = (textColor || '').toLowerCase();
+                const isWhiteText = normalizedColor === '#ffffff' || normalizedColor === '#fff' || normalizedColor === 'white';
+
+                return {
+                    color: textColor,
+                    textStrokeColor: isWhiteText ? '#0f172a' : '#ffffff',
+                    textStrokeWidth: 3
+                };
+            };
             const percentScaleY = {
                 beginAtZero: true,
                 min: 0,
@@ -587,7 +597,7 @@
                         datalabels: {
                             anchor: 'end',
                             align: 'top',
-                            color: '#0f172a',
+                            ...getDataLabelStyle('#0f172a'),
                             font: { weight: '600', size: 20 },
                             formatter: formatDataLabelPercent
                         }
@@ -630,7 +640,7 @@
                     plugins: {
                         legend: { display: false },
                         datalabels: {
-                            color: '#ffffff',
+                            ...getDataLabelStyle('#ffffff'),
                             font: { weight: '700', size: 20 },
                             formatter: formatDataLabelPercent
                         }
@@ -670,7 +680,7 @@
                     plugins: {
                         legend: { display: false },
                         datalabels: {
-                            color: '#ffffff',
+                            ...getDataLabelStyle('#ffffff'),
                             font: { weight: '700', size: 20 },
                             formatter: formatDataLabelPercent
                         }
@@ -711,7 +721,7 @@
                         datalabels: {
                             anchor: 'end',
                             align: 'top',
-                            color: '#0f172a',
+                            ...getDataLabelStyle('#0f172a'),
                             font: { weight: '600', size: 20 },
                             formatter: formatDataLabelPercent
                         }
@@ -741,7 +751,7 @@
                             }
                         },
                         datalabels: {
-                            color: '#ffffff',
+                            ...getDataLabelStyle('#ffffff'),
                             font: { weight: '700', size: 20 },
                             formatter: (value, context) => {
                                 const total = context.dataset.data.reduce((sum, item) => sum + item, 0);
@@ -775,7 +785,7 @@
                             }
                         },
                         datalabels: {
-                            color: '#ffffff',
+                            ...getDataLabelStyle('#ffffff'),
                             font: { weight: '700', size: 20 },
                             formatter: (value, context) => {
                                 const total = context.dataset.data.reduce((sum, item) => sum + item, 0);
