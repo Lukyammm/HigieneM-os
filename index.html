@@ -588,7 +588,7 @@
                             anchor: 'end',
                             align: 'top',
                             color: '#0f172a',
-                            font: { weight: '600', size: 10 },
+                            font: { weight: '600', size: 20 },
                             formatter: formatDataLabelPercent
                         }
                     }
@@ -603,7 +603,7 @@
                     datasets: [{
                         label: '% Adesão',
                         data: chartData.porUnidade.adesaoPercent,
-                        backgroundColor: '#10b981',
+                        backgroundColor: '#047857',
                         borderRadius: 6
                     }]
                 },
@@ -627,7 +627,14 @@
                             }
                         }
                     },
-                    plugins: { legend: { display: false } }
+                    plugins: {
+                        legend: { display: false },
+                        datalabels: {
+                            color: '#ffffff',
+                            font: { weight: '700', size: 20 },
+                            formatter: formatDataLabelPercent
+                        }
+                    }
                 }
             });
 
@@ -639,7 +646,7 @@
                     datasets: [{
                         label: '% Adesão',
                         data: chartData.porCategoria.adesaoPercent,
-                        backgroundColor: '#0ea5e9'
+                        backgroundColor: '#0369a1'
                     }]
                 },
                 options: {
@@ -660,7 +667,14 @@
                             }
                         }
                     },
-                    plugins: { legend: { display: false } }
+                    plugins: {
+                        legend: { display: false },
+                        datalabels: {
+                            color: '#ffffff',
+                            font: { weight: '700', size: 20 },
+                            formatter: formatDataLabelPercent
+                        }
+                    }
                 }
             });
 
@@ -698,7 +712,7 @@
                             anchor: 'end',
                             align: 'top',
                             color: '#0f172a',
-                            font: { weight: '600', size: 10 },
+                            font: { weight: '600', size: 20 },
                             formatter: formatDataLabelPercent
                         }
                     }
@@ -728,7 +742,7 @@
                         },
                         datalabels: {
                             color: '#ffffff',
-                            font: { weight: '700', size: 10 },
+                            font: { weight: '700', size: 20 },
                             formatter: (value, context) => {
                                 const total = context.dataset.data.reduce((sum, item) => sum + item, 0);
                                 if (!total) return '0%';
@@ -762,7 +776,7 @@
                         },
                         datalabels: {
                             color: '#ffffff',
-                            font: { weight: '700', size: 10 },
+                            font: { weight: '700', size: 20 },
                             formatter: (value, context) => {
                                 const total = context.dataset.data.reduce((sum, item) => sum + item, 0);
                                 if (!total) return '0%';
