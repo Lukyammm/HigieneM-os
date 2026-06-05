@@ -338,7 +338,7 @@ function buildPieData(filtered, key) {
     const metodoOrder = ['Água e sabonete', 'Fricção com álcool', 'Não realizado', 'Realizado sem método detalhado', 'Não informado'];
     labels = metodoOrder.filter(label => counts[label] !== undefined);
   } else if (key === 'dispensadores' || key === 'adornos') {
-    const conformityOrder = ['Conforme', 'Não conforme', 'Não se aplica', 'Não informado'];
+    const conformityOrder = ['Conforme', 'Não conforme'];
     labels = conformityOrder.filter(label => counts[label] !== undefined);
   } else {
     labels = Object.keys(counts);

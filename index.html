@@ -39,7 +39,7 @@
         }
 
         .chart-container.chart-categoria {
-            min-height: 420px;
+            min-height: 840px;
         }
 
         .chart-container.chart-distribuicao {
@@ -51,7 +51,7 @@
         }
 
         .chart-container.chart-xxlarge {
-            height: 560px;
+            height: 1120px;
         }
 
         .kpi-card {
@@ -95,9 +95,16 @@
         @media (max-width: 1024px) {
             .chart-container,
             .chart-container.chart-tall,
-            .chart-container.chart-xlarge,
-            .chart-container.chart-xxlarge {
+            .chart-container.chart-xlarge {
                 height: 300px;
+            }
+
+            .chart-container.chart-xxlarge {
+                height: 600px;
+            }
+
+            .chart-container.chart-categoria {
+                min-height: 600px;
             }
         }
 
@@ -948,7 +955,7 @@
                     labels: chartData.distribuicaoDispensadores.labels,
                     datasets: [{
                         data: chartData.distribuicaoDispensadores.data,
-                        backgroundColor: ['#10b981', '#f43f5e', '#94a3b8', '#64748b']
+                        backgroundColor: ['#10b981', '#f43f5e']
                     }]
                 },
                 options: conformityChartOptions
@@ -961,7 +968,7 @@
                     labels: chartData.distribuicaoAdornos.labels,
                     datasets: [{
                         data: chartData.distribuicaoAdornos.data,
-                        backgroundColor: ['#10b981', '#f43f5e', '#94a3b8', '#64748b']
+                        backgroundColor: ['#10b981', '#f43f5e']
                     }]
                 },
                 options: conformityChartOptions
