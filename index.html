@@ -11,71 +11,112 @@
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Space+Grotesk:wght@500;600;700&amp;display=swap');
 
         :root {
-            --brand-50:#ecfdf5;
-            --brand-100:#d1fae5;
-            --brand-500:#10b981;
-            --brand-600:#059669;
-            --brand-700:#047857;
-            --ink:#0f172a;
-            --line:#e8edf2;
+            --brand-500: #10b981;
+            --brand-600: #059669;
+            --brand-700: #047857;
+            --line: #e8edf2;
         }
 
         html { scroll-behavior: smooth; }
 
+        /* Background com textura de grid pontilhado */
         body {
-            background:
-                radial-gradient(1200px 500px at 100% -10%, rgba(16,185,129,0.05), transparent 60%),
-                #f5f7fa;
+            background-color: #f4f6f9;
+            background-image:
+                radial-gradient(circle, #cbd5e1 1px, transparent 1px),
+                radial-gradient(1400px 600px at 110% -5%, rgba(16,185,129,0.06), transparent 55%);
+            background-size: 28px 28px, 100% 100%;
             color: #1e293b;
             -webkit-font-smoothing: antialiased;
             -moz-osx-font-smoothing: grayscale;
         }
 
-        /* Cartão base — superfície neutra com borda discreta */
+        /* Header com linha gradiente na base */
+        .header-gradient-line {
+            background: linear-gradient(90deg, var(--brand-600), rgba(5,150,105,0) 60%);
+            height: 2px;
+        }
+
+        /* Card base */
         .card {
             background: #ffffff;
             border: 1px solid var(--line);
             border-radius: 1rem;
-            box-shadow: 0 1px 2px 0 rgba(15, 23, 42, 0.04);
+            box-shadow: 0 1px 3px 0 rgba(15,23,42,0.05), 0 1px 2px -1px rgba(15,23,42,0.05);
         }
 
         .card-hover {
             transition: transform .22s ease, box-shadow .22s ease, border-color .22s ease;
         }
-
         .card-hover:hover {
             transform: translateY(-2px);
-            border-color: #dbe3ec;
-            box-shadow: 0 14px 30px -16px rgba(15, 23, 42, 0.25);
+            border-color: #d1dae4;
+            box-shadow: 0 12px 28px -14px rgba(15,23,42,0.22);
         }
 
-        /* Acento vertical para títulos de seção */
+        /* Borda-status lateral nos KPI cards */
+        .kpi-card { min-height: 142px; position: relative; overflow: hidden; }
+        .kpi-card::before {
+            content: '';
+            position: absolute;
+            left: 0; top: 0; bottom: 0;
+            width: 4px;
+            border-radius: 1rem 0 0 1rem;
+        }
+        .kpi-card.status-neutral::before  { background: #cbd5e1; }
+        .kpi-card.status-success::before  { background: linear-gradient(180deg, #10b981, #047857); }
+        .kpi-card.status-warning::before  { background: linear-gradient(180deg, #f59e0b, #d97706); }
+        .kpi-card.status-danger::before   { background: linear-gradient(180deg, #f43f5e, #be123c); }
+
+        /* Acento vertical */
         .accent-bar {
             width: 4px;
             border-radius: 9999px;
             background: linear-gradient(180deg, var(--brand-500), var(--brand-700));
+            flex-shrink: 0;
+        }
+
+        /* Badge de valor no cabeçalho dos gráficos */
+        .chart-value-badge {
+            font-size: 11px;
+            font-weight: 700;
+            padding: 2px 8px;
+            border-radius: 9999px;
+            background: #ecfdf5;
+            color: #065f46;
+            border: 1px solid #a7f3d0;
+            letter-spacing: 0.02em;
         }
 
         /* Botão primário */
         .btn-primary {
             background: var(--brand-600);
             color: #fff;
-            transition: background .18s ease, box-shadow .18s ease, transform .18s ease;
-            box-shadow: 0 1px 2px rgba(5, 150, 105, 0.25);
+            transition: background .18s, transform .15s;
+            box-shadow: 0 1px 2px rgba(5,150,105,0.3);
         }
-        .btn-primary:hover { background: var(--brand-700); }
+        .btn-primary:hover  { background: var(--brand-700); }
         .btn-primary:active { transform: translateY(1px); }
 
+        /* Skeleton shimmer */
+        .skeleton {
+            background: linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%);
+            background-size: 200% 100%;
+            animation: shimmer 1.6s infinite;
+            border-radius: 0.5rem;
+        }
+        @keyframes shimmer { to { background-position: -200% 0; } }
+
+        /* Gráficos */
         .chart-container { height: 320px; position: relative; }
-        .chart-container.chart-tall { height: 360px; }
-        .chart-container.chart-compact { height: 220px; }
-        .chart-container.chart-xlarge { height: 420px; }
+        .chart-container.chart-tall      { height: 360px; }
+        .chart-container.chart-xlarge    { height: 420px; }
         .chart-container.chart-categoria { min-height: 840px; }
         .chart-container.chart-distribuicao { height: 260px; }
-        .chart-container.chart-xxlarge { height: 1120px; }
+        .chart-container.chart-xxlarge   { height: 1120px; }
         .dashboard-card { min-height: 100%; }
-        .kpi-card { min-height: 142px; }
 
+        /* Filtros */
         .filter-collapse {
             overflow: hidden;
             max-height: 0;
@@ -83,7 +124,6 @@
             transition: max-height 0.35s ease, opacity 0.25s ease;
         }
         .filter-collapse.expanded { max-height: 1200px; opacity: 1; }
-
         .filter-toggle svg.chevron { transition: transform 0.25s ease; }
         .filter-toggle[aria-expanded="true"] svg.chevron { transform: rotate(180deg); }
 
@@ -95,16 +135,25 @@
             display: flex;
             flex-direction: column;
         }
-
         .multi-filter-options { max-height: 140px; overflow-y: auto; }
 
-        /* Scrollbars discretas */
+        /* Scrollbars */
         .multi-filter-options::-webkit-scrollbar,
-        .table-scroll::-webkit-scrollbar { width: 9px; height: 9px; }
+        .table-scroll::-webkit-scrollbar { width: 6px; height: 6px; }
         .multi-filter-options::-webkit-scrollbar-thumb,
-        .table-scroll::-webkit-scrollbar-thumb { background: #d7dee7; border-radius: 9999px; }
+        .table-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 9999px; }
         .multi-filter-options::-webkit-scrollbar-track,
         .table-scroll::-webkit-scrollbar-track { background: transparent; }
+
+        /* Sticky column na tabela */
+        .table-col-sticky {
+            position: sticky;
+            left: 0;
+            background: #fff;
+            z-index: 2;
+        }
+        thead .table-col-sticky { background: #f8fafc; z-index: 3; }
+        tr:hover .table-col-sticky { background: #f8fafc; }
 
         @media (max-width: 1024px) {
             .chart-container,
@@ -114,220 +163,208 @@
             .chart-container.chart-categoria { min-height: 600px; }
         }
 
-        .loading-spinner { animation: spin 1.5s linear infinite; }
+        /* Animação de entrada */
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(12px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+        .fade-up { animation: fadeUp 0.4s ease both; }
+        .fade-up-1 { animation-delay: 0.05s; }
+        .fade-up-2 { animation-delay: 0.10s; }
+        .fade-up-3 { animation-delay: 0.15s; }
+        .fade-up-4 { animation-delay: 0.20s; }
+        .fade-up-5 { animation-delay: 0.25s; }
+
+        /* Contador animado */
+        .kpi-value { transition: opacity 0.3s ease; }
+
+        .loading-spinner { animation: spin 1.2s linear infinite; }
         @keyframes spin { to { transform: rotate(360deg); } }
     </style>
 </head>
 <body class="font-sans text-slate-700">
-    <!-- HEADER INSTITUCIONAL -->
-    <header class="bg-white/85 backdrop-blur-md border-b border-slate-200 sticky top-0 z-50">
-        <div class="max-w-screen-2xl mx-auto px-4 md:px-8 py-4 flex flex-col lg:flex-row lg:items-center gap-4 lg:justify-between">
+
+    <!-- HEADER -->
+    <header class="bg-white/90 backdrop-blur-md sticky top-0 z-50 border-b border-slate-200">
+        <div class="max-w-screen-2xl mx-auto px-4 md:px-8 py-3.5 flex flex-col lg:flex-row lg:items-center gap-4 lg:justify-between">
             <div class="flex items-center gap-x-3.5">
                 <img src="https://i.ibb.co/yc9G0sSv/oie-transparent.png" alt="Logo SCIH" class="w-11 h-11 object-contain">
                 <div>
-                    <h1 class="text-2xl font-semibold tracking-tight text-slate-900" style="font-family: 'Space Grotesk', sans-serif;">Higiene das Mãos</h1>
-                    <p class="text-[11px] font-medium tracking-[0.16em] text-slate-400 uppercase mt-0.5">SCIH · HUC — Monitoramento de Adesão</p>
+                    <h1 class="text-2xl font-semibold tracking-tight text-slate-900" style="font-family:'Space Grotesk',sans-serif;">Higiene das Mãos</h1>
+                    <p class="text-[11px] font-medium tracking-[0.15em] text-slate-400 uppercase mt-0.5">SCIH · HUC — Monitoramento de Adesão</p>
                 </div>
                 <span class="ml-2 hidden sm:inline-flex items-center gap-x-1.5 px-2.5 py-1 bg-emerald-50 text-emerald-700 text-[11px] font-semibold rounded-full border border-emerald-100">
                     <span class="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse"></span>
                     TEMPO REAL
                 </span>
             </div>
-
             <div class="flex flex-wrap items-center gap-2 md:gap-x-4">
                 <button onclick="refreshAllData()"
-                        class="inline-flex items-center gap-x-2 px-3.5 py-2 text-sm font-medium text-slate-600 hover:text-emerald-700 hover:bg-emerald-50 rounded-lg transition cursor-pointer">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="w-[18px] h-[18px]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.9" d="M20 5v5h-5M4 19v-5h5m10.2-4a8 8 0 0 0-13.7-3L4 9m16 6-1.5 1.9A8 8 0 0 1 4.8 14" />
+                        class="inline-flex items-center gap-x-2 px-3.5 py-2 text-sm font-medium text-slate-600 hover:text-emerald-700 hover:bg-emerald-50 rounded-lg transition">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-[17px] h-[17px]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.9" d="M20 5v5h-5M4 19v-5h5m10.2-4a8 8 0 0 0-13.7-3L4 9m16 6-1.5 1.9A8 8 0 0 1 4.8 14"/>
                     </svg>
                     Atualizar
                 </button>
-
                 <div class="hidden md:inline-flex items-center gap-x-1.5 bg-slate-100 text-slate-500 text-xs font-medium px-2.5 py-1.5 rounded-full">
                     <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
                     Respostas ao formulário 1
                 </div>
-
                 <div class="text-right pl-1">
                     <div class="text-[10px] uppercase tracking-wider text-slate-400">Atualizado</div>
                     <div id="last-update" class="text-sm font-semibold text-slate-700">Agora</div>
                 </div>
             </div>
         </div>
+        <div class="header-gradient-line"></div>
     </header>
 
     <div class="max-w-screen-2xl mx-auto px-4 md:px-8 py-8">
 
-        <!-- LOADING OVERLAY -->
-        <div id="loading-screen" class="fixed top-24 right-6 z-[9999] hidden pointer-events-none">
-            <div class="bg-white/95 border border-emerald-100 shadow-lg rounded-xl px-4 py-3 flex items-center gap-3">
+        <!-- LOADING TOAST -->
+        <div id="loading-screen" class="fixed top-20 right-6 z-[9999] hidden pointer-events-none">
+            <div class="bg-white border border-emerald-100 shadow-xl rounded-xl px-4 py-3 flex items-center gap-3">
                 <div class="loading-spinner w-5 h-5 border-2 border-emerald-200 border-t-emerald-600 rounded-full"></div>
                 <p class="text-sm text-slate-600 font-medium">Atualizando análise...</p>
             </div>
         </div>
 
-        <div id="main-content">
+        <!-- SKELETON -->
+        <div id="skeleton-screen">
+            <div class="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-5 gap-5 mb-8">
+                <div class="skeleton h-[142px]"></div>
+                <div class="skeleton h-[142px]"></div>
+                <div class="skeleton h-[142px]"></div>
+                <div class="skeleton h-[142px]"></div>
+                <div class="skeleton h-[142px]"></div>
+            </div>
+            <div class="skeleton h-20 mb-8 rounded-2xl"></div>
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-5 mb-8">
+                <div class="skeleton h-64 rounded-2xl"></div>
+                <div class="skeleton h-64 rounded-2xl"></div>
+            </div>
+        </div>
+
+        <div id="main-content" class="hidden">
 
             <!-- KPI CARDS -->
             <div id="kpi-grid" class="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-5 gap-5 mb-8"></div>
 
-            <!-- FILTROS COMPACTOS -->
-            <div class="card p-5 md:p-7 mb-8">
-                <div class="flex flex-col gap-3 mb-1">
-                    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3 w-full">
-                        <button id="filters-toggle"
-                                type="button"
-                                class="filter-toggle inline-flex items-center gap-2.5 text-lg font-semibold text-slate-800 text-left"
-                                aria-expanded="true"
-                                onclick="toggleFiltersPanel()">
-                            <span class="accent-bar h-5"></span>
-                            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="m21 21-4.35-4.35m1.6-5.15a6.75 6.75 0 11-13.5 0 6.75 6.75 0 0113.5 0z" />
-                            </svg>
-                            Filtros
-                            <svg xmlns="http://www.w3.org/2000/svg" class="chevron w-4 h-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
-                            </svg>
-                        </button>
-
-                        <div class="text-xs text-slate-500">
-                            <span id="filters-summary">Nenhum filtro selecionado</span>
-                        </div>
-                    </div>
+            <!-- FILTROS -->
+            <div class="card p-5 md:p-7 mb-8 fade-up">
+                <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3 mb-1">
+                    <button id="filters-toggle" type="button"
+                            class="filter-toggle inline-flex items-center gap-2.5 text-lg font-semibold text-slate-800 text-left"
+                            aria-expanded="true" onclick="toggleFiltersPanel()">
+                        <span class="accent-bar h-5"></span>
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="m21 21-4.35-4.35m1.6-5.15a6.75 6.75 0 11-13.5 0 6.75 6.75 0 0113.5 0z"/>
+                        </svg>
+                        Filtros
+                        <svg xmlns="http://www.w3.org/2000/svg" class="chevron w-4 h-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="m19.5 8.25-7.5 7.5-7.5-7.5"/>
+                        </svg>
+                    </button>
+                    <span id="filters-summary" class="text-xs text-slate-500">Nenhum filtro selecionado</span>
                 </div>
 
                 <div id="filters-collapse" class="filter-collapse expanded">
                     <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3 w-full mb-6 mt-5">
-                        <div class="p-0 lg:flex-1">
-                            <div class="flex flex-wrap items-center justify-start lg:justify-center gap-2">
-                                <label class="text-[11px] font-semibold tracking-wide text-slate-500 uppercase mr-1">Período</label>
-                                <input id="dataInicio" type="date"
-                                       class="border border-slate-200 bg-white rounded-lg px-3 py-2 text-sm text-slate-700 focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100 transition w-40">
-                                <span class="text-slate-300 text-sm">—</span>
-                                <input id="dataFim" type="date"
-                                       class="border border-slate-200 bg-white rounded-lg px-3 py-2 text-sm text-slate-700 focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100 transition w-40">
-                            </div>
+                        <div class="flex flex-wrap items-center gap-2">
+                            <label class="text-[11px] font-semibold tracking-wide text-slate-500 uppercase">Período</label>
+                            <input id="dataInicio" type="date" class="border border-slate-200 bg-white rounded-lg px-3 py-2 text-sm text-slate-700 focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100 transition w-40">
+                            <span class="text-slate-300">—</span>
+                            <input id="dataFim" type="date" class="border border-slate-200 bg-white rounded-lg px-3 py-2 text-sm text-slate-700 focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100 transition w-40">
                         </div>
-
-                        <div class="flex gap-x-3 items-center justify-start lg:justify-end">
-                            <button onclick="clearAllFilters()"
-                                    class="text-xs font-semibold text-slate-400 hover:text-slate-600 px-3 py-2 rounded-lg hover:bg-slate-50 transition">
-                                Limpar tudo
-                            </button>
-                            <button onclick="applyCurrentFilters()"
-                                    class="btn-primary px-5 py-2 rounded-lg text-sm font-semibold">
-                                Aplicar filtros
-                            </button>
+                        <div class="flex gap-x-3 items-center">
+                            <button onclick="clearAllFilters()" class="text-xs font-semibold text-slate-400 hover:text-slate-600 px-3 py-2 rounded-lg hover:bg-slate-50 transition">Limpar tudo</button>
+                            <button onclick="applyCurrentFilters()" class="btn-primary px-5 py-2 rounded-lg text-sm font-semibold">Aplicar filtros</button>
                         </div>
                     </div>
-
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-5">
-                        <div>
-                            <label class="block text-[11px] font-semibold uppercase tracking-wide text-slate-500 mb-2">Unidade de Internação</label>
-                            <div id="unidades-panel" class="multi-filter-panel"></div>
-                            <select id="unidades" multiple class="hidden"></select>
-                        </div>
-
-                        <div>
-                            <label class="block text-[11px] font-semibold uppercase tracking-wide text-slate-500 mb-2">Categoria Profissional</label>
-                            <div id="categorias-panel" class="multi-filter-panel"></div>
-                            <select id="categorias" multiple class="hidden"></select>
-                        </div>
-
-                        <div>
-                            <label class="block text-[11px] font-semibold uppercase tracking-wide text-slate-500 mb-2">Momento de Realização</label>
-                            <div id="momentos-panel" class="multi-filter-panel"></div>
-                            <select id="momentos" multiple class="hidden"></select>
-                        </div>
-
-                        <div>
-                            <label class="block text-[11px] font-semibold uppercase tracking-wide text-slate-500 mb-2">Situação</label>
-                            <div id="situacoes-panel" class="multi-filter-panel"></div>
-                            <select id="situacoes" multiple class="hidden"></select>
-                        </div>
-
-                        <div>
-                            <label class="block text-[11px] font-semibold uppercase tracking-wide text-slate-500 mb-2">Método</label>
-                            <div id="metodos-panel" class="multi-filter-panel"></div>
-                            <select id="metodos" multiple class="hidden"></select>
-                        </div>
+                        <div><label class="block text-[11px] font-semibold uppercase tracking-wide text-slate-500 mb-2">Unidade</label><div id="unidades-panel" class="multi-filter-panel"></div><select id="unidades" multiple class="hidden"></select></div>
+                        <div><label class="block text-[11px] font-semibold uppercase tracking-wide text-slate-500 mb-2">Categoria Profissional</label><div id="categorias-panel" class="multi-filter-panel"></div><select id="categorias" multiple class="hidden"></select></div>
+                        <div><label class="block text-[11px] font-semibold uppercase tracking-wide text-slate-500 mb-2">Momento</label><div id="momentos-panel" class="multi-filter-panel"></div><select id="momentos" multiple class="hidden"></select></div>
+                        <div><label class="block text-[11px] font-semibold uppercase tracking-wide text-slate-500 mb-2">Situação</label><div id="situacoes-panel" class="multi-filter-panel"></div><select id="situacoes" multiple class="hidden"></select></div>
+                        <div><label class="block text-[11px] font-semibold uppercase tracking-wide text-slate-500 mb-2">Método</label><div id="metodos-panel" class="multi-filter-panel"></div><select id="metodos" multiple class="hidden"></select></div>
                     </div>
                 </div>
             </div>
 
             <!-- GRÁFICOS -->
             <div class="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-4 gap-5 mb-10 auto-rows-[minmax(260px,auto)]">
-                <div class="card p-6 flex flex-col xl:col-span-2">
-                    <div class="flex items-center gap-2.5 mb-5">
-                        <span class="accent-bar h-4"></span>
-                        <h3 class="text-[15px] font-semibold text-slate-800">Evolução Temporal por Mês</h3>
+
+                <div class="card p-6 flex flex-col xl:col-span-2 fade-up fade-up-1">
+                    <div class="flex items-center justify-between mb-5">
+                        <div class="flex items-center gap-2.5">
+                            <span class="accent-bar h-4"></span>
+                            <h3 class="text-[15px] font-semibold text-slate-800">Evolução Temporal por Mês</h3>
+                        </div>
+                        <span id="badge-temporal" class="chart-value-badge hidden"></span>
                     </div>
                     <div class="chart-container flex-1"><canvas id="temporalChart"></canvas></div>
                 </div>
 
-                <div class="card p-6 flex flex-col xl:col-span-2">
-                    <div class="flex items-center gap-2.5 mb-5">
-                        <span class="accent-bar h-4"></span>
-                        <h3 class="text-[15px] font-semibold text-slate-800">Adesão por Momento</h3>
+                <div class="card p-6 flex flex-col xl:col-span-2 fade-up fade-up-2">
+                    <div class="flex items-center justify-between mb-5">
+                        <div class="flex items-center gap-2.5">
+                            <span class="accent-bar h-4"></span>
+                            <h3 class="text-[15px] font-semibold text-slate-800">Adesão por Momento</h3>
+                        </div>
+                        <span id="badge-momento" class="chart-value-badge hidden"></span>
                     </div>
                     <div class="chart-container chart-xlarge flex-1"><canvas id="momentoChart"></canvas></div>
                 </div>
 
-                <div class="card p-6 flex flex-col lg:col-span-2 xl:col-span-2 xl:row-span-2 dashboard-card">
-                    <div class="flex items-center gap-2.5 mb-5">
-                        <span class="accent-bar h-4"></span>
-                        <h3 class="text-[15px] font-semibold text-slate-800">Adesão por Unidade</h3>
+                <div class="card p-6 flex flex-col lg:col-span-2 xl:col-span-2 xl:row-span-2 dashboard-card fade-up fade-up-3">
+                    <div class="flex items-center justify-between mb-5">
+                        <div class="flex items-center gap-2.5">
+                            <span class="accent-bar h-4"></span>
+                            <h3 class="text-[15px] font-semibold text-slate-800">Adesão por Unidade</h3>
+                        </div>
+                        <span id="badge-unidade" class="chart-value-badge hidden"></span>
                     </div>
                     <div class="chart-container chart-xxlarge flex-1"><canvas id="unidadeChart"></canvas></div>
                 </div>
 
-                <div class="card p-6 flex flex-col lg:col-span-2 xl:col-span-2 xl:row-span-2 dashboard-card">
-                    <div class="flex items-center gap-2.5 mb-5">
-                        <span class="accent-bar h-4"></span>
-                        <h3 class="text-[15px] font-semibold text-slate-800">Por Categoria Profissional</h3>
+                <div class="card p-6 flex flex-col lg:col-span-2 xl:col-span-2 xl:row-span-2 dashboard-card fade-up fade-up-3">
+                    <div class="flex items-center justify-between mb-5">
+                        <div class="flex items-center gap-2.5">
+                            <span class="accent-bar h-4"></span>
+                            <h3 class="text-[15px] font-semibold text-slate-800">Por Categoria Profissional</h3>
+                        </div>
+                        <span id="badge-categoria" class="chart-value-badge hidden"></span>
                     </div>
                     <div class="chart-container chart-xxlarge chart-categoria flex-1"><canvas id="categoriaChart"></canvas></div>
                 </div>
 
-                <div class="card p-6 flex flex-col">
-                    <div class="flex items-center gap-2.5 mb-5">
-                        <span class="accent-bar h-4"></span>
-                        <h3 class="text-[15px] font-semibold text-slate-800">Distribuição por Situação</h3>
-                    </div>
+                <div class="card p-6 flex flex-col fade-up fade-up-4">
+                    <div class="flex items-center gap-2.5 mb-5"><span class="accent-bar h-4"></span><h3 class="text-[15px] font-semibold text-slate-800">Distribuição por Situação</h3></div>
                     <div class="chart-container chart-distribuicao flex-1"><canvas id="situacaoChart"></canvas></div>
                 </div>
 
-                <div class="card p-6 flex flex-col">
-                    <div class="flex items-center gap-2.5 mb-5">
-                        <span class="accent-bar h-4"></span>
-                        <h3 class="text-[15px] font-semibold text-slate-800">Distribuição por Método</h3>
-                    </div>
+                <div class="card p-6 flex flex-col fade-up fade-up-4">
+                    <div class="flex items-center gap-2.5 mb-5"><span class="accent-bar h-4"></span><h3 class="text-[15px] font-semibold text-slate-800">Distribuição por Método</h3></div>
                     <div class="chart-container chart-distribuicao flex-1"><canvas id="metodoChart"></canvas></div>
                 </div>
 
-                <div class="card p-6 flex flex-col">
-                    <div class="flex items-center gap-2.5 mb-5">
-                        <span class="accent-bar h-4"></span>
-                        <h3 class="text-[15px] font-semibold text-slate-800">Dispensadores de Álcool/Sabão</h3>
-                    </div>
+                <div class="card p-6 flex flex-col fade-up fade-up-5">
+                    <div class="flex items-center gap-2.5 mb-5"><span class="accent-bar h-4"></span><h3 class="text-[15px] font-semibold text-slate-800">Dispensadores de Álcool/Sabão</h3></div>
                     <div class="chart-container chart-distribuicao flex-1"><canvas id="dispensadoresChart"></canvas></div>
                 </div>
 
-                <div class="card p-6 flex flex-col">
-                    <div class="flex items-center gap-2.5 mb-5">
-                        <span class="accent-bar h-4"></span>
-                        <h3 class="text-[15px] font-semibold text-slate-800">Profissional sem Adornos</h3>
-                    </div>
+                <div class="card p-6 flex flex-col fade-up fade-up-5">
+                    <div class="flex items-center gap-2.5 mb-5"><span class="accent-bar h-4"></span><h3 class="text-[15px] font-semibold text-slate-800">Profissional sem Adornos</h3></div>
                     <div class="chart-container chart-distribuicao flex-1"><canvas id="adornosChart"></canvas></div>
                 </div>
             </div>
 
-            <!-- INSIGHTS AUTOMÁTICOS -->
-            <section class="card p-5 md:p-6 mb-8">
+            <!-- INSIGHTS -->
+            <section class="card p-5 md:p-6 mb-8 fade-up">
                 <div class="flex items-center gap-2.5 mb-4">
                     <span class="flex items-center justify-center w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600">
                         <svg xmlns="http://www.w3.org/2000/svg" class="w-[18px] h-[18px]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M9 18h6m-5 3h4m-7-9a5 5 0 1110 0c0 1.9-.93 3.57-2.36 4.6-.62.45-1.14 1.13-1.14 1.9V19H10.5v-.5c0-.77-.52-1.45-1.14-1.9A5.64 5.64 0 017 12z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M9 18h6m-5 3h4m-7-9a5 5 0 1110 0c0 1.9-.93 3.57-2.36 4.6-.62.45-1.14 1.13-1.14 1.9V19H10.5v-.5c0-.77-.52-1.45-1.14-1.9A5.64 5.64 0 017 12z"/>
                         </svg>
                     </span>
                     <h2 class="text-[15px] font-semibold text-slate-800">Insights Automáticos</h2>
@@ -335,9 +372,9 @@
                 <div id="insights-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3"></div>
             </section>
 
-            <!-- TABELA DETALHADA -->
-            <section class="card overflow-hidden">
-                <div class="px-6 md:px-8 py-5 border-b border-slate-100 flex items-center justify-between gap-3 flex-wrap">
+            <!-- TABELA -->
+            <section class="card overflow-hidden fade-up">
+                <div class="px-6 md:px-8 py-5 border-b border-slate-100 flex items-center justify-between gap-3 flex-wrap bg-white">
                     <div class="flex items-center gap-2.5">
                         <span class="accent-bar h-4"></span>
                         <h2 class="text-[15px] font-semibold text-slate-800">Tabela Detalhada</h2>
@@ -346,17 +383,16 @@
                     <button onclick="exportToCSV()"
                             class="inline-flex items-center gap-x-2 px-4 py-2 text-xs font-semibold text-slate-600 border border-slate-200 hover:bg-slate-50 hover:text-slate-800 rounded-lg transition">
                         <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M12 3v12m0 0 4-4m-4 4-4-4m-3 9h14" />
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M12 3v12m0 0 4-4m-4 4-4-4m-3 9h14"/>
                         </svg>
                         Exportar CSV
                     </button>
                 </div>
-
                 <div class="table-scroll overflow-auto max-h-[560px]">
                     <table class="w-full text-sm" id="detail-table">
-                        <thead class="sticky top-0 bg-slate-50/95 backdrop-blur z-10">
-                            <tr class="border-b border-slate-200">
-                                <th class="text-left px-6 py-3.5 font-semibold text-slate-400 text-[11px] tracking-wider">DATA/HORA</th>
+                        <thead class="sticky top-0 z-10">
+                            <tr class="border-b border-slate-200 bg-slate-50">
+                                <th class="table-col-sticky text-left px-6 py-3.5 font-semibold text-slate-400 text-[11px] tracking-wider">DATA/HORA</th>
                                 <th class="text-left px-6 py-3.5 font-semibold text-slate-400 text-[11px] tracking-wider">UNIDADE</th>
                                 <th class="text-left px-6 py-3.5 font-semibold text-slate-400 text-[11px] tracking-wider">CATEGORIA</th>
                                 <th class="text-left px-6 py-3.5 font-semibold text-slate-400 text-[11px] tracking-wider">MOMENTO</th>
@@ -376,39 +412,39 @@
     </div>
 
     <script>
-        // ====================== CONFIGURAÇÃO TAILWIND ======================
         function initTailwind() {
-            tailwind.config = {
-                content: [],
-                theme: {
-                    extend: {
-                        fontFamily: {
-                            heading: ['Space Grotesk', 'sans-serif']
-                        }
-                    }
-                }
-            };
+            tailwind.config = { content: [], theme: { extend: { fontFamily: { heading: ['Space Grotesk','sans-serif'] } } } };
         }
 
-        // ====================== VARIÁVEIS GLOBAIS ======================
-        let allRecords = null;
-        let currentResponse = null;
-        let chartInstances = {};
-        let chartPluginsRegistered = false;
+        let allRecords = null, currentResponse = null, chartInstances = {}, chartPluginsRegistered = false;
         const MAX_TABLE_ROWS_RENDER = 1000;
         const FILTER_MULTSELECT_CONFIG = [
-            { id: 'unidades', panelId: 'unidades-panel' },
-            { id: 'categorias', panelId: 'categorias-panel' },
-            { id: 'momentos', panelId: 'momentos-panel' },
-            { id: 'situacoes', panelId: 'situacoes-panel' },
-            { id: 'metodos', panelId: 'metodos-panel' }
+            { id:'unidades', panelId:'unidades-panel' }, { id:'categorias', panelId:'categorias-panel' },
+            { id:'momentos', panelId:'momentos-panel' }, { id:'situacoes', panelId:'situacoes-panel' },
+            { id:'metodos', panelId:'metodos-panel' }
         ];
+
+        // ====================== CONTADOR ANIMADO ======================
+        function animateCounter(el, target, duration = 900) {
+            const isFloat = String(target).includes('.');
+            const start = 0;
+            const startTime = performance.now();
+            function update(now) {
+                const elapsed = now - startTime;
+                const progress = Math.min(elapsed / duration, 1);
+                const eased = 1 - Math.pow(1 - progress, 3);
+                const current = start + (target - start) * eased;
+                el.textContent = isFloat
+                    ? current.toFixed(1)
+                    : Math.round(current).toLocaleString('pt-BR');
+                if (progress < 1) requestAnimationFrame(update);
+            }
+            requestAnimationFrame(update);
+        }
 
         // ====================== CARREGAR DADOS ======================
         function loadData(filters = {}) {
-            const loading = document.getElementById('loading-screen');
-            loading.classList.remove('hidden');
-
+            document.getElementById('loading-screen').classList.remove('hidden');
             google.script.run
                 .withSuccessHandler(onDataSuccess)
                 .withFailureHandler(onDataError)
@@ -416,18 +452,15 @@
         }
 
         function onDataSuccess(response) {
-            const loading = document.getElementById('loading-screen');
-            loading.classList.add('hidden');
+            document.getElementById('loading-screen').classList.add('hidden');
+            document.getElementById('skeleton-screen').classList.add('hidden');
+            document.getElementById('main-content').classList.remove('hidden');
 
-            if (!response.success) {
-                showErrorModal(response.error);
-                return;
-            }
+            if (!response.success) { showErrorModal(response.error); return; }
 
             currentResponse = response;
             allRecords = response.totalProcessed || 0;
 
-            // Popula filtros apenas na primeira carga
             if (!document.getElementById('unidades').hasChildNodes()) {
                 populateFilterOptions(response.filterOptions);
             }
@@ -436,659 +469,284 @@
             renderAllCharts(response.chartData);
             renderInsights(response.insights);
             renderDetailTable(response.tableData);
-
             document.getElementById('last-update').textContent = new Date().toLocaleTimeString('pt-BR');
         }
 
         function onDataError(err) {
-            const loading = document.getElementById('loading-screen');
-            loading.classList.add('hidden');
+            document.getElementById('loading-screen').classList.add('hidden');
+            document.getElementById('skeleton-screen').classList.add('hidden');
+            document.getElementById('main-content').classList.remove('hidden');
             showErrorModal(err.message || 'Erro de comunicação com o servidor');
         }
 
         // ====================== RENDER KPIs ======================
+        function getKpiStatus(value, type) {
+            if (type === 'adesao') {
+                if (value >= 80) return 'success';
+                if (value >= 60) return 'warning';
+                return 'danger';
+            }
+            if (type === 'taxa-nao') {
+                if (value <= 20) return 'success';
+                if (value <= 40) return 'warning';
+                return 'danger';
+            }
+            return 'neutral';
+        }
+
         function renderKPIs(kpis) {
-            const container = document.getElementById('kpi-grid');
-            container.innerHTML = `
-                <div class="card card-hover kpi-card p-5 flex flex-col justify-between">
+            const adesaoNum = parseFloat(kpis.adesaoGeral);
+            const taxaNum   = parseFloat(kpis.taxaNaoRealizacao);
+            const statusAdesao = getKpiStatus(adesaoNum, 'adesao');
+            const statusTaxa   = getKpiStatus(taxaNum, 'taxa-nao');
+
+            document.getElementById('kpi-grid').innerHTML = `
+                <div class="card card-hover kpi-card status-neutral p-5 pl-6 flex flex-col justify-between fade-up fade-up-1">
                     <div class="flex items-start justify-between">
                         <p class="text-[11px] font-semibold uppercase tracking-wider text-slate-400">Total de observações</p>
-                        <span class="flex items-center justify-center w-9 h-9 rounded-lg bg-slate-100 text-slate-500">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
-                                <path fill-rule="evenodd" d="M3.75 5.25A2.25 2.25 0 0 1 6 3h8.25a2.25 2.25 0 0 1 2.25 2.25V6h1.5A2.25 2.25 0 0 1 20.25 8.25v11.5A2.25 2.25 0 0 1 18 22H9.75a2.25 2.25 0 0 1-2.25-2.25V19.5H6A2.25 2.25 0 0 1 3.75 17.25V5.25Zm3.75 0v12h6.75V5.25H7.5Z" clip-rule="evenodd" />
-                            </svg>
+                        <span class="flex items-center justify-center w-9 h-9 rounded-lg bg-slate-100 text-slate-400">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor"><path fill-rule="evenodd" d="M3.75 5.25A2.25 2.25 0 0 1 6 3h8.25a2.25 2.25 0 0 1 2.25 2.25V6h1.5A2.25 2.25 0 0 1 20.25 8.25v11.5A2.25 2.25 0 0 1 18 22H9.75a2.25 2.25 0 0 1-2.25-2.25V19.5H6A2.25 2.25 0 0 1 3.75 17.25V5.25Zm3.75 0v12h6.75V5.25H7.5Z" clip-rule="evenodd"/></svg>
                         </span>
                     </div>
-                    <p class="text-4xl font-bold tracking-tight text-slate-900 mt-3">${kpis.totalObservacoes.toLocaleString('pt-BR')}</p>
+                    <p class="kpi-value text-4xl font-bold tracking-tight text-slate-900 mt-3" data-target="${kpis.totalObservacoes}" data-type="int">0</p>
                 </div>
 
-                <div class="card card-hover kpi-card p-5 flex flex-col justify-between border-emerald-200">
+                <div class="card card-hover kpi-card status-${statusAdesao} p-5 pl-6 flex flex-col justify-between fade-up fade-up-2">
                     <div class="flex items-start justify-between">
                         <p class="text-[11px] font-semibold uppercase tracking-wider text-emerald-700">Adesão geral</p>
                         <span class="flex items-center justify-center w-9 h-9 rounded-lg bg-emerald-50 text-emerald-600">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
-                                <path fill-rule="evenodd" d="M12 2.25a9.75 9.75 0 1 0 9.75 9.75A9.75 9.75 0 0 0 12 2.25Zm-1.2 12.72-2.33-2.33a.75.75 0 1 1 1.06-1.06l1.72 1.72 3.54-4.58a.75.75 0 1 1 1.18.92l-4.06 5.25a.75.75 0 0 1-1.11.08Z" clip-rule="evenodd" />
-                            </svg>
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor"><path fill-rule="evenodd" d="M12 2.25a9.75 9.75 0 1 0 9.75 9.75A9.75 9.75 0 0 0 12 2.25Zm-1.2 12.72-2.33-2.33a.75.75 0 1 1 1.06-1.06l1.72 1.72 3.54-4.58a.75.75 0 1 1 1.18.92l-4.06 5.25a.75.75 0 0 1-1.11.08Z" clip-rule="evenodd"/></svg>
                         </span>
                     </div>
                     <div class="mt-3">
-                        <p class="text-4xl font-bold tracking-tight text-emerald-700">${kpis.adesaoGeral}<span class="text-xl font-semibold text-emerald-500">%</span></p>
+                        <p class="text-4xl font-bold tracking-tight text-emerald-700">
+                            <span class="kpi-value" data-target="${adesaoNum}" data-type="float">0</span><span class="text-xl font-semibold text-emerald-500">%</span>
+                        </p>
                         <div class="h-1.5 bg-emerald-100 rounded-full mt-3 overflow-hidden">
-                            <div class="h-full bg-emerald-500 rounded-full transition-all duration-500" style="width: ${kpis.adesaoGeral}%"></div>
+                            <div class="h-full bg-emerald-500 rounded-full" style="width:0%" data-width="${adesaoNum}%" id="adesao-bar"></div>
                         </div>
                     </div>
                 </div>
 
-                <div class="card card-hover kpi-card p-5 flex flex-col justify-between">
+                <div class="card card-hover kpi-card status-success p-5 pl-6 flex flex-col justify-between fade-up fade-up-3">
                     <div class="flex items-start justify-between">
                         <p class="text-[11px] font-semibold uppercase tracking-wider text-slate-400">Realizado</p>
                         <span class="flex items-center justify-center w-9 h-9 rounded-lg bg-emerald-50 text-emerald-600">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
-                                <path fill-rule="evenodd" d="M12 2.25a9.75 9.75 0 1 0 9.75 9.75A9.75 9.75 0 0 0 12 2.25Zm4.28 8.47a.75.75 0 1 0-1.06-1.06l-4.03 4.03-2.4-2.4a.75.75 0 0 0-1.06 1.06l2.93 2.93a.75.75 0 0 0 1.06 0l4.56-4.56Z" clip-rule="evenodd" />
-                            </svg>
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor"><path fill-rule="evenodd" d="M12 2.25a9.75 9.75 0 1 0 9.75 9.75A9.75 9.75 0 0 0 12 2.25Zm4.28 8.47a.75.75 0 1 0-1.06-1.06l-4.03 4.03-2.4-2.4a.75.75 0 0 0-1.06 1.06l2.93 2.93a.75.75 0 0 0 1.06 0l4.56-4.56Z" clip-rule="evenodd"/></svg>
                         </span>
                     </div>
-                    <p class="text-4xl font-bold tracking-tight text-emerald-600 mt-3">${kpis.totalRealizado.toLocaleString('pt-BR')}</p>
+                    <p class="kpi-value text-4xl font-bold tracking-tight text-emerald-600 mt-3" data-target="${kpis.totalRealizado}" data-type="int">0</p>
                 </div>
 
-                <div class="card card-hover kpi-card p-5 flex flex-col justify-between">
+                <div class="card card-hover kpi-card status-danger p-5 pl-6 flex flex-col justify-between fade-up fade-up-4">
                     <div class="flex items-start justify-between">
                         <p class="text-[11px] font-semibold uppercase tracking-wider text-rose-500">Não realizado</p>
-                        <span class="flex items-center justify-center w-9 h-9 rounded-lg bg-rose-50 text-rose-500">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
-                                <path fill-rule="evenodd" d="M12 2.25a9.75 9.75 0 1 0 9.75 9.75A9.75 9.75 0 0 0 12 2.25Zm-3.53 6.22a.75.75 0 0 1 1.06 0L12 10.94l2.47-2.47a.75.75 0 1 1 1.06 1.06L13.06 12l2.47 2.47a.75.75 0 0 1-1.06 1.06L12 13.06l-2.47 2.47a.75.75 0 0 1-1.06-1.06L10.94 12 8.47 9.53a.75.75 0 0 1 0-1.06Z" clip-rule="evenodd" />
-                            </svg>
+                        <span class="flex items-center justify-center w-9 h-9 rounded-lg bg-rose-50 text-rose-400">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor"><path fill-rule="evenodd" d="M12 2.25a9.75 9.75 0 1 0 9.75 9.75A9.75 9.75 0 0 0 12 2.25Zm-3.53 6.22a.75.75 0 0 1 1.06 0L12 10.94l2.47-2.47a.75.75 0 1 1 1.06 1.06L13.06 12l2.47 2.47a.75.75 0 0 1-1.06 1.06L12 13.06l-2.47 2.47a.75.75 0 0 1-1.06-1.06L10.94 12 8.47 9.53a.75.75 0 0 1 0-1.06Z" clip-rule="evenodd"/></svg>
                         </span>
                     </div>
-                    <p class="text-4xl font-bold tracking-tight text-rose-600 mt-3">${kpis.totalNaoRealizado.toLocaleString('pt-BR')}</p>
+                    <p class="kpi-value text-4xl font-bold tracking-tight text-rose-600 mt-3" data-target="${kpis.totalNaoRealizado}" data-type="int">0</p>
                 </div>
 
-                <div class="card card-hover kpi-card p-5 flex flex-col justify-between">
+                <div class="card card-hover kpi-card status-${statusTaxa} p-5 pl-6 flex flex-col justify-between fade-up fade-up-5">
                     <div class="flex items-start justify-between">
                         <p class="text-[11px] font-semibold uppercase tracking-wider text-rose-400">Taxa de não realização</p>
-                        <span class="flex items-center justify-center w-9 h-9 rounded-lg bg-rose-50 text-rose-500">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
-                                <path fill-rule="evenodd" d="M2.25 18 12 3.75 21.75 18H2.25Zm9-3.75v-4.5h1.5v4.5h-1.5Zm0 3v-1.5h1.5v1.5h-1.5Z" clip-rule="evenodd" />
-                            </svg>
+                        <span class="flex items-center justify-center w-9 h-9 rounded-lg bg-rose-50 text-rose-400">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor"><path fill-rule="evenodd" d="M2.25 18 12 3.75 21.75 18H2.25Zm9-3.75v-4.5h1.5v4.5h-1.5Zm0 3v-1.5h1.5v1.5h-1.5Z" clip-rule="evenodd"/></svg>
                         </span>
                     </div>
-                    <p class="text-4xl font-bold tracking-tight text-rose-600 mt-3">${kpis.taxaNaoRealizacao}<span class="text-xl font-semibold text-rose-400">%</span></p>
+                    <p class="text-4xl font-bold tracking-tight text-rose-600 mt-3">
+                        <span class="kpi-value" data-target="${taxaNum}" data-type="float">0</span><span class="text-xl font-semibold text-rose-400">%</span>
+                    </p>
                 </div>
             `;
+
+            // Dispara contadores e barra de progresso
+            requestAnimationFrame(() => {
+                document.querySelectorAll('.kpi-value').forEach(el => {
+                    const target = parseFloat(el.dataset.target);
+                    const type   = el.dataset.type;
+                    animateCounter(el, target, type === 'float' ? 800 : 1000);
+                });
+                const bar = document.getElementById('adesao-bar');
+                if (bar) setTimeout(() => { bar.style.transition = 'width 1s ease'; bar.style.width = bar.dataset.width; }, 100);
+            });
         }
 
-        // ====================== POPULAR FILTROS ======================
+        // ====================== FILTROS ======================
         function populateFilterOptions(options) {
-            // Unidades
-            const unitSel = document.getElementById('unidades');
-            unitSel.innerHTML = options.unidades.map(u => `<option value="${u}">${u}</option>`).join('');
-
-            // Categorias
-            const catSel = document.getElementById('categorias');
-            catSel.innerHTML = options.categorias.map(c => `<option value="${c}">${c}</option>`).join('');
-
-            // Momentos
-            const momSel = document.getElementById('momentos');
-            momSel.innerHTML = options.momentos.map(m => `<option value="${m}">${m}</option>`).join('');
-
-            const sitSel = document.getElementById('situacoes');
-            const situacoesFixas = ['Realizado', 'Não realizado', 'Incompleto'];
-            sitSel.innerHTML = situacoesFixas.map(s => `<option value="${s}">${s}</option>`).join('');
-
-            // Métodos fixos
-            const metSel = document.getElementById('metodos');
-            const metodosFixos = ['Água e sabonete','Fricção com álcool','Não realizado','Realizado sem método detalhado','Não informado'];
-            metSel.innerHTML = metodosFixos.map(m => `<option value="${m}">${m}</option>`).join('');
-
+            document.getElementById('unidades').innerHTML   = options.unidades.map(u => `<option value="${u}">${u}</option>`).join('');
+            document.getElementById('categorias').innerHTML = options.categorias.map(c => `<option value="${c}">${c}</option>`).join('');
+            document.getElementById('momentos').innerHTML   = options.momentos.map(m => `<option value="${m}">${m}</option>`).join('');
+            document.getElementById('situacoes').innerHTML  = ['Realizado','Não realizado','Incompleto'].map(s => `<option value="${s}">${s}</option>`).join('');
+            document.getElementById('metodos').innerHTML    = ['Água e sabonete','Fricção com álcool','Não realizado','Realizado sem método detalhado','Não informado'].map(m => `<option value="${m}">${m}</option>`).join('');
             initializeMultiSelectPanels();
             updateFiltersSummary();
         }
 
         function initializeMultiSelectPanels() {
-            FILTER_MULTSELECT_CONFIG.forEach(config => renderMultiSelectPanel(config.id, config.panelId));
+            FILTER_MULTSELECT_CONFIG.forEach(c => renderMultiSelectPanel(c.id, c.panelId));
         }
 
         function renderMultiSelectPanel(selectId, panelId) {
-            const selectEl = document.getElementById(selectId);
-            const panelEl = document.getElementById(panelId);
+            const selectEl = document.getElementById(selectId), panelEl = document.getElementById(panelId);
             if (!selectEl || !panelEl) return;
-
-            const options = Array.from(selectEl.options);
-            const optionsHtml = options.map(option => `
+            const html = Array.from(selectEl.options).map(o => `
                 <label class="flex items-center gap-2 text-sm text-slate-700 hover:bg-slate-50 px-2 py-1.5 rounded-lg cursor-pointer transition">
-                    <input type="checkbox"
-                           data-select-id="${selectId}"
-                           value="${option.value}"
-                           ${option.selected ? 'checked' : ''}
-                           class="h-4 w-4 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500">
-                    <span class="leading-tight">${option.text}</span>
-                </label>
-            `).join('');
-
+                    <input type="checkbox" data-select-id="${selectId}" value="${o.value}" ${o.selected ? 'checked' : ''} class="h-4 w-4 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500">
+                    <span class="leading-tight">${o.text}</span>
+                </label>`).join('');
             panelEl.innerHTML = `
-                <div class="px-3 py-2 border-b border-slate-100 text-[11px] font-semibold text-slate-500 flex items-center justify-between">
+                <div class="px-3 py-2 border-b border-slate-100 text-[11px] font-semibold text-slate-500 flex justify-between">
                     <button type="button" class="hover:text-emerald-700 transition" onclick="selectAllFilterOptions('${selectId}')">Selecionar todos</button>
                     <button type="button" class="hover:text-slate-700 transition" onclick="clearFilterOptions('${selectId}')">Limpar</button>
                 </div>
-                <div class="multi-filter-options p-2 space-y-0.5">${optionsHtml || '<p class="text-xs text-slate-400 px-2 py-1">Sem opções disponíveis.</p>'}</div>
-            `;
-
-            panelEl.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
-                checkbox.addEventListener('change', () => {
-                    syncSelectFromCheckboxes(selectId);
-                    updateFiltersSummary();
-                });
-            });
+                <div class="multi-filter-options p-2 space-y-0.5">${html || '<p class="text-xs text-slate-400 px-2 py-1">Sem opções.</p>'}</div>`;
+            panelEl.querySelectorAll('input[type="checkbox"]').forEach(cb =>
+                cb.addEventListener('change', () => { syncSelectFromCheckboxes(selectId); updateFiltersSummary(); }));
         }
 
         function syncSelectFromCheckboxes(selectId) {
-            const selectEl = document.getElementById(selectId);
-            if (!selectEl) return;
-            const selectedValues = new Set(Array.from(document.querySelectorAll(`input[data-select-id="${selectId}"]:checked`)).map(input => input.value));
-            Array.from(selectEl.options).forEach(option => {
-                option.selected = selectedValues.has(option.value);
-            });
+            const sel = document.getElementById(selectId); if (!sel) return;
+            const vals = new Set(Array.from(document.querySelectorAll(`input[data-select-id="${selectId}"]:checked`)).map(i => i.value));
+            Array.from(sel.options).forEach(o => o.selected = vals.has(o.value));
         }
 
-        function selectAllFilterOptions(selectId) {
-            const checkboxes = document.querySelectorAll(`input[data-select-id="${selectId}"]`);
-            checkboxes.forEach(checkbox => {
-                checkbox.checked = true;
-            });
-            syncSelectFromCheckboxes(selectId);
-            updateFiltersSummary();
-        }
+        function selectAllFilterOptions(id) { document.querySelectorAll(`input[data-select-id="${id}"]`).forEach(cb => cb.checked = true); syncSelectFromCheckboxes(id); updateFiltersSummary(); }
+        function clearFilterOptions(id)      { document.querySelectorAll(`input[data-select-id="${id}"]`).forEach(cb => cb.checked = false); syncSelectFromCheckboxes(id); updateFiltersSummary(); }
 
-        function clearFilterOptions(selectId) {
-            const checkboxes = document.querySelectorAll(`input[data-select-id="${selectId}"]`);
-            checkboxes.forEach(checkbox => {
-                checkbox.checked = false;
-            });
-            syncSelectFromCheckboxes(selectId);
-            updateFiltersSummary();
-        }
-
-        // ====================== PEGAR FILTROS ======================
         function getCurrentFilters() {
-            const getSelected = (id) => Array.from(document.getElementById(id).selectedOptions).map(o => o.value);
-
+            const get = id => Array.from(document.getElementById(id).selectedOptions).map(o => o.value);
             return {
                 dataInicio: document.getElementById('dataInicio').value || null,
-                dataFim: document.getElementById('dataFim').value || null,
-                unidades: getSelected('unidades'),
-                categorias: getSelected('categorias'),
-                momentos: getSelected('momentos'),
-                situacoes: getSelected('situacoes'),
-                metodos: getSelected('metodos')
+                dataFim:    document.getElementById('dataFim').value    || null,
+                unidades: get('unidades'), categorias: get('categorias'), momentos: get('momentos'),
+                situacoes: get('situacoes'), metodos: get('metodos')
             };
         }
 
-        function applyCurrentFilters() {
-            loadData(getCurrentFilters());
-        }
+        function applyCurrentFilters() { loadData(getCurrentFilters()); }
 
         function toggleFiltersPanel(forceState) {
-            const collapseEl = document.getElementById('filters-collapse');
-            const toggleBtn = document.getElementById('filters-toggle');
-            if (!collapseEl || !toggleBtn) return;
-
-            const shouldExpand = typeof forceState === 'boolean'
-                ? forceState
-                : !collapseEl.classList.contains('expanded');
-
-            collapseEl.classList.toggle('expanded', shouldExpand);
-            toggleBtn.setAttribute('aria-expanded', String(shouldExpand));
+            const el = document.getElementById('filters-collapse'), btn = document.getElementById('filters-toggle');
+            if (!el || !btn) return;
+            const expand = typeof forceState === 'boolean' ? forceState : !el.classList.contains('expanded');
+            el.classList.toggle('expanded', expand);
+            btn.setAttribute('aria-expanded', String(expand));
         }
 
         function updateFiltersSummary() {
-            const filters = getCurrentFilters();
-            const selectedTotal = ['unidades', 'categorias', 'momentos', 'situacoes', 'metodos']
-                .reduce((total, key) => total + (filters[key]?.length || 0), 0);
-            const hasDateRange = Boolean(filters.dataInicio || filters.dataFim);
-            const summary = document.getElementById('filters-summary');
-            if (!summary) return;
-
-            if (!selectedTotal && !hasDateRange) {
-                summary.textContent = 'Nenhum filtro selecionado';
-                return;
-            }
-
+            const f = getCurrentFilters();
+            const total = ['unidades','categorias','momentos','situacoes','metodos'].reduce((t,k) => t + (f[k]?.length||0), 0);
+            const hasDates = Boolean(f.dataInicio || f.dataFim);
+            const el = document.getElementById('filters-summary'); if (!el) return;
+            if (!total && !hasDates) { el.textContent = 'Nenhum filtro selecionado'; return; }
             const parts = [];
-            if (selectedTotal) parts.push(`${selectedTotal} opção(ões) marcada(s)`);
-            if (hasDateRange) parts.push('período definido');
-            summary.textContent = parts.join(' • ');
+            if (total) parts.push(`${total} opção(ões) marcada(s)`);
+            if (hasDates) parts.push('período definido');
+            el.textContent = parts.join(' • ');
         }
 
         function clearAllFilters() {
             document.getElementById('dataInicio').value = '';
             document.getElementById('dataFim').value = '';
-            ['unidades','categorias','momentos','situacoes','metodos'].forEach(id => {
-                clearFilterOptions(id);
-            });
+            ['unidades','categorias','momentos','situacoes','metodos'].forEach(id => clearFilterOptions(id));
             updateFiltersSummary();
             loadData({});
         }
 
+        // ====================== BADGE DE VALOR ======================
+        function setBadge(id, data) {
+            const el = document.getElementById(id); if (!el || !data || !data.length) return;
+            const avg = Math.round(data.reduce((s,v) => s + (Number(v)||0), 0) / data.length);
+            el.textContent = `Média: ${avg}%`;
+            el.classList.remove('hidden');
+        }
+
         // ====================== GRÁFICOS ======================
         function renderAllCharts(chartData) {
-            if (!chartPluginsRegistered && window.ChartDataLabels) {
-                Chart.register(ChartDataLabels);
-                chartPluginsRegistered = true;
-            }
-
-            // Tipografia e cor padrão dos gráficos
+            if (!chartPluginsRegistered && window.ChartDataLabels) { Chart.register(ChartDataLabels); chartPluginsRegistered = true; }
             Chart.defaults.font.family = "'Inter', system-ui, sans-serif";
             Chart.defaults.color = '#64748b';
+            Object.keys(chartInstances).forEach(k => { if (chartInstances[k]) chartInstances[k].destroy(); });
 
-            Object.keys(chartInstances).forEach(key => {
-                if (chartInstances[key]) chartInstances[key].destroy();
-            });
+            const B = '#059669', BD = '#047857', NEG = '#e11d48', WARN = '#f59e0b', NEUT = '#94a3b8';
+            const CAT = [B, '#0ea5e9', '#6366f1', WARN, NEUT];
+            const GC = '#eef2f6';
+            const tip = { backgroundColor:'rgba(15,23,42,0.92)', padding:12, cornerRadius:10, titleFont:{size:12,weight:'600'}, bodyFont:{size:12}, boxPadding:6, usePointStyle:true };
+            const base = { responsive:true, maintainAspectRatio:false, plugins:{ legend:{ display:true, position:'top', labels:{boxWidth:10,boxHeight:10,padding:16,usePointStyle:true,color:'#475569',font:{size:12,weight:'600'}} }, tooltip:tip } };
+            const fmt = v => `${Math.round(Number(v)||0)}%`;
+            const ls  = c => { const w = ['#ffffff','#fff','white'].includes((c||'').toLowerCase()); return { color:c, textStrokeColor: w ? '#0f172a':'#ffffff', textStrokeWidth:3 }; };
+            const sY  = { beginAtZero:true, min:0, max:100, grid:{color:GC,drawBorder:false}, border:{display:false}, ticks:{callback:fmt,stepSize:20,color:'#94a3b8',font:{size:11}} };
+            const sX  = { beginAtZero:true, min:0, max:100, grid:{color:GC,drawBorder:false}, border:{display:false}, ticks:{callback:fmt,stepSize:20,color:'#94a3b8',font:{size:11}} };
+            const ng  = { grid:{display:false}, border:{display:false} };
+            const wrap = (l,m=28) => { if(!l||l.length<=m) return l; const ws=l.split(' '),ls2=[]; let c=''; ws.forEach(w=>{const t=c?`${c} ${w}`:w; if(t.length>m&&c){ls2.push(c);c=w;}else c=t;}); if(c)ls2.push(c); return ls2; };
 
-            // Paleta cohesiva
-            const BRAND = '#059669';
-            const BRAND_DARK = '#047857';
-            const NEGATIVE = '#e11d48';
-            const WARN = '#f59e0b';
-            const NEUTRAL = '#94a3b8';
-            const CATEGORICAL = [BRAND, '#0ea5e9', '#6366f1', WARN, NEUTRAL];
+            // Badges de contexto
+            setBadge('badge-temporal', chartData.temporal.adesao);
+            setBadge('badge-momento', chartData.porMomento.adesaoPercent);
+            setBadge('badge-unidade', chartData.porUnidade.adesaoPercent);
+            setBadge('badge-categoria', chartData.porCategoria.adesaoPercent);
 
-            const commonOptions = {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: {
-                        display: true,
-                        position: 'top',
-                        labels: {
-                            boxWidth: 10,
-                            boxHeight: 10,
-                            padding: 16,
-                            usePointStyle: true,
-                            color: '#475569',
-                            font: { size: 12, weight: '600' }
-                        }
-                    },
-                    tooltip: {
-                        backgroundColor: 'rgba(15,23,42,0.92)',
-                        padding: 12,
-                        cornerRadius: 10,
-                        titleFont: { size: 12, weight: '600' },
-                        bodyFont: { size: 12 },
-                        boxPadding: 6,
-                        usePointStyle: true
-                    }
-                }
-            };
-
-            const formatPercentTicks = (value) => `${Math.round(Number(value) || 0)}%`;
-            const formatDataLabelPercent = (value) => `${Math.round(Number(value) || 0)}%`;
-            const getDataLabelStyle = (textColor) => {
-                const normalizedColor = (textColor || '').toLowerCase();
-                const isWhiteText = normalizedColor === '#ffffff' || normalizedColor === '#fff' || normalizedColor === 'white';
-
-                return {
-                    color: textColor,
-                    textStrokeColor: isWhiteText ? '#0f172a' : '#ffffff',
-                    textStrokeWidth: 3
-                };
-            };
-            const GRID_COLOR = '#eef2f6';
-            const percentScaleY = {
-                beginAtZero: true,
-                min: 0,
-                max: 100,
-                grid: { color: GRID_COLOR, drawBorder: false },
-                border: { display: false },
-                ticks: {
-                    callback: formatPercentTicks,
-                    stepSize: 20,
-                    color: '#94a3b8',
-                    font: { size: 11 }
-                }
-            };
-            const percentScaleX = {
-                beginAtZero: true,
-                min: 0,
-                max: 100,
-                grid: { color: GRID_COLOR, drawBorder: false },
-                border: { display: false },
-                ticks: {
-                    callback: formatPercentTicks,
-                    stepSize: 20,
-                    color: '#94a3b8',
-                    font: { size: 11 }
-                }
-            };
-            const wrapLabel = (label, maxChars = 28) => {
-                if (!label || label.length <= maxChars) return label;
-                const words = label.split(' ');
-                const lines = [];
-                let current = '';
-                words.forEach(word => {
-                    const candidate = current ? `${current} ${word}` : word;
-                    if (candidate.length > maxChars && current) {
-                        lines.push(current);
-                        current = word;
-                    } else {
-                        current = candidate;
-                    }
-                });
-                if (current) lines.push(current);
-                return lines;
-            };
-
-            // Evolução Temporal
             chartInstances.temporal = new Chart(document.getElementById('temporalChart'), {
-                type: 'line',
-                data: {
-                    labels: chartData.temporal.labels,
-                    datasets: [{
-                        label: 'Adesão (%)',
-                        data: chartData.temporal.adesao,
-                        borderColor: BRAND,
-                        backgroundColor: 'rgba(5, 150, 105, 0.08)',
-                        borderWidth: 2.5,
-                        tension: 0.35,
-                        fill: true,
-                        pointRadius: 3,
-                        pointBackgroundColor: BRAND,
-                        pointBorderColor: '#ffffff',
-                        pointBorderWidth: 2,
-                        pointHoverRadius: 5
-                    }]
-                },
-                options: {
-                    ...commonOptions,
-                    scales: { y: percentScaleY, x: { grid: { display: false }, border: { display: false }, ticks: { color: '#94a3b8', font: { size: 11 } } } },
-                    plugins: {
-                        legend: { display: false },
-                        tooltip: commonOptions.plugins.tooltip,
-                        datalabels: {
-                            anchor: 'end',
-                            align: (context) => {
-                                if (context.dataIndex === 0) return 'right';
-                                if (context.dataIndex === context.dataset.data.length - 1) return 'left';
-                                return 'top';
-                            },
-                            offset: (context) => context.dataIndex === 0 ? 10 : 6,
-                            clamp: true,
-                            clip: true,
-                            ...getDataLabelStyle('#0f172a'),
-                            font: { weight: '600', size: 14 },
-                            formatter: formatDataLabelPercent
-                        }
-                    }
-                }
+                type:'line',
+                data:{ labels:chartData.temporal.labels, datasets:[{ label:'Adesão (%)', data:chartData.temporal.adesao, borderColor:B, backgroundColor:'rgba(5,150,105,0.07)', borderWidth:2.5, tension:0.35, fill:true, pointRadius:3, pointBackgroundColor:B, pointBorderColor:'#fff', pointBorderWidth:2, pointHoverRadius:6 }] },
+                options:{ ...base, scales:{ y:sY, x:{...ng,ticks:{color:'#94a3b8',font:{size:11}}} }, plugins:{ legend:{display:false}, tooltip:tip, datalabels:{ anchor:'end', align:ctx=>ctx.dataIndex===0?'right':ctx.dataIndex===ctx.dataset.data.length-1?'left':'top', offset:ctx=>ctx.dataIndex===0?10:6, clamp:true, clip:true, ...ls('#0f172a'), font:{weight:'600',size:14}, formatter:fmt } } }
             });
 
-            // Por Unidade
             chartInstances.unidade = new Chart(document.getElementById('unidadeChart'), {
-                type: 'bar',
-                data: {
-                    labels: chartData.porUnidade.labels,
-                    datasets: [{
-                        label: '% Adesão',
-                        data: chartData.porUnidade.adesaoPercent,
-                        backgroundColor: BRAND,
-                        hoverBackgroundColor: BRAND_DARK,
-                        borderRadius: 6,
-                        maxBarThickness: 26
-                    }]
-                },
-                options: {
-                    ...commonOptions,
-                    indexAxis: 'y',
-                    layout: {
-                        padding: {
-                            left: 10,
-                            right: 6
-                        }
-                    },
-                    scales: {
-                        x: percentScaleX,
-                        y: {
-                            grid: { display: false },
-                            border: { display: false },
-                            ticks: {
-                                autoSkip: false,
-                                color: '#475569',
-                                font: {
-                                    size: 11
-                                }
-                            }
-                        }
-                    },
-                    plugins: {
-                        legend: { display: false },
-                        tooltip: commonOptions.plugins.tooltip,
-                        datalabels: {
-                            ...getDataLabelStyle('#ffffff'),
-                            font: { weight: '700', size: 13 },
-                            formatter: formatDataLabelPercent
-                        }
-                    }
-                }
+                type:'bar',
+                data:{ labels:chartData.porUnidade.labels, datasets:[{ label:'% Adesão', data:chartData.porUnidade.adesaoPercent, backgroundColor:B, hoverBackgroundColor:BD, borderRadius:6, maxBarThickness:26 }] },
+                options:{ ...base, indexAxis:'y', layout:{padding:{left:10,right:6}}, scales:{ x:sX, y:{...ng,ticks:{autoSkip:false,color:'#475569',font:{size:11}}} }, plugins:{ legend:{display:false}, tooltip:tip, datalabels:{...ls('#fff'),font:{weight:'700',size:13},formatter:fmt} } }
             });
 
-            // Por Categoria
             chartInstances.categoria = new Chart(document.getElementById('categoriaChart'), {
-                type: 'bar',
-                data: {
-                    labels: chartData.porCategoria.labels,
-                    datasets: [{
-                        label: '% Adesão',
-                        data: chartData.porCategoria.adesaoPercent,
-                        backgroundColor: BRAND,
-                        hoverBackgroundColor: BRAND_DARK,
-                        borderRadius: 6,
-                        maxBarThickness: 30
-                    }]
-                },
-                options: {
-                    ...commonOptions,
-                    indexAxis: 'y',
-                    scales: {
-                        x: percentScaleX,
-                        y: {
-                            grid: { display: false },
-                            border: { display: false },
-                            ticks: {
-                                autoSkip: false,
-                                color: '#475569',
-                                callback: function(value) {
-                                    const originalLabel = this.getLabelForValue(value);
-                                    return wrapLabel(originalLabel, 24);
-                                },
-                                font: {
-                                    size: 11
-                                }
-                            }
-                        }
-                    },
-                    plugins: {
-                        legend: { display: false },
-                        tooltip: commonOptions.plugins.tooltip,
-                        datalabels: {
-                            anchor: 'end',
-                            align: 'right',
-                            offset: -4,
-                            clamp: true,
-                            clip: true,
-                            ...getDataLabelStyle('#ffffff'),
-                            font: { weight: '700', size: 13 },
-                            formatter: formatDataLabelPercent
-                        }
-                    }
-                }
+                type:'bar',
+                data:{ labels:chartData.porCategoria.labels, datasets:[{ label:'% Adesão', data:chartData.porCategoria.adesaoPercent, backgroundColor:B, hoverBackgroundColor:BD, borderRadius:6, maxBarThickness:30 }] },
+                options:{ ...base, indexAxis:'y', scales:{ x:sX, y:{...ng,ticks:{autoSkip:false,color:'#475569',callback:function(v){return wrap(this.getLabelForValue(v),24);},font:{size:11}}} }, plugins:{ legend:{display:false}, tooltip:tip, datalabels:{anchor:'end',align:'right',offset:-4,clamp:true,clip:true,...ls('#fff'),font:{weight:'700',size:13},formatter:fmt} } }
             });
 
-            // Por Momento
             chartInstances.momento = new Chart(document.getElementById('momentoChart'), {
-                type: 'bar',
-                data: {
-                    labels: chartData.porMomento.labels,
-                    datasets: [{
-                        label: '% Adesão',
-                        data: chartData.porMomento.adesaoPercent,
-                        backgroundColor: BRAND,
-                        hoverBackgroundColor: BRAND_DARK,
-                        borderRadius: 6,
-                        maxBarThickness: 48
-                    }]
-                },
-                options: {
-                    ...commonOptions,
-                    scales: {
-                        y: percentScaleY,
-                        x: {
-                            grid: { display: false },
-                            border: { display: false },
-                            ticks: {
-                                color: '#475569',
-                                callback: function(value) {
-                                    const originalLabel = this.getLabelForValue(value);
-                                    return wrapLabel(originalLabel, 18);
-                                },
-                                autoSkip: true,
-                                maxTicksLimit: 12,
-                                maxRotation: 0,
-                                minRotation: 0
-                            }
-                        }
-                    },
-                    plugins: {
-                        legend: { display: false },
-                        tooltip: commonOptions.plugins.tooltip,
-                        datalabels: {
-                            anchor: 'end',
-                            align: 'top',
-                            ...getDataLabelStyle('#0f172a'),
-                            font: { weight: '600', size: 14 },
-                            formatter: formatDataLabelPercent
-                        }
-                    }
-                }
+                type:'bar',
+                data:{ labels:chartData.porMomento.labels, datasets:[{ label:'% Adesão', data:chartData.porMomento.adesaoPercent, backgroundColor:B, hoverBackgroundColor:BD, borderRadius:6, maxBarThickness:48 }] },
+                options:{ ...base, scales:{ y:sY, x:{...ng,ticks:{color:'#475569',callback:function(v){return wrap(this.getLabelForValue(v),18);},autoSkip:true,maxTicksLimit:12,maxRotation:0,minRotation:0}} }, plugins:{ legend:{display:false}, tooltip:tip, datalabels:{anchor:'end',align:'top',...ls('#0f172a'),font:{weight:'600',size:14},formatter:fmt} } }
             });
 
-            const conformityChartOptions = {
-                ...commonOptions,
-                cutout: '0%',
-                plugins: {
-                    legend: {
-                        ...commonOptions.plugins.legend,
-                        position: 'bottom',
-                        labels: {
-                            ...commonOptions.plugins.legend.labels,
-                            padding: 14
-                        }
-                    },
-                    tooltip: commonOptions.plugins.tooltip,
-                    datalabels: {
-                        ...getDataLabelStyle('#ffffff'),
-                        font: { weight: '700', size: 14 },
-                        formatter: (value, context) => {
-                            const total = context.dataset.data.reduce((sum, item) => sum + item, 0);
-                            if (!total) return '0%';
-                            return `${Math.round((value / total) * 100)}%`;
-                        }
-                    }
-                }
-            };
+            const pb = { borderColor:'#fff', borderWidth:2, hoverOffset:8 };
+            const po = { ...base, cutout:'0%', plugins:{ legend:{...base.plugins.legend,position:'bottom',labels:{...base.plugins.legend.labels,padding:14}}, tooltip:tip, datalabels:{...ls('#fff'),font:{weight:'700',size:14},formatter:(v,ctx)=>{ const t=ctx.dataset.data.reduce((s,i)=>s+i,0); return t?`${Math.round((v/t)*100)}%`:'0%'; }} } };
 
-            const pieDatasetBase = {
-                borderColor: '#ffffff',
-                borderWidth: 2,
-                hoverOffset: 6
-            };
-
-            // Distribuição Situação
-            chartInstances.situacao = new Chart(document.getElementById('situacaoChart'), {
-                type: 'pie',
-                data: {
-                    labels: chartData.distribuicaoSituacao.labels,
-                    datasets: [{
-                        ...pieDatasetBase,
-                        data: chartData.distribuicaoSituacao.data,
-                        backgroundColor: [BRAND, NEGATIVE, WARN]
-                    }]
-                },
-                options: conformityChartOptions
-            });
-
-            // Distribuição Método
-            chartInstances.metodo = new Chart(document.getElementById('metodoChart'), {
-                type: 'pie',
-                data: {
-                    labels: chartData.distribuicaoMetodo.labels,
-                    datasets: [{
-                        ...pieDatasetBase,
-                        data: chartData.distribuicaoMetodo.data,
-                        backgroundColor: CATEGORICAL
-                    }]
-                },
-                options: conformityChartOptions
-            });
-
-            // Dispensadores de álcool em gel e sabão líquido
-            chartInstances.dispensadores = new Chart(document.getElementById('dispensadoresChart'), {
-                type: 'pie',
-                data: {
-                    labels: chartData.distribuicaoDispensadores.labels,
-                    datasets: [{
-                        ...pieDatasetBase,
-                        data: chartData.distribuicaoDispensadores.data,
-                        backgroundColor: [BRAND, NEGATIVE]
-                    }]
-                },
-                options: conformityChartOptions
-            });
-
-            // Profissional responsável sem adornos
-            chartInstances.adornos = new Chart(document.getElementById('adornosChart'), {
-                type: 'pie',
-                data: {
-                    labels: chartData.distribuicaoAdornos.labels,
-                    datasets: [{
-                        ...pieDatasetBase,
-                        data: chartData.distribuicaoAdornos.data,
-                        backgroundColor: [BRAND, NEGATIVE]
-                    }]
-                },
-                options: conformityChartOptions
-            });
+            chartInstances.situacao     = new Chart(document.getElementById('situacaoChart'),     { type:'pie', data:{ labels:chartData.distribuicaoSituacao.labels,     datasets:[{...pb,data:chartData.distribuicaoSituacao.data,     backgroundColor:[B,NEG,WARN]}] }, options:po });
+            chartInstances.metodo       = new Chart(document.getElementById('metodoChart'),       { type:'pie', data:{ labels:chartData.distribuicaoMetodo.labels,       datasets:[{...pb,data:chartData.distribuicaoMetodo.data,       backgroundColor:CAT}] },        options:po });
+            chartInstances.dispensadores= new Chart(document.getElementById('dispensadoresChart'),{ type:'pie', data:{ labels:chartData.distribuicaoDispensadores.labels, datasets:[{...pb,data:chartData.distribuicaoDispensadores.data, backgroundColor:[B,NEG]}] },   options:po });
+            chartInstances.adornos      = new Chart(document.getElementById('adornosChart'),      { type:'pie', data:{ labels:chartData.distribuicaoAdornos.labels,      datasets:[{...pb,data:chartData.distribuicaoAdornos.data,      backgroundColor:[B,NEG]}] },   options:po });
         }
 
         // ====================== INSIGHTS ======================
         function renderInsights(insights) {
-            const container = document.getElementById('insights-container');
-            container.innerHTML = insights.map(insight => `
-                <div class="flex items-start gap-2.5 bg-slate-50 border border-slate-100 rounded-xl px-3.5 py-3 text-sm leading-snug text-slate-600">
+            document.getElementById('insights-container').innerHTML = insights.map(insight => `
+                <div class="flex items-start gap-2.5 bg-slate-50 border border-slate-100 rounded-xl px-3.5 py-3 text-sm leading-snug text-slate-600 hover:border-emerald-100 hover:bg-emerald-50/40 transition">
                     <span class="mt-1.5 w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0"></span>
                     <span>${insight}</span>
-                </div>
-            `).join('');
+                </div>`).join('');
         }
 
         // ====================== TABELA ======================
         function renderDetailTable(tableData) {
             const tbody = document.getElementById('table-body');
-            const info = document.getElementById('table-info');
-            const totalRows = tableData.length;
-            const visibleRows = tableData.slice(0, MAX_TABLE_ROWS_RENDER);
+            const info  = document.getElementById('table-info');
+            const visible = tableData.slice(0, MAX_TABLE_ROWS_RENDER);
+            info.innerHTML = `${visible.length} de ${tableData.length} • base: ${allRecords}`;
 
-            info.innerHTML = `${visibleRows.length} de ${totalRows} registros • Total base: ${allRecords}`;
-
-            tbody.innerHTML = visibleRows.map(row => `
-                <tr class="hover:bg-slate-50 transition-colors">
-                    <td class="px-6 py-3.5 whitespace-nowrap text-xs font-medium text-slate-500">${row.data}</td>
+            tbody.innerHTML = visible.map(row => `
+                <tr class="hover:bg-slate-50/80 transition-colors">
+                    <td class="table-col-sticky px-6 py-3.5 whitespace-nowrap text-xs font-medium text-slate-500 border-r border-slate-100">${row.data}</td>
                     <td class="px-6 py-3.5">${row.unidade}</td>
                     <td class="px-6 py-3.5">${row.categoriaProfissional}</td>
                     <td class="px-6 py-3.5">${row.momento}</td>
                     <td class="px-6 py-3.5 text-xs max-w-[220px] truncate">${row.acao}</td>
                     <td class="px-6 py-3.5">
                         <span class="px-2.5 py-1 text-xs font-semibold rounded-full whitespace-nowrap inline-flex
-                            ${row.situacao === 'Realizado' ? 'bg-emerald-50 text-emerald-700' :
-                              row.situacao === 'Não realizado' ? 'bg-rose-50 text-rose-700' : 'bg-amber-50 text-amber-700'}">
+                            ${row.situacao==='Realizado'?'bg-emerald-50 text-emerald-700':row.situacao==='Não realizado'?'bg-rose-50 text-rose-700':'bg-amber-50 text-amber-700'}">
                             ${row.situacao}
                         </span>
                     </td>
@@ -1096,89 +754,57 @@
                     <td class="px-6 py-3.5">${renderConformityBadge(row.dispensadores)}</td>
                     <td class="px-6 py-3.5">${renderConformityBadge(row.adornos)}</td>
                     <td class="px-6 py-3.5">
-                        <span class="px-2.5 py-1 text-xs font-semibold rounded-full
-                            ${row.preenchimento === 'Completo' ? 'bg-sky-50 text-sky-700' : 'bg-orange-50 text-orange-700'}">
+                        <span class="px-2.5 py-1 text-xs font-semibold rounded-full ${row.preenchimento==='Completo'?'bg-sky-50 text-sky-700':'bg-orange-50 text-orange-700'}">
                             ${row.preenchimento}
                         </span>
                     </td>
-                </tr>
-            `).join('');
+                </tr>`).join('');
 
-            if (totalRows > MAX_TABLE_ROWS_RENDER) {
-                tbody.innerHTML += `<tr><td colspan="10" class="px-6 py-4 text-center text-amber-700 bg-amber-50 text-xs font-medium">Exibindo os primeiros ${MAX_TABLE_ROWS_RENDER} registros para manter a interface rápida. O CSV exporta todos os registros filtrados.</td></tr>`;
-            }
-
-            if (tableData.length === 0) {
+            if (tableData.length > MAX_TABLE_ROWS_RENDER)
+                tbody.innerHTML += `<tr><td colspan="10" class="px-6 py-4 text-center text-amber-700 bg-amber-50 text-xs font-medium">Exibindo os primeiros ${MAX_TABLE_ROWS_RENDER} registros. O CSV exporta todos.</td></tr>`;
+            if (tableData.length === 0)
                 tbody.innerHTML = `<tr><td colspan="10" class="px-6 py-12 text-center text-slate-400">Nenhum registro encontrado com os filtros aplicados.</td></tr>`;
-            }
         }
 
         function renderConformityBadge(value) {
-            const status = value || 'Não informado';
-            const classes = status === 'Conforme' ? 'bg-emerald-50 text-emerald-700' :
-                status === 'Não conforme' ? 'bg-rose-50 text-rose-700' :
-                status === 'Não se aplica' ? 'bg-slate-100 text-slate-600' : 'bg-amber-50 text-amber-700';
-
-            return `<span class="px-2.5 py-1 text-xs font-semibold rounded-full whitespace-nowrap inline-flex ${classes}">${status}</span>`;
+            const s = value || 'Não informado';
+            const c = s==='Conforme'?'bg-emerald-50 text-emerald-700':s==='Não conforme'?'bg-rose-50 text-rose-700':s==='Não se aplica'?'bg-slate-100 text-slate-600':'bg-amber-50 text-amber-700';
+            return `<span class="px-2.5 py-1 text-xs font-semibold rounded-full whitespace-nowrap inline-flex ${c}">${s}</span>`;
         }
 
         // ====================== EXPORT CSV ======================
         function exportToCSV() {
-            if (!currentResponse || !currentResponse.tableData) return;
-
-            const headers = ['Data', 'Unidade', 'Categoria Profissional', 'Momento', 'Ação', 'Situação', 'Método', 'Dispensadores', 'Sem Adornos', 'Preenchimento'];
-            let csv = headers.join(';') + '\n';
-
-            currentResponse.tableData.forEach(row => {
-                csv += [
-                    `"${row.data}"`,
-                    `"${row.unidade}"`,
-                    `"${row.categoriaProfissional}"`,
-                    `"${row.momento}"`,
-                    `"${row.acao.replace(/"/g, '""')}"`,
-                    `"${row.situacao}"`,
-                    `"${row.metodo}"`,
-                    `"${row.dispensadores}"`,
-                    `"${row.adornos}"`,
-                    `"${row.preenchimento}"`
-                ].join(';') + '\n';
+            if (!currentResponse?.tableData) return;
+            const h = ['Data','Unidade','Categoria Profissional','Momento','Ação','Situação','Método','Dispensadores','Sem Adornos','Preenchimento'];
+            let csv = h.join(';') + '\n';
+            currentResponse.tableData.forEach(r => {
+                csv += [`"${r.data}"`,`"${r.unidade}"`,`"${r.categoriaProfissional}"`,`"${r.momento}"`,`"${r.acao.replace(/"/g,'""')}"`,`"${r.situacao}"`,`"${r.metodo}"`,`"${r.dispensadores}"`,`"${r.adornos}"`,`"${r.preenchimento}"`].join(';') + '\n';
             });
-
-            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
             const link = document.createElement('a');
-            link.href = URL.createObjectURL(blob);
+            link.href = URL.createObjectURL(new Blob([csv], { type:'text/csv;charset=utf-8;' }));
             link.download = `analise_higiene_maos_${new Date().toISOString().slice(0,10)}.csv`;
             link.click();
         }
 
         // ====================== ERROR MODAL ======================
         function showErrorModal(message) {
-            const modalHTML = `
+            const div = document.createElement('div');
+            div.innerHTML = `
             <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-[10000]">
                 <div class="bg-white rounded-2xl max-w-md w-full mx-4 p-8 shadow-2xl border border-slate-100">
                     <div class="flex items-center justify-center w-12 h-12 rounded-xl bg-rose-50 text-rose-500 mb-4">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M12 9v4m0 4h.01M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z" />
-                        </svg>
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M12 9v4m0 4h.01M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z"/></svg>
                     </div>
                     <h3 class="text-slate-900 text-lg font-semibold mb-1">Algo deu errado</h3>
                     <p class="text-slate-600 text-sm">${message}</p>
                     <p class="text-xs text-slate-400 mt-6">Verifique se a aba "Respostas ao formulário 1" existe e contém dados.</p>
-                    <button onclick="this.closest('.fixed').remove(); loadData({})"
-                            class="mt-6 w-full py-3 bg-slate-900 hover:bg-slate-800 text-white rounded-lg font-semibold text-sm transition">
-                        Tentar novamente
-                    </button>
+                    <button onclick="this.closest('.fixed').remove();loadData({})" class="mt-6 w-full py-3 bg-slate-900 hover:bg-slate-800 text-white rounded-lg font-semibold text-sm transition">Tentar novamente</button>
                 </div>
             </div>`;
-            const div = document.createElement('div');
-            div.innerHTML = modalHTML;
             document.body.appendChild(div);
         }
 
-        // ====================== REFRESH ======================
-        function refreshAllData() {
-            loadData(getCurrentFilters());
-        }
+        function refreshAllData() { loadData(getCurrentFilters()); }
 
         // ====================== INICIALIZAÇÃO ======================
         function initializeSystem() {
@@ -1186,8 +812,7 @@
             document.getElementById('dataInicio').addEventListener('change', updateFiltersSummary);
             document.getElementById('dataFim').addEventListener('change', updateFiltersSummary);
             toggleFiltersPanel(window.innerWidth >= 768);
-            loadData({}); // carrega todos os dados
-            console.log('Sistema de Higiene das Mãos carregado com layout e gráficos otimizados.');
+            loadData({});
         }
 
         window.onload = initializeSystem;
