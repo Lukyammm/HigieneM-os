@@ -657,7 +657,8 @@
 
         // ====================== BADGE DE VALOR ======================
         function setBadge(id, data) {
-            const el = document.getElementById(id); if (!el || !data || !data.length) return;
+            const el = document.getElementById(id); if (!el) return;
+            if (!data || !data.length) { el.textContent = ''; el.classList.add('hidden'); return; }
             const avg = Math.round(data.reduce((s,v) => s + (Number(v)||0), 0) / data.length);
             el.textContent = `Média: ${avg}%`;
             el.classList.remove('hidden');
