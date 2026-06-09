@@ -486,34 +486,39 @@
                 <div class="flex items-center gap-2.5 mb-6">
                     <span class="accent-bar h-5"></span>
                     <h2 class="text-lg font-semibold text-slate-800">Comparativo de Períodos</h2>
+                    <span class="text-xs text-slate-400 font-medium">Selecione dois intervalos e compare a adesão</span>
                 </div>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                    <div class="bg-slate-50 rounded-xl p-4 border border-slate-200">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-5">
+                    <div class="rounded-xl p-4 border-2 border-emerald-200 bg-emerald-50/40">
                         <div class="flex items-center gap-2 mb-3">
-                            <span class="w-3 h-3 rounded-full bg-emerald-500 inline-block"></span>
-                            <span class="text-sm font-semibold text-slate-700">Período A</span>
+                            <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 inline-block"></span>
+                            <span class="text-xs font-bold uppercase tracking-wider text-emerald-700">Período A</span>
                         </div>
                         <div class="flex flex-wrap items-center gap-2">
-                            <input id="compAInicio" type="date" class="border border-slate-200 bg-white rounded-lg px-3 py-2 text-sm text-slate-700 focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100 transition w-40">
-                            <span class="text-slate-300">—</span>
-                            <input id="compAFim" type="date" class="border border-slate-200 bg-white rounded-lg px-3 py-2 text-sm text-slate-700 focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100 transition w-40">
+                            <input id="compAInicio" type="date" class="border border-emerald-200 bg-white rounded-lg px-3 py-2 text-sm text-slate-700 focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100 transition w-40">
+                            <span class="text-slate-300 font-bold">→</span>
+                            <input id="compAFim" type="date" class="border border-emerald-200 bg-white rounded-lg px-3 py-2 text-sm text-slate-700 focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100 transition w-40">
                         </div>
                     </div>
-                    <div class="bg-slate-50 rounded-xl p-4 border border-slate-200">
+                    <div class="rounded-xl p-4 border-2 border-slate-200 bg-slate-50/40">
                         <div class="flex items-center gap-2 mb-3">
-                            <span class="w-3 h-3 rounded-full bg-slate-400 inline-block"></span>
-                            <span class="text-sm font-semibold text-slate-700">Período B</span>
+                            <span class="w-2.5 h-2.5 rounded-full bg-slate-400 inline-block"></span>
+                            <span class="text-xs font-bold uppercase tracking-wider text-slate-500">Período B</span>
                         </div>
                         <div class="flex flex-wrap items-center gap-2">
-                            <input id="compBInicio" type="date" class="border border-slate-200 bg-white rounded-lg px-3 py-2 text-sm text-slate-700 focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100 transition w-40">
-                            <span class="text-slate-300">—</span>
-                            <input id="compBFim" type="date" class="border border-slate-200 bg-white rounded-lg px-3 py-2 text-sm text-slate-700 focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100 transition w-40">
+                            <input id="compBInicio" type="date" class="border border-slate-200 bg-white rounded-lg px-3 py-2 text-sm text-slate-700 focus:outline-none focus:border-slate-400 focus:ring-2 focus:ring-slate-100 transition w-40">
+                            <span class="text-slate-300 font-bold">→</span>
+                            <input id="compBFim" type="date" class="border border-slate-200 bg-white rounded-lg px-3 py-2 text-sm text-slate-700 focus:outline-none focus:border-slate-400 focus:ring-2 focus:ring-slate-100 transition w-40">
                         </div>
                     </div>
                 </div>
-                <button onclick="runComparison()" class="btn-primary px-6 py-2.5 rounded-lg text-sm font-semibold inline-flex items-center gap-2">
+                <div id="comp-date-error" class="hidden mb-4 flex items-center gap-2 text-sm text-rose-600 bg-rose-50 border border-rose-200 rounded-lg px-4 py-2.5">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="currentColor"><path fill-rule="evenodd" d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12Zm8.706-1.442c1.146-.573 2.437.463 2.126 1.706l-.709 2.836.042-.02a.75.75 0 0 1 .67 1.34l-.04.022c-1.147.573-2.438-.463-2.127-1.706l.71-2.836-.042.02a.75.75 0 1 1-.671-1.34l.041-.022ZM12 9a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5Z" clip-rule="evenodd"/></svg>
+                    Preencha as datas dos dois períodos antes de comparar.
+                </div>
+                <button onclick="runComparison()" class="btn-primary w-full py-3 rounded-xl text-sm font-semibold inline-flex items-center justify-center gap-2 mt-1">
                     <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7.5 21 3 16.5m0 0L7.5 12M3 16.5h13.5m0-13.5L21 7.5m0 0L16.5 12M21 7.5H7.5"/></svg>
-                    Comparar
+                    Comparar Períodos
                 </button>
             </div>
 
@@ -543,9 +548,12 @@
                 </div>
             </div>
 
-            <div id="comp-empty" class="text-center py-20 text-slate-400">
-                <svg xmlns="http://www.w3.org/2000/svg" class="w-12 h-12 mx-auto mb-3 opacity-30" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M7.5 21 3 16.5m0 0L7.5 12M3 16.5h13.5m0-13.5L21 7.5m0 0L16.5 12M21 7.5H7.5"/></svg>
-                <p class="text-sm font-medium">Selecione dois períodos e clique em Comparar</p>
+            <div id="comp-empty" class="card text-center py-16 px-8 text-slate-400">
+                <div class="flex items-center justify-center w-14 h-14 rounded-2xl bg-slate-100 mx-auto mb-4">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-7 h-7 opacity-50" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M7.5 21 3 16.5m0 0L7.5 12M3 16.5h13.5m0-13.5L21 7.5m0 0L16.5 12M21 7.5H7.5"/></svg>
+                </div>
+                <p class="text-base font-semibold text-slate-500 mb-1">Nenhuma comparação carregada</p>
+                <p class="text-sm text-slate-400">Selecione o Período A e o Período B acima e clique em <strong class="font-semibold">Comparar Períodos</strong></p>
             </div>
         </div>
 
@@ -589,7 +597,11 @@
                         <h3 class="text-[15px] font-semibold text-slate-800">Resumo do Período</h3>
                     </div>
                     <div id="report-summary" class="space-y-2">
-                        <p class="text-sm text-slate-400">Carregue dados na aba Visão Geral para ver o resumo aqui.</p>
+                        <div class="flex flex-col items-center py-6 text-center text-slate-400">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-8 h-8 mb-2 opacity-30" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z"/></svg>
+                            <p class="text-sm font-medium text-slate-500">Sem dados carregados</p>
+                            <p class="text-xs mt-1">Acesse a aba <strong class="font-semibold">Visão Geral</strong> para gerar o resumo</p>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -605,7 +617,11 @@
                     <h2 class="text-[15px] font-semibold text-slate-800">Análise Automática</h2>
                 </div>
                 <div id="report-insights" class="grid grid-cols-1 md:grid-cols-2 gap-3">
-                    <p class="text-sm text-slate-400">Carregue dados na aba Visão Geral para ver a análise aqui.</p>
+                    <div class="md:col-span-2 flex flex-col items-center py-8 text-center text-slate-400">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-8 h-8 mb-2 opacity-30" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 18h6m-5 3h4m-7-9a5 5 0 1110 0c0 1.9-.93 3.57-2.36 4.6-.62.45-1.14 1.13-1.14 1.9V19H10.5v-.5c0-.77-.52-1.45-1.14-1.9A5.64 5.64 0 017 12z"/></svg>
+                        <p class="text-sm font-medium text-slate-500">Análise indisponível</p>
+                        <p class="text-xs mt-1">Acesse a aba <strong class="font-semibold">Visão Geral</strong> para carregar os dados</p>
+                    </div>
                 </div>
             </div>
         </div>
@@ -984,10 +1000,13 @@
             const bI = document.getElementById('compBInicio').value;
             const bF = document.getElementById('compBFim').value;
 
+            const errEl = document.getElementById('comp-date-error');
             if (!aI || !aF || !bI || !bF) {
-                alert('Preencha as datas dos dois períodos antes de comparar.');
+                errEl.classList.remove('hidden');
+                setTimeout(() => errEl.classList.add('hidden'), 4000);
                 return;
             }
+            errEl.classList.add('hidden');
 
             document.getElementById('comp-empty').classList.add('hidden');
             document.getElementById('comp-results').classList.add('hidden');
@@ -1018,8 +1037,9 @@
             const aF = document.getElementById('compAFim').value;
             const bI = document.getElementById('compBInicio').value;
             const bF = document.getElementById('compBFim').value;
-            const labelA = `${aI} → ${aF}`;
-            const labelB = `${bI} → ${bF}`;
+            const fmtDate = iso => iso ? iso.split('-').reverse().join('/') : iso;
+            const labelA = `${fmtDate(aI)} → ${fmtDate(aF)}`;
+            const labelB = `${fmtDate(bI)} → ${fmtDate(bF)}`;
 
             // KPIs comparativos
             const compKpiDefs = [
@@ -1036,23 +1056,27 @@
                 const delta = vA - vB;
                 const improved = d.higherIsBetter ? delta > 0 : delta < 0;
                 const neutral  = Math.abs(delta) < 0.01;
-                const deltaClass = neutral ? 'delta-flat' : improved ? 'delta-up' : 'delta-down';
-                const arrow = neutral ? '→' : delta > 0 ? '↑' : '↓';
-                const deltaStr = neutral ? 'Igual' : `${arrow} ${Math.abs(delta % 1 === 0 ? delta : parseFloat(delta.toFixed(1)))}${String(d.keyA).includes('.') ? '%' : ''}`;
+                const isPercent = d.fmt(1).includes('%');
+                const absDelta = Math.abs(isPercent ? parseFloat(delta.toFixed(1)) : Math.round(delta));
+                const deltaStr = neutral ? 'Sem variação' : `${delta > 0 ? '+' : '-'}${isPercent ? absDelta + '%' : absDelta.toLocaleString('pt-BR')}`;
+                const borderColor = neutral ? '#e2e8f0' : improved ? '#10b981' : '#f43f5e';
+                const deltaBg    = neutral ? 'bg-slate-100 text-slate-500' : improved ? 'bg-emerald-50 text-emerald-700' : 'bg-rose-50 text-rose-700';
                 return `
-                <div class="comp-kpi-card fade-up">
-                    <p class="text-[11px] font-semibold uppercase tracking-wider text-slate-400 mb-2">${d.label}</p>
-                    <div class="flex items-end justify-between gap-2 mb-2">
-                        <div>
-                            <span class="text-[10px] text-emerald-600 font-semibold">A</span>
-                            <span class="text-xl font-bold text-slate-800 ml-1">${d.fmt(vA)}</span>
+                <div class="comp-kpi-card fade-up" style="border-left: 4px solid ${borderColor}; padding-left: 14px;">
+                    <p class="text-[11px] font-semibold uppercase tracking-wider text-slate-400 mb-3">${d.label}</p>
+                    <div class="mb-3">
+                        <div class="flex items-center gap-1.5 mb-1">
+                            <span class="w-2 h-2 rounded-full bg-emerald-500 shrink-0"></span>
+                            <span class="text-[10px] font-bold text-emerald-600 uppercase tracking-wide">A</span>
+                            <span class="text-xl font-bold text-slate-900">${d.fmt(vA)}</span>
                         </div>
-                        <div>
-                            <span class="text-[10px] text-slate-400 font-semibold">B</span>
-                            <span class="text-lg font-semibold text-slate-500 ml-1">${d.fmt(vB)}</span>
+                        <div class="flex items-center gap-1.5">
+                            <span class="w-2 h-2 rounded-full bg-slate-400 shrink-0"></span>
+                            <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wide">B</span>
+                            <span class="text-base font-semibold text-slate-500">${d.fmt(vB)}</span>
                         </div>
                     </div>
-                    <span class="text-xs font-bold ${deltaClass}">${deltaStr}</span>
+                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-bold ${deltaBg}">${deltaStr}</span>
                 </div>`;
             }).join('');
 
