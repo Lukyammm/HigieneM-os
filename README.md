@@ -1,4 +1,4 @@
-# HigieneM-os - Monitoramento de Higiene das Mãos
+# Hand Hygiene Compliance Dashboard
 
 Sistema web em **Google Apps Script + Google Sheets** para transformar respostas de formulário em um painel operacional de adesão à higiene das mãos, com KPIs, filtros, gráficos e tabela analítica para apoio à gestão de segurança do paciente.
 
@@ -46,7 +46,7 @@ O sistema centraliza os registros em um painel único, classifica automaticament
 ## Estrutura do projeto
 
 ```text
-HigieneM-os/
+hand-hygiene-compliance-dashboard/
 ├── Code.gs         # Backend: leitura, tratamento, filtros e métricas
 ├── index.html      # Frontend: dashboard, filtros, gráficos e tabela
 ├── README.md       # Documentação técnica e de portfólio
